@@ -420,6 +420,36 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .lb-score i{font-style:normal;font-size:11px;color:var(--smoke);display:block;line-height:1;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:600px){.lb-metrics{display:none}.lb-name{flex:1}}
 
+/* ---------- roadmap (journey) ---------- */
+.rm-lead{color:var(--smoke);font-size:12px;margin:-4px 0 14px}
+.rm-list{display:flex;flex-direction:column}
+.rm-item{display:flex;gap:14px}
+.rm-track{display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0}
+.rm-node{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:'Oswald';font-weight:700;font-size:17px;border:2px solid var(--line);background:var(--ink);color:var(--smoke);z-index:1;transition:all .3s}
+.rm-node.active{border-color:var(--blood);color:var(--blood);animation:flamePulse 2.2s ease-in-out infinite}
+.rm-node.mastered{background:var(--blood);border-color:var(--blood);color:#fff}
+.rm-node.locked{opacity:.45}
+.rm-line{width:3px;flex:1;min-height:34px;background:var(--line);border-radius:3px;position:relative;overflow:hidden;margin:2px 0}
+.rm-line-fill{position:absolute;top:0;left:0;width:100%;background:var(--blood);transition:height .5s cubic-bezier(.2,.8,.2,1)}
+.rm-body{flex:1;padding-bottom:22px;min-width:0}
+.rm-title{font-family:'Oswald';font-size:17px;font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rm-badge{font-family:'Archivo Narrow';font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:var(--blood);color:#fff;padding:3px 7px;border-radius:2px;font-weight:700}
+.rm-badge.locked{background:var(--line);color:var(--smoke)}
+.rm-sub{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke);margin-top:3px}
+.rm-bar{height:6px;background:var(--ink);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.rm-bar-fill{height:100%;background:linear-gradient(90deg,var(--blood),var(--blood-hi));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.rm-pct{font-family:'Oswald';font-size:13px;font-weight:600;color:var(--smoke);margin-top:4px}
+.rm-actions{display:flex;gap:8px;margin-top:8px}
+.rm-edit,.rm-del{background:none;border:1px solid var(--line);border-radius:2px;padding:4px 10px;font-family:'Archivo Narrow';font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--smoke)}
+.rm-edit:hover{color:var(--gold);border-color:var(--gold)}
+.rm-del:hover{color:var(--blood);border-color:var(--blood)}
+.rm-form{margin-top:10px;padding:12px;background:var(--ink);border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;gap:8px}
+.rm-form input,.rm-form select{background:var(--panel);border:1px solid var(--line);color:var(--chalk);padding:8px 10px;border-radius:3px;font-size:13px}
+.rm-form input:focus,.rm-form select:focus{outline:1px solid var(--blood);border-color:var(--blood)}
+.rm-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rm-row select,.rm-row input{flex:1;min-width:80px}
+body.rtl .rm-title{text-align:right}
+
 /* ---------- weekly goal ring ---------- */
 .weekly-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .ring{position:relative;width:120px;height:120px;flex-shrink:0}
@@ -825,6 +855,12 @@ const I18N = {
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
     pr_exercise:"Exercise", pr_best:"Best", weekly_none:"No weekly goal set.",
+    roadmap:"Journey", roadmap_sub:"Your long-term mastery path.",
+    add_milestone:"+ Add a goal", milestone_name_ph:"Goal name (e.g. Muay Thai mastery)",
+    milestone_type_disc:"Discipline", milestone_type_free:"Free goal",
+    target_sessions:"Target sessions", mastered:"Mastered", locked:"Upcoming",
+    manual_adjust:"Adjust %", auto_progress:"Auto (from sessions)", roadmap_empty:"No goals yet — add your first milestone below.",
+    milestone_disc:"Linked discipline", edit:"Edit", save_btn2:"Save",
   },
   fr:{
     brand_sub:"Carnet de combat", logout:"Déconnexion",
@@ -905,6 +941,12 @@ const I18N = {
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
     pr_exercise:"Exercice", pr_best:"Record", weekly_none:"Aucun objectif hebdo défini.",
+    roadmap:"Parcours", roadmap_sub:"Ton chemin de maîtrise à long terme.",
+    add_milestone:"+ Ajouter un objectif", milestone_name_ph:"Nom de l'objectif (ex. Maîtrise Muay Thaï)",
+    milestone_type_disc:"Discipline", milestone_type_free:"Objectif libre",
+    target_sessions:"Séances cibles", mastered:"Maîtrisé", locked:"À venir",
+    manual_adjust:"Ajuster %", auto_progress:"Auto (selon les séances)", roadmap_empty:"Aucun objectif — ajoute ta première étape ci-dessous.",
+    milestone_disc:"Discipline liée", edit:"Modifier", save_btn2:"Enregistrer",
   },
   ar:{
     brand_sub:"سجل القتال", logout:"تسجيل الخروج",
@@ -985,6 +1027,12 @@ const I18N = {
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
     pr_exercise:"تمرين", pr_best:"الأفضل", weekly_none:"لا هدف أسبوعي محدّد.",
+    roadmap:"المسار", roadmap_sub:"طريق إتقانك على المدى الطويل.",
+    add_milestone:"+ إضافة هدف", milestone_name_ph:"اسم الهدف (مثل: إتقان المواي تاي)",
+    milestone_type_disc:"تخصص", milestone_type_free:"هدف حر",
+    target_sessions:"الحصص المستهدفة", mastered:"مُتقَن", locked:"قادم",
+    manual_adjust:"تعديل %", auto_progress:"تلقائي (حسب الحصص)", roadmap_empty:"لا أهداف بعد — أضف مرحلتك الأولى أدناه.",
+    milestone_disc:"التخصص المرتبط", edit:"تعديل", save_btn2:"حفظ",
   },
   de:{
     brand_sub:"Kampf-Logbuch", logout:"Abmelden",
@@ -1065,6 +1113,12 @@ const I18N = {
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
     pr_exercise:"Übung", pr_best:"Bestwert", weekly_none:"Kein Wochenziel festgelegt.",
+    roadmap:"Weg", roadmap_sub:"Dein langfristiger Meisterschaftspfad.",
+    add_milestone:"+ Ziel hinzufügen", milestone_name_ph:"Zielname (z. B. Muay-Thai-Meisterschaft)",
+    milestone_type_disc:"Disziplin", milestone_type_free:"Freies Ziel",
+    target_sessions:"Zieleinheiten", mastered:"Gemeistert", locked:"Bevorstehend",
+    manual_adjust:"% anpassen", auto_progress:"Auto (aus Einheiten)", roadmap_empty:"Noch keine Ziele — füge unten dein erstes hinzu.",
+    milestone_disc:"Verknüpfte Disziplin", edit:"Bearbeiten", save_btn2:"Speichern",
   }
 };
 function t(key, vars){
@@ -1239,6 +1293,7 @@ function ownerSlotForKey(key){
   }
   if(key.startsWith("prog:"))   return key.slice(5);
   if(key.startsWith("weight:")) return key.slice(7);
+  if(key.startsWith("roadmap:")) return key.slice(8);
   if(key.startsWith("coach:"))  return "coach";   // coach:goals, coach:notes
   if(key.startsWith("weekly:")) return me || "coach";
   return me || "coach";
@@ -1354,6 +1409,22 @@ async function saveWeight(athleteId){
   await window.storage.set("weight:"+athleteId, JSON.stringify(weights[athleteId]||{target:null,entries:[]}), true);
 }
 
+// roadmap: roadmap:<athlete> -> [{id,name,type:'disc'|'free',disc,target,manual}]
+let roadmaps = {};
+async function loadRoadmaps(){
+  try{
+    const r=await window.storage.list("roadmap:", true);
+    const keys=(r&&r.keys)?r.keys:[];
+    roadmaps={};
+    for(const k of keys){
+      try{ const g=await window.storage.get(k, true); if(g&&g.value){ roadmaps[k.slice(8)]=JSON.parse(g.value); } }catch(e){}
+    }
+  }catch(e){ roadmaps={}; }
+}
+async function saveRoadmap(athleteId){
+  await window.storage.set("roadmap:"+athleteId, JSON.stringify(roadmaps[athleteId]||[]), true);
+}
+
 // coach notes on nutrition (per athlete, standing) and program (per athlete)
 let coachNotes = {}; // { "nutri:athleteId": "text", "prog:athleteId": "text" }
 async function loadCoachNotes(){
@@ -1429,7 +1500,7 @@ function enterApp(){
   subscribeRealtime();
 }
 async function reloadAll(){
-  await Promise.all([loadSessions(), loadGoals(), loadNutriTargets(), loadPrograms(), loadWeights(), loadCoachNotes(), loadWeeklyGoals()]);
+  await Promise.all([loadSessions(), loadGoals(), loadNutriTargets(), loadPrograms(), loadWeights(), loadCoachNotes(), loadWeeklyGoals(), loadRoadmaps()]);
 }
 // Realtime: when any table changes, reload and re-render (debounced).
 let realtimeTimer=null;
@@ -1899,9 +1970,9 @@ function renderProgram(){
   }else if(coachNotes[noteKey]){
     html += `<div class="note" style="margin-top:16px"><b>${t("coach_note_label")}</b>${esc(coachNotes[noteKey])}</div>`;
   }
-  root.innerHTML = html;
+  root.innerHTML = html + (isCoach?`<div id="coachRoadmap" style="margin-top:16px"></div>`:"");
   wireProgram(targetAthlete, isCoach, root);
-  if(isCoach) wireCoachNoteBox(root, "prog", targetAthlete, renderProgram);
+  if(isCoach){ wireCoachNoteBox(root, "prog", targetAthlete, renderProgram); renderRoadmap(targetAthlete, true, document.getElementById("coachRoadmap")); }
 }
 function wireProgram(athleteId, isCoach, root){
   if(isCoach){
@@ -2018,7 +2089,9 @@ async function renderSpace(){
           </div>`).join("")}
         </div>`:`<div class="goal-empty">${t("pr_none")}</div>`}
       </div>
-    </div>`;
+    </div>
+    <div id="roadmapWrap" style="margin-top:16px"></div>`;
+  renderRoadmap(me, false, document.getElementById("roadmapWrap"));
   document.getElementById("wSave").onclick=async()=>{
     const kg=parseFloat(document.getElementById("wKg").value);
     const tg=document.getElementById("wTarget").value;
@@ -2039,6 +2112,103 @@ async function renderSpace(){
     if(v>0){ weeklyGoals[me]=v; } else { delete weeklyGoals[me]; }
     await saveWeeklyGoals(); renderSpace();
   };
+}
+
+/* ---------- roadmap (long-term journey) ---------- */
+function milestoneProgress(athleteId, m){
+  if(m.manual!=null && m.manual!=="") return Math.max(0, Math.min(100, +m.manual));
+  if(m.type==="disc" && m.disc && m.target>0){
+    const n = sessions.filter(s=>s.athlete===athleteId && s.discipline===m.disc).length;
+    return Math.max(0, Math.min(100, Math.round((n/m.target)*100)));
+  }
+  return 0;
+}
+function renderRoadmap(athleteId, readonly, root){
+  if(!root) return;
+  const list = roadmaps[athleteId] || [];
+  const rows = list.map((m,i)=>{
+    const pct = milestoneProgress(athleteId, m);
+    const mastered = pct>=100;
+    const prevMastered = i===0 || milestoneProgress(athleteId, list[i-1])>=100;
+    const active = !mastered && prevMastered;
+    const locked = !mastered && !active;
+    const label = m.type==="disc" ? (m.disc?discLabel(m.disc):t("milestone_type_disc")) : (m.name||t("milestone_type_free"));
+    const sub = (m.type==="disc" && m.target>0)
+      ? `${sessions.filter(s=>s.athlete===athleteId && s.discipline===m.disc).length}/${m.target} ${t("lb_sessions").toLowerCase()}`
+      : "";
+    const nodeCls = ["rm-node", mastered?"mastered":"", active?"active":"", locked?"locked":""].filter(Boolean).join(" ");
+    const editor = (!readonly) ? `
+      <div class="rm-actions">
+        <button class="rm-edit" data-rmedit="${i}">${t("edit")}</button>
+        <button class="rm-del" data-rmdel="${i}">${t("delete")}</button>
+      </div>` : "";
+    const editForm = (!readonly) ? `
+      <div class="rm-form" data-rmform="${i}" style="display:none">
+        <input class="rm-name" data-rmname="${i}" value="${esc(m.name||"")}" placeholder="${esc(t("milestone_name_ph"))}">
+        <div class="rm-row">
+          <select data-rmtype="${i}">
+            <option value="disc" ${m.type==="disc"?"selected":""}>${t("milestone_type_disc")}</option>
+            <option value="free" ${m.type==="free"?"selected":""}>${t("milestone_type_free")}</option>
+          </select>
+          <select data-rmdisc="${i}" ${m.type!=="disc"?'style="display:none"':""}>
+            ${DISC_IDS.map(id=>`<option value="${id}" ${m.disc===id?"selected":""}>${discLabel(id)}</option>`).join("")}
+          </select>
+          <input type="number" min="1" data-rmtarget="${i}" value="${m.target||""}" placeholder="${esc(t("target_sessions"))}" ${m.type!=="disc"?'style="display:none"':""}>
+        </div>
+        <div class="rm-row">
+          <input type="number" min="0" max="100" data-rmmanual="${i}" value="${m.manual!=null?m.manual:""}" placeholder="${esc(t("manual_adjust"))} (0-100)">
+          <button class="mini" data-rmsave="${i}">${t("save_btn2")}</button>
+        </div>
+      </div>` : "";
+    return `<div class="rm-item">
+      <div class="rm-track">
+        <div class="${nodeCls}">${mastered?"✓":(i+1)}</div>
+        ${i<list.length-1?`<div class="rm-line"><div class="rm-line-fill" style="height:${pct}%"></div></div>`:""}
+      </div>
+      <div class="rm-body">
+        <div class="rm-title">${esc(label)} ${mastered?`<span class="rm-badge">${t("mastered")}</span>`:locked?`<span class="rm-badge locked">${t("locked")}</span>`:""}</div>
+        ${sub?`<div class="rm-sub">${esc(sub)}</div>`:""}
+        <div class="rm-bar"><div class="rm-bar-fill" style="width:${pct}%"></div></div>
+        <div class="rm-pct">${pct}%</div>
+        ${editor}${editForm}
+      </div>
+    </div>`;
+  }).join("");
+  root.innerHTML = `<div class="nutri-group">
+    <div class="nutri-group-h">${t("roadmap")}</div>
+    <p class="rm-lead">${t("roadmap_sub")}</p>
+    ${list.length?`<div class="rm-list">${rows}</div>`:`<div class="goal-empty">${t("roadmap_empty")}</div>`}
+    ${!readonly?`<button class="mini" id="rmAdd" style="margin-top:14px">${t("add_milestone")}</button>`:""}
+  </div>`;
+  if(!readonly) wireRoadmap(athleteId, root);
+}
+function wireRoadmap(athleteId, root){
+  const ensure=()=>{ if(!roadmaps[athleteId]) roadmaps[athleteId]=[]; return roadmaps[athleteId]; };
+  const add=document.getElementById("rmAdd");
+  if(add) add.onclick=async()=>{ const p=ensure(); p.push({name:"",type:"disc",disc:DISC_IDS[0],target:20,manual:null}); await saveRoadmap(athleteId); renderSpace(); };
+  root.querySelectorAll("[data-rmedit]").forEach(b=>b.onclick=()=>{
+    const f=root.querySelector(`[data-rmform="${b.dataset.rmedit}"]`);
+    if(f) f.style.display = f.style.display==="none"?"":"none";
+  });
+  root.querySelectorAll("[data-rmtype]").forEach(sel=>sel.onchange=()=>{
+    const i=sel.dataset.rmtype; const isDisc=sel.value==="disc";
+    const d=root.querySelector(`[data-rmdisc="${i}"]`); const tg=root.querySelector(`[data-rmtarget="${i}"]`);
+    if(d) d.style.display=isDisc?"":"none";
+    if(tg) tg.style.display=isDisc?"":"none";
+  });
+  root.querySelectorAll("[data-rmsave]").forEach(b=>b.onclick=async()=>{
+    const i=+b.dataset.rmsave; const p=ensure(); const m=p[i];
+    m.name=root.querySelector(`[data-rmname="${i}"]`).value.trim();
+    m.type=root.querySelector(`[data-rmtype="${i}"]`).value;
+    m.disc=root.querySelector(`[data-rmdisc="${i}"]`).value;
+    const tg=root.querySelector(`[data-rmtarget="${i}"]`).value; m.target=tg?+tg:0;
+    const mn=root.querySelector(`[data-rmmanual="${i}"]`).value; m.manual = mn!==""?+mn:null;
+    await saveRoadmap(athleteId); renderSpace();
+  });
+  root.querySelectorAll("[data-rmdel]").forEach(b=>b.onclick=async()=>{
+    if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent=t("delete")+" ?"; setTimeout(()=>{if(b.dataset.confirm==="1"){b.dataset.confirm="0";b.textContent=t("delete");}},3000); return; }
+    const i=+b.dataset.rmdel; const p=ensure(); p.splice(i,1); await saveRoadmap(athleteId); renderSpace();
+  });
 }
 
 /* ---------- leaderboard ---------- */
