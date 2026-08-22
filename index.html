@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LE CAMP — Suivi de combat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===================== SUPABASE CONFIG =====================
+   Fill these two values from: Supabase Dashboard → Project Settings → API
+   - SUPABASE_URL  : "Project URL"
+   - SUPABASE_ANON : "anon public" key
+   The anon key is safe to expose in front-end code; security is enforced
+   by the Row Level Security (RLS) policies in supabase-setup.sql.
+============================================================ */
+const SUPABASE_URL  = "https://fqmfrsagkewagoukwsdl.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbWZyc2Fna2V3YWdvdWt3c2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNzk0ODAsImV4cCI6MjEwMjk1NTQ4MH0.VTgLc0OOy69I69XGx3q0dBgs0OwVaiRpIqll5DFodXw";
+</script>
+<style>
+:root{
+  --ink:#0d0d0f;
+  --panel:#161619;
+  --panel-2:#1e1e22;
+  --line:#2c2c31;
+  --smoke:#8a8a92;
+  --chalk:#e9e7e2;
+  --blood:#c9262c;
+  --blood-hi:#e8393f;
+  --gold:#d8a53a;
+  --win:#4f9d69;
+}
+body.light{
+  --ink:#f4f2ee;
+  --panel:#ffffff;
+  --panel-2:#efece6;
+  --line:#dcd8d0;
+  --smoke:#6b6b73;
+  --chalk:#1a1a1f;
+  --blood:#c9262c;
+  --blood-hi:#e8393f;
+  --gold:#b5852a;
+  --win:#3f8557;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{max-width:100%;overflow-x:hidden}
+body{
+  background:var(--ink);
+  color:var(--chalk);
+  font-family:'Archivo',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  min-height:100vh;
+}
+h1,h2,h3,.cond{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.02em}
+.narrow{font-family:'Archivo Narrow',sans-serif}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:'Archivo',sans-serif}
+/* clean number inputs: hide native spinner arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+::selection{background:var(--blood);color:#fff}
+
+/* ---------- top bar ---------- */
+header{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(180deg,#0d0d0f 60%,rgba(13,13,15,.85));
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(6px);
+}
+.bar{max-width:1080px;margin:0 auto;padding:16px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.brand .mark{
+  font-family:'Oswald';font-weight:700;font-size:30px;line-height:1;
+  letter-spacing:.06em;color:var(--chalk);white-space:nowrap;
+}
+.brand .mark b{color:var(--blood)}
+.brand .sub{font-family:'Archivo Narrow';text-transform:uppercase;letter-spacing:.2em;font-size:10px;color:var(--smoke);white-space:nowrap;line-height:1.2;align-self:center;padding-top:3px}
+.who{display:flex;align-items:center;gap:10px}
+.who label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.who select{
+  background:var(--panel-2);color:var(--chalk);border:1px solid var(--line);
+  padding:8px 12px;font-size:13px;font-weight:600;border-radius:2px;
+}
+
+/* ---------- hero strip ---------- */
+.hero{
+  max-width:1080px;margin:0 auto;padding:34px 22px 8px;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+}
+.hero .title h1{font-size:clamp(34px,6vw,58px);font-weight:700;line-height:.92}
+.hero .title h1 em{font-style:normal;color:var(--blood);}
+.hero .title p{color:var(--smoke);margin-top:6px;max-width:44ch;font-size:14px}
+.week{
+  display:flex;gap:2px;border:1px solid var(--line);border-radius:3px;overflow:hidden;
+}
+.week .d{padding:9px 12px;text-align:center;background:var(--panel);min-width:44px}
+.week .d span{display:block;font-family:'Archivo Narrow';font-size:10px;letter-spacing:.12em;color:var(--smoke);text-transform:uppercase}
+.week .d b{font-family:'Oswald';font-size:19px;font-weight:600}
+.week .d.on{background:var(--blood);}
+.week .d.on b,.week .d.on span{color:#fff}
+
+/* ---------- layout ---------- */
+main{max-width:1080px;margin:0 auto;padding:20px 22px 90px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:22px 0 26px}
+.tab{
+  background:none;border:none;color:var(--smoke);padding:12px 16px 14px;
+  font-family:'Oswald';text-transform:uppercase;letter-spacing:.06em;font-weight:500;font-size:15px;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab.on{color:var(--chalk);border-bottom-color:var(--blood)}
+.tab:hover{color:var(--chalk)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px}
+.grid{display:grid;gap:16px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}.grid.side{grid-template-columns:340px 1fr}}
+
+/* ---------- log form ---------- */
+.card-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.card-h h3{font-size:17px;font-weight:600}
+.card-h .hint{font-size:11px;color:var(--smoke);letter-spacing:.14em;text-transform:uppercase}
+.card-b{padding:18px 20px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--chalk);
+  padding:11px 12px;font-size:14px;border-radius:3px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--blood);outline-offset:0;border-color:var(--blood)}
+.disc-pick{display:flex;flex-wrap:wrap;gap:7px}
+.disc-pick button{
+  background:var(--ink);border:1px solid var(--line);color:var(--smoke);
+  padding:9px 13px;border-radius:2px;font-size:13px;font-weight:500;letter-spacing:.02em;
+}
+.disc-pick button.on{background:var(--blood);border-color:var(--blood);color:#fff}
+.row{display:flex;gap:10px}
+.row .field{flex:1}
+.exset{border:1px dashed var(--line);border-radius:3px;padding:12px;margin-bottom:10px;background:var(--panel-2)}
+.exset .exhead{display:flex;gap:8px;margin-bottom:8px}
+.exset .exhead input{flex:1}
+.exset .exhead button{background:none;border:1px solid var(--line);color:var(--smoke);border-radius:2px;padding:0 12px;font-size:18px}
+.sets{display:flex;flex-wrap:wrap;gap:8px}
+.setchip{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:6px 8px}
+.setchip input{width:56px;background:var(--panel);border:1px solid var(--line);color:var(--chalk);text-align:center;font-size:13px;padding:5px 6px;border-radius:3px}
+.setchip input:focus{outline:1px solid var(--blood);border-color:var(--blood)}
+.setchip .x{font-size:11px;letter-spacing:.1em;color:var(--smoke);padding:0 2px}
+.setchip button{background:none;border:none;color:var(--smoke);font-size:15px;line-height:1;cursor:pointer;padding:0 2px;margin-inline-start:2px}
+.setchip button:hover{color:var(--blood)}
+.mini{background:none;border:1px solid var(--line);color:var(--smoke);border-radius:2px;padding:6px 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.btn{
+  width:100%;background:var(--blood);color:#fff;border:none;padding:14px;
+  font-family:'Oswald';text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:15px;border-radius:3px;
+}
+.btn:hover{background:var(--blood-hi)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- feed ---------- */
+.empty{padding:44px 20px;text-align:center;color:var(--smoke)}
+.empty b{display:block;font-family:'Oswald';font-size:20px;color:var(--chalk);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.sess{border:1px solid var(--line);border-radius:4px;margin-bottom:14px;background:var(--panel);overflow:hidden}
+.sess-h{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:'Oswald';font-weight:600;font-size:15px;color:#fff;flex-shrink:0}
+.sess-h .meta{flex:1;min-width:0}
+.sess-h .meta b{font-family:'Oswald';font-size:15px;letter-spacing:.02em;font-weight:600}
+.sess-h .meta span{display:block;font-size:12px;color:var(--smoke)}
+.tag{font-family:'Archivo Narrow';text-transform:uppercase;letter-spacing:.1em;font-size:11px;padding:4px 9px;border-radius:2px;border:1px solid var(--line);color:var(--chalk);white-space:nowrap}
+.sess-b{padding:14px 18px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px}
+.stat b{font-family:'Oswald';font-size:22px;font-weight:600;display:block;line-height:1}
+.stat span{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.exlist{border-top:1px solid var(--line);padding-top:12px}
+.exrow{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:14px}
+.exrow .n{font-weight:600}
+.exrow .s{color:var(--smoke);font-family:'Archivo Narrow';text-align:right}
+.note{margin-top:10px;padding:10px 12px;background:var(--ink);border-left:2px solid var(--gold);border-radius:2px;font-size:14px;font-style:italic;color:#d9d4c8}
+.note b{font-style:normal;color:var(--gold);font-family:'Archivo Narrow';letter-spacing:.1em;text-transform:uppercase;font-size:10px;display:block;margin-bottom:3px}
+.coachbox{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.coachbox input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--chalk);padding:9px 11px;border-radius:3px;font-size:13px}
+.coachbox button{background:var(--gold);border:none;color:#1a1608;padding:0 16px;border-radius:3px;font-family:'Oswald';text-transform:uppercase;font-weight:600;letter-spacing:.04em;font-size:13px}
+.del{background:none;border:none;color:var(--smoke);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:4px;cursor:pointer}
+.del.confirm{color:#fff;background:var(--blood);border-radius:3px;padding:4px 10px}
+.del:hover{color:var(--blood)}
+
+/* ---------- roster / stats ---------- */
+.roster{display:grid;gap:14px}
+@media(min-width:640px){.roster{grid-template-columns:repeat(3,1fr)}}
+.athlete{border:1px solid var(--line);border-radius:4px;padding:18px;background:var(--panel);text-align:center}
+.athlete .avatar{width:56px;height:56px;font-size:24px;margin:0 auto 12px}
+.athlete h3{font-size:18px;font-weight:600}
+.athlete .big{font-family:'Oswald';font-size:40px;font-weight:700;line-height:1;margin:10px 0 2px}
+.athlete .big.z{color:var(--smoke)}
+.athlete .lbl{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.discbar{margin-top:14px;text-align:left}
+.discbar .b{margin-bottom:7px}
+.discbar .b .t{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;font-family:'Archivo Narrow';letter-spacing:.06em;text-transform:uppercase;color:var(--smoke)}
+.discbar .b .track{height:5px;background:var(--ink);border-radius:3px;overflow:hidden}
+.discbar .b .fill{height:100%;background:var(--blood);border-radius:3px}
+.loading{padding:60px;text-align:center;color:var(--smoke);font-family:'Oswald';letter-spacing:.2em;text-transform:uppercase}
+.foot{text-align:center;color:var(--smoke);font-size:11px;letter-spacing:.1em;padding:30px 0 0;text-transform:uppercase;font-family:'Archivo Narrow'}
+.foot b{color:var(--blood)}
+.saving{font-size:11px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- login ---------- */
+.gate{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 80% at 50% -10%,#1a1114 0%,var(--ink) 55%);display:grid;place-items:center;padding:24px}
+.gate-card{width:100%;max-width:400px}
+.gate-brand{text-align:center;margin-bottom:26px}
+.gate-brand .mark{font-family:'Oswald';font-weight:700;font-size:46px;letter-spacing:.05em;line-height:.9}
+.gate-brand .mark b{color:var(--blood)}
+.gate-brand .sub{font-family:'Archivo Narrow';text-transform:uppercase;letter-spacing:.3em;font-size:11px;color:var(--smoke);margin-top:8px}
+.gate-panel{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:26px 24px}
+.gate-panel h2{font-size:20px;font-weight:600;margin-bottom:4px}
+.gate-panel .lead{color:var(--smoke);font-size:13px;margin-bottom:20px}
+.pick-user{display:grid;gap:9px}
+.pick-user button{display:flex;align-items:center;gap:13px;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:12px 14px;text-align:left;color:var(--chalk);transition:border-color .12s}
+.pick-user button:hover{border-color:var(--blood)}
+.pick-user button .avatar{width:40px;height:40px;font-size:17px}
+.pick-user button .pu-meta{flex:1}
+.pick-user button .pu-meta b{font-family:'Oswald';font-size:16px;font-weight:600;letter-spacing:.02em;display:block}
+.pick-user button .pu-meta span{font-size:11px;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
+.pick-user button .pu-state{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 8px;border-radius:2px;border:1px solid var(--line);color:var(--smoke)}
+.pick-user button .pu-state.new{color:var(--gold);border-color:var(--gold)}
+.gate-back{background:none;border:none;color:var(--smoke);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:0;margin-bottom:16px;cursor:pointer}
+.gate-back:hover{color:var(--chalk)}
+.gate-who{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.gate-who .avatar{width:46px;height:46px;font-size:19px}
+.gate-who b{font-family:'Oswald';font-size:19px;font-weight:600;display:block}
+.gate-who span{font-size:11px;color:var(--smoke);letter-spacing:.08em;text-transform:uppercase}
+.gate-err{color:var(--blood-hi);font-size:12px;min-height:15px;margin-top:4px;letter-spacing:.02em}
+.gate-note{background:var(--ink);border-left:2px solid var(--gold);border-radius:2px;padding:10px 12px;font-size:11.5px;color:#cfc9bb;margin-top:16px;line-height:1.45}
+.logout{background:none;border:1px solid var(--line);color:var(--smoke);padding:8px 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;font-family:'Archivo Narrow'}
+.logout:hover{color:var(--blood);border-color:var(--blood)}
+.session-badge{display:flex;align-items:center;gap:9px}
+.session-badge .avatar{width:32px;height:32px;font-size:14px}
+.session-badge b{font-family:'Oswald';font-size:14px;font-weight:600;letter-spacing:.02em}
+
+/* ---------- photos ---------- */
+.photo-drop{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:3px;padding:16px;color:var(--smoke);font-size:13px;cursor:pointer;background:var(--ink);transition:border-color .12s,color .12s}
+.photo-drop:hover{border-color:var(--blood);color:var(--chalk)}
+.photo-preview{position:relative;margin-top:10px;border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.photo-preview img{display:block;width:100%;max-height:240px;object-fit:cover}
+.photo-preview button{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(13,13,15,.8);border:1px solid var(--line);color:#fff;font-size:16px;line-height:1;cursor:pointer}
+.photo-preview button:hover{background:var(--blood);border-color:var(--blood)}
+.sess-photo{margin-top:12px;border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.sess-photo img{display:block;width:100%;max-height:420px;object-fit:cover;cursor:zoom-in}
+.lightbox{position:fixed;inset:0;z-index:120;background:rgba(6,6,8,.92);display:none;place-items:center;padding:24px;cursor:zoom-out}
+.lightbox.on{display:grid}
+.lightbox img{max-width:100%;max-height:100%;border-radius:4px}
+
+/* ---------- month grid ---------- */
+.month-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px}
+.mnav-btn{width:36px;height:36px;border-radius:3px;background:var(--panel);border:1px solid var(--line);color:var(--chalk);font-size:20px;line-height:1;display:grid;place-items:center}
+.mnav-btn:hover{border-color:var(--blood);color:var(--blood)}
+.month-label{font-family:'Oswald';text-transform:uppercase;letter-spacing:.08em;font-size:18px;font-weight:600;min-width:180px;text-align:center}
+.cube-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:14px}
+.cube{aspect-ratio:1;border-radius:3px;background:var(--ink);border:1px solid var(--line);display:grid;place-items:center;font-family:'Archivo Narrow';font-size:10px;color:var(--smoke);position:relative}
+.cube.pad{background:transparent;border:none}
+.cube.on{background:var(--blood);border-color:var(--blood);color:#fff;font-weight:600}
+.cube.today{box-shadow:0 0 0 2px var(--gold)}
+.cube.future{opacity:.35}
+.cube-legend{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-family:'Archivo Narrow';font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--smoke)}
+.cube-legend .swatch{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin:0 4px}
+.cube-count{font-family:'Oswald';font-size:15px;font-weight:600;color:var(--chalk);letter-spacing:.02em}
+.dow{font-family:'Archivo Narrow';font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke);text-align:center;padding-bottom:2px}
+.streaks{display:flex;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.streak{flex:1;background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:10px 8px;text-align:center}
+.streak b{font-family:'Oswald';font-size:26px;font-weight:700;display:block;line-height:1;color:var(--blood)}
+.streak span{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);display:block;margin-top:3px}
+
+/* ---------- coach rating ---------- */
+.rating-badge{font-family:'Archivo Narrow';color:var(--gold);letter-spacing:.05em;font-size:11px;margin-left:6px;font-style:normal}
+.coachbox-rich{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.rate-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rate-lbl{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.stars button{background:none;border:none;color:var(--gold);font-size:22px;line-height:1;padding:0 1px;cursor:pointer}
+.stars button:hover{transform:scale(1.15)}
+.coachbox-rich .coachbox{margin-top:0;padding-top:0;border-top:none}
+
+/* ---------- technical goals ---------- */
+.goals{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);text-align:left}
+.goals-h{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.coach-tag{background:var(--gold);color:#1a1608;font-size:9px;letter-spacing:.1em;padding:2px 6px;border-radius:2px;font-weight:600}
+.goal-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.goal-row:last-of-type{border-bottom:none}
+.goal-disc{font-family:'Archivo Narrow';text-transform:uppercase;letter-spacing:.06em;font-size:10px;color:var(--gold);background:var(--ink);border:1px solid var(--line);padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.goal-txt{flex:1;color:var(--chalk);text-align:left}
+.goal-del{background:none;border:none;color:var(--smoke);font-size:15px;line-height:1;cursor:pointer;padding:0 2px}
+.goal-del:hover{color:var(--blood)}
+.goal-empty{font-size:12px;color:var(--smoke);font-style:italic;padding:2px 0}
+.goal-editor{display:flex;gap:6px;margin-top:10px}
+.goal-editor select{background:var(--ink);border:1px solid var(--line);color:var(--chalk);border-radius:2px;padding:7px 6px;font-size:12px;max-width:110px}
+.goal-editor input{flex:1;min-width:0;background:var(--ink);border:1px solid var(--line);color:var(--chalk);border-radius:2px;padding:7px 8px;font-size:12px}
+.goal-editor button{background:var(--gold);border:none;color:#1a1608;border-radius:2px;padding:0 12px;font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.04em;cursor:pointer}
+
+/* ---------- coach view ---------- */
+.coach-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.coach-title{font-family:'Oswald';font-size:26px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.coach-sub{color:var(--smoke);font-size:13px;margin-top:2px}
+.c-card{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:18px 20px;margin-bottom:16px}
+.c-dash-grid{display:grid;gap:16px}
+.c-dash-grid .c-card{margin-bottom:0}
+@media(min-width:820px){.c-dash-grid{grid-template-columns:repeat(3,1fr)}}
+.c-card-h{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.c-card-h .avatar{width:44px;height:44px;font-size:18px}
+.c-card-id{flex:1}
+.c-card-id b{font-family:'Oswald';font-size:18px;font-weight:600;letter-spacing:.02em;display:block}
+.c-card-id span{font-size:12px;color:var(--smoke)}
+.c-alert{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:2px;border:1px solid var(--line);color:var(--smoke)}
+.c-alert.warn{color:var(--blood-hi);border-color:var(--blood)}
+.c-alert.ok{color:var(--win);border-color:var(--win)}
+.c-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:560px){.c-metrics{grid-template-columns:repeat(2,1fr)}}
+.c-metric{background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:11px 8px;text-align:center}
+.c-metric b{font-family:'Oswald';font-size:22px;font-weight:600;display:block;line-height:1}
+.c-metric b i{font-style:normal;font-size:13px;color:var(--smoke)}
+.c-metric span{font-family:'Archivo Narrow';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);display:block;margin-top:4px}
+.c-sess{max-width:640px}
+.c-feedback{position:relative}
+.c-fb-actions{display:flex;gap:8px;margin-top:10px}
+.c-fb-edit,.c-fb-del{background:none;border:1px solid var(--line);border-radius:2px;padding:5px 12px;font-family:'Archivo Narrow';font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--smoke)}
+.c-fb-edit:hover{color:var(--gold);border-color:var(--gold)}
+.c-fb-del:hover{color:var(--blood);border-color:var(--blood)}
+
+/* ---------- mobile polish ---------- */
+@media(max-width:600px){
+  .bar{padding:12px 16px;gap:10px}
+  .brand .mark{font-size:24px}
+  .brand .sub{display:none}
+  main{padding:16px 16px 80px}
+  .hero{padding:22px 16px 4px}
+  .hero .title h1{font-size:clamp(30px,10vw,44px)}
+  .week{display:none}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;padding:11px 12px;font-size:14px}
+  .coach-head{flex-direction:column;align-items:stretch}
+  .logout{padding:7px 9px;font-size:10px}
+  .session-badge b{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cube{font-size:9px}
+  .stat b{font-size:19px}
+}
+
+/* ---------- nutrition ---------- */
+.nutri-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nutri-date{background:var(--panel-2);color:var(--chalk);border:1px solid var(--line);padding:8px 10px;border-radius:2px;font-size:13px}
+.nutri-group{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:18px 20px;margin-bottom:16px}
+.nutri-group-h{font-family:'Oswald';text-transform:uppercase;letter-spacing:.05em;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--chalk)}
+.nutri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.nutri-item label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--smoke);margin-bottom:5px}
+.nutri-item .nutri-unit{color:var(--blood);letter-spacing:0}
+.nutri-item input{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--chalk);padding:9px 10px;font-size:14px;border-radius:3px}
+.nutri-item input:focus{outline:2px solid var(--blood);border-color:var(--blood)}
+.nutri-bar{height:5px;background:var(--ink);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.nutri-fill{height:100%;background:var(--blood)}
+.nutri-tgt{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke);margin-top:3px}
+.nutri-tgt.dim{opacity:.6}
+.nutri-readval{font-family:'Oswald';font-size:20px;font-weight:600;color:var(--chalk);line-height:1}
+.nutri-targets-head{font-family:'Oswald';text-transform:uppercase;letter-spacing:.05em;font-size:16px;font-weight:600;margin-bottom:14px}
+
+/* ---------- program ---------- */
+.prog-days{display:grid;gap:14px}
+@media(min-width:720px){.prog-days{grid-template-columns:repeat(2,1fr)}}
+.prog-day{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:16px 18px}
+.prog-day-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.prog-day-name{font-family:'Oswald';font-size:17px;font-weight:600;letter-spacing:.02em;flex:1}
+.prog-day-name-input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--chalk);font-family:'Oswald';font-size:16px;font-weight:600;padding:8px 10px;border-radius:3px}
+.prog-day-name-input:focus{outline:2px solid var(--blood);border-color:var(--blood)}
+.prog-blocks{display:flex;flex-direction:column;gap:8px}
+.prog-block{display:flex;align-items:center;gap:6px}
+.prog-block-txt{flex:1;background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-size:14px}
+.prog-block-input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--chalk);border-radius:3px;padding:9px 11px;font-size:14px}
+.prog-block-input:focus{outline:2px solid var(--blood);border-color:var(--blood)}
+.prog-block-del,.prog-del{background:none;border:1px solid var(--line);color:var(--smoke);border-radius:2px;width:30px;height:30px;font-size:16px;line-height:1;cursor:pointer;flex-shrink:0}
+.prog-block-del:hover,.prog-del:hover{color:var(--blood);border-color:var(--blood)}
+.prog-del{margin-inline-start:auto}
+body.rtl .prog-day-name{text-align:right}
+
+/* ---------- weight / my space ---------- */
+.weight-stats{display:flex;gap:22px;margin-bottom:14px}
+.weight-svg{width:100%;height:140px;background:var(--ink);border:1px solid var(--line);border-radius:4px;margin-top:6px}
+
+/* ---------- coach note box ---------- */
+.coach-note-box{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:16px 18px;margin-top:16px;border-left:2px solid var(--gold)}
+body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
+.cnb-h{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.cnb-row{display:flex;gap:8px}
+.cnb-row input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--chalk);padding:9px 11px;border-radius:3px;font-size:13px}
+.cnb-row input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+.cnb-row button{background:var(--gold);border:none;color:#1a1608;padding:0 16px;border-radius:3px;font-family:'Oswald';text-transform:uppercase;font-weight:600;letter-spacing:.04em;font-size:13px;cursor:pointer}
+
+/* ---------- leaderboard ---------- */
+.lb{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:6px 6px 8px;margin-bottom:24px;overflow:hidden}
+.lb-head{padding:14px 16px 12px}
+.lb-head h3{font-family:'Oswald';font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.lb-head span{font-size:12px;color:var(--smoke)}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:4px;margin:2px 0}
+.lb-row.lead{background:linear-gradient(90deg,rgba(216,165,58,.14),transparent)}
+.lb-rank{font-family:'Oswald';font-size:20px;font-weight:700;min-width:34px;text-align:center}
+.lb-row .avatar{width:38px;height:38px;font-size:16px;flex-shrink:0}
+.lb-name{font-family:'Oswald';font-size:16px;font-weight:600;letter-spacing:.02em;flex:1;min-width:60px}
+.lb-metrics{display:flex;gap:16px;flex-wrap:wrap}
+.lb-metrics span{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke)}
+.lb-metrics b{font-family:'Oswald';font-size:15px;color:var(--chalk);font-weight:600}
+.lb-score{font-family:'Oswald';font-size:26px;font-weight:700;color:var(--blood);text-align:end;min-width:70px}
+.lb-score i{font-style:normal;font-size:11px;color:var(--smoke);display:block;line-height:1;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:600px){.lb-metrics{display:none}.lb-name{flex:1}}
+
+/* ---------- weekly goal ring ---------- */
+.weekly-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ring{position:relative;width:120px;height:120px;flex-shrink:0}
+.ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+.ring .ring-bg{fill:none;stroke:var(--line);stroke-width:9}
+.ring .ring-fg{fill:none;stroke:var(--blood);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.ring.reached .ring-fg{stroke:var(--win)}
+.ring-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-center b{font-family:'Oswald';font-size:28px;font-weight:700;line-height:1}
+.ring-center b i{font-style:normal;font-size:15px;color:var(--smoke)}
+.ring-center span{font-family:'Archivo Narrow';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);display:block;margin-top:2px}
+.weekly-side{flex:1;min-width:120px}
+.weekly-lbl{font-family:'Oswald';font-size:22px;font-weight:700;margin-bottom:10px}
+.weekly-set{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.weekly-set input{width:60px;background:var(--ink);border:1px solid var(--line);color:var(--chalk);padding:8px;border-radius:3px;font-size:14px;text-align:center}
+.weekly-unit{font-size:12px;color:var(--smoke)}
+
+/* ---------- PRs ---------- */
+.pr-list{display:flex;flex-direction:column;gap:8px}
+.pr-row{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;background:var(--ink);border:1px solid var(--line);border-radius:3px}
+.pr-name{font-weight:600;font-size:14px}
+.pr-val{font-family:'Oswald';font-size:15px;color:var(--blood);font-weight:600}
+.pr-badge{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#1a1608;padding:3px 8px;border-radius:2px;font-weight:700;animation:pop .4s ease}
+
+/* ---------- theme toggle ---------- */
+.theme-toggle{background:var(--panel-2);color:var(--chalk);border:1px solid var(--line);width:34px;height:34px;border-radius:2px;font-size:16px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:border-color .15s,color .15s}
+.theme-toggle:hover{border-color:var(--blood);color:var(--blood)}
+.gate-lang-row{display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;align-items:center}
+
+/* ---------- animations ---------- */
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes cubeIn{from{transform:scale(.5);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sess{animation:fadeUp .3s ease}
+.cube.on{animation:cubeIn .35s cubic-bezier(.2,.8,.2,1)}
+.streak b{display:inline-block}
+.streak:first-child b{animation:flamePulse 2.2s ease-in-out infinite}
+.btn{transition:background .15s,transform .08s}
+.btn:active{transform:scale(.98)}
+.tab{transition:color .15s,border-color .15s}
+.lb-row{transition:background .2s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- language selector ---------- */
+.lang-select{
+  background:var(--panel-2);color:var(--chalk);border:1px solid var(--line);
+  padding:7px 10px;font-size:12px;font-weight:600;border-radius:2px;font-family:'Archivo Narrow';
+  letter-spacing:.04em;cursor:pointer;
+}
+.lang-select:focus{outline:2px solid var(--blood);border-color:var(--blood)}
+.gate-lang-row{display:flex;justify-content:flex-end;margin-bottom:14px}
+.gate-lang-row .lang-select{min-width:120px}
+
+/* ---------- RTL (Arabic) ---------- */
+body.rtl{direction:rtl}
+body.rtl .brand{flex-direction:row}
+body.rtl .hero{flex-direction:row}
+body.rtl .note{border-left:none;border-right:2px solid var(--gold)}
+body.rtl .note[style*="smoke"]{border-right-color:var(--smoke)!important}
+body.rtl .goal-disc{margin-top:1px}
+body.rtl .tab{letter-spacing:0}
+body.rtl .brand .sub,body.rtl .gate-brand .sub{letter-spacing:.12em}
+body.rtl .cube-legend{flex-direction:row-reverse}
+body.rtl .exrow .s{text-align:left}
+body.rtl .mark{direction:ltr}
+body.rtl .lb-score,body.rtl .c-metric b i{direction:ltr;unicode-bidi:isolate}
+body.rtl .weight-svg{transform:scaleX(-1)}
+body.rtl .month-nav .mnav-btn,body.rtl .nutri-nav .mnav-btn{transform:scaleX(-1)}
+body.rtl input,body.rtl textarea,body.rtl select{text-align:right}
+body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direction:ltr}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="mark">LE<b>·</b>CAMP</div>
+      <div class="sub">Fight logbook</div>
+    </div>
+    <div class="who">
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme" title="Theme">◐</button>
+      <select class="lang-select" id="langHeader" aria-label="Language"></select>
+      <div class="session-badge" id="sessionBadge"></div>
+      <button class="logout" id="logout" data-i18n="logout">Log out</button>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-brand">
+      <div class="mark">LE<b>·</b>CAMP</div>
+      <div class="sub">Fight logbook</div>
+    </div>
+    <div class="gate-panel">
+      <div class="gate-lang-row">
+        <button class="theme-toggle" id="themeToggleGate" aria-label="Theme" title="Theme">◐</button>
+        <select class="lang-select" id="langGate" aria-label="Language"></select>
+      </div>
+      <div id="gateLogin">
+        <h2 data-i18n="gate_who">Sign in</h2>
+        <p class="lead" data-i18n="gate_pick_lead">Enter your camp email and password.</p>
+        <div class="field"><label data-i18n="email">Email</label><input type="email" id="authEmail" autocomplete="username" placeholder="kumeil@lecamp.local"></div>
+        <div class="field"><label data-i18n="pw">Password</label><input type="password" id="authPw" autocomplete="current-password"></div>
+        <div class="gate-err" id="gateErr"></div>
+        <button class="btn" id="gateSubmit" data-i18n="enter">Enter</button>
+        <div class="gate-note" data-i18n="gate_note_supabase">Data is shared across the camp. Forgot your password? Ask the coach to reset it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="title">
+    <h1>ROUND<br><em>BY ROUND.</em></h1>
+    <p>Every session counts. Log your attendance, your performance and your discipline — the coach tracks progress and leaves feedback.</p>
+  </div>
+  <div class="week" id="week"></div>
+</section>
+
+<main>
+  <div class="tabs" id="tabsAthlete">
+    <button class="tab on" data-tab="log" data-i18n="tab_log">New session</button>
+    <button class="tab" data-tab="feed" data-i18n="tab_feed">Journal</button>
+    <button class="tab" data-tab="nutrition" data-i18n="tab_nutrition">Nutrition</button>
+    <button class="tab" data-tab="program" data-i18n="tab_program">My program</button>
+    <button class="tab" data-tab="space" data-i18n="tab_space">My space</button>
+    <button class="tab" data-tab="stats" data-i18n="tab_camp">The camp</button>
+  </div>
+  <div class="tabs" id="tabsCoach" style="display:none">
+    <button class="tab on" data-ctab="dash" data-i18n="ctab_dash">Dashboard</button>
+    <button class="tab" data-ctab="journal" data-i18n="ctab_journal">Journal &amp; feedback</button>
+    <button class="tab" data-ctab="cnutrition" data-i18n="ctab_nutrition">Nutrition</button>
+    <button class="tab" data-ctab="cprogram" data-i18n="programs_title">Programs</button>
+  </div>
+
+  <!-- LOG -->
+  <section id="tab-log" class="grid side">
+    <div class="panel" style="align-self:start">
+      <div class="card-h"><h3 data-i18n="record">Log</h3><span class="hint" data-i18n="session_today">Today's session</span></div>
+      <div class="card-b">
+        <div class="field">
+          <label data-i18n="discipline">Discipline</label>
+          <div class="disc-pick" id="discPick"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label data-i18n="date">Date</label><input type="date" id="fDate"></div>
+          <div class="field"><label data-i18n="duration">Duration (min)</label><input type="number" id="fDur" min="0" placeholder="90"></div>
+        </div>
+        <div class="field">
+          <label data-i18n="feeling">Feeling / intensity</label>
+          <select id="fIntensity"></select>
+        </div>
+
+        <div class="field" style="margin-bottom:8px">
+          <label><span data-i18n="ex_sets">Exercises &amp; sets</span> <span style="color:var(--smoke);text-transform:none;letter-spacing:0" data-i18n="optional">(optional)</span></label>
+        </div>
+        <div id="exWrap"></div>
+        <button class="mini" id="addEx" type="button" data-i18n="add_ex">+ Add exercise</button>
+
+        <div class="field" style="margin-top:16px">
+          <label data-i18n="personal_note">Personal note</label>
+          <textarea id="fNote" rows="2" data-i18n-ph="note_placeholder"></textarea>
+        </div>
+        <div class="field">
+          <label><span data-i18n="progress_photo">Progress photo</span> <span style="color:var(--smoke);text-transform:none;letter-spacing:0" data-i18n="optional">(optional)</span></label>
+          <label class="photo-drop" id="photoDrop">
+            <input type="file" id="fPhoto" accept="image/*" hidden>
+            <span id="photoLabel" data-i18n="add_photo">＋ Add a photo</span>
+          </label>
+          <div id="photoPreview" class="photo-preview" style="display:none">
+            <img id="photoImg" alt="">
+            <button type="button" id="photoRemove" title="×">×</button>
+          </div>
+        </div>
+        <button class="btn" id="save" data-i18n="validate">Confirm session</button>
+        <div id="saveMsg" style="text-align:center;margin-top:8px;height:14px"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="card-h"><h3 data-i18n="recent">Latest sessions</h3><span class="hint" id="recentCount">—</span></div>
+        <div class="card-b" id="recentFeed"><div class="loading" data-i18n="loading">Loading…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEED -->
+  <section id="tab-feed" style="display:none">
+    <div class="field" style="max-width:260px;margin-bottom:18px">
+      <label data-i18n="filter_athlete">Filter by athlete</label>
+      <select id="filterAthlete"></select>
+    </div>
+    <div id="fullFeed"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- NUTRITION -->
+  <section id="tab-nutrition" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="nutrition_title">Nutrition</h2>
+        <p class="coach-sub" data-i18n="nutrition_sub">Log your daily intake.</p>
+      </div>
+      <div class="nutri-nav">
+        <button id="nPrev" class="mnav-btn" title="‹">‹</button>
+        <input type="date" id="nDate" class="nutri-date">
+        <button id="nNext" class="mnav-btn" title="›">›</button>
+        <button id="nTargets" class="mini" data-i18n="edit_targets" style="margin-inline-start:8px">Edit targets</button>
+      </div>
+    </div>
+    <div id="nutriBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- MY PROGRAM -->
+  <section id="tab-program" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="program_title">My program</h2>
+        <p class="coach-sub" data-i18n="program_sub">Write your own plan.</p>
+      </div>
+    </div>
+    <div id="programBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- MY SPACE (weight) -->
+  <section id="tab-space" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="space_title">My space</h2>
+        <p class="coach-sub" data-i18n="space_sub">Track your weight.</p>
+      </div>
+    </div>
+    <div id="spaceBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- STATS -->
+  <section id="tab-stats" style="display:none">
+    <div id="leaderboard"></div>
+    <div class="month-nav">
+      <button id="mPrev" class="mnav-btn" title="Mois précédent">‹</button>
+      <div class="month-label" id="monthLabel">—</div>
+      <button id="mNext" class="mnav-btn" title="Mois suivant">›</button>
+    </div>
+    <div class="roster" id="roster"></div>
+  </section>
+
+  <!-- COACH: DASHBOARD -->
+  <section id="ctab-dash" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="dashboard">Dashboard</h2>
+        <p class="coach-sub" data-i18n="dash_sub">Camp overview.</p>
+      </div>
+      <div class="month-nav" style="margin:0">
+        <button id="cmPrev" class="mnav-btn" title="‹">‹</button>
+        <div class="month-label" id="cMonthLabel" style="min-width:150px;font-size:15px">—</div>
+        <button id="cmNext" class="mnav-btn" title="›">›</button>
+      </div>
+    </div>
+    <div id="coachDash"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- COACH: JOURNAL & FEEDBACK -->
+  <section id="ctab-journal" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="journal_title">Journal &amp; feedback</h2>
+        <p class="coach-sub" data-i18n="journal_sub">Rate, comment and manage your feedback.</p>
+      </div>
+      <div class="field" style="max-width:220px;margin:0">
+        <label data-i18n="filter_athlete">Filter by athlete</label>
+        <select id="coachFilter"></select>
+      </div>
+    </div>
+    <div id="coachJournal"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- COACH: NUTRITION -->
+  <section id="ctab-cnutrition" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="nutrition_title">Nutrition</h2>
+        <p class="coach-sub" data-i18n="nutrition_coach_sub">View each athlete's intake.</p>
+      </div>
+      <div class="nutri-nav">
+        <select id="cnAthlete" class="nutri-date"></select>
+        <button id="cnPrev" class="mnav-btn" title="‹">‹</button>
+        <input type="date" id="cnDate" class="nutri-date">
+        <button id="cnNext" class="mnav-btn" title="›">›</button>
+      </div>
+    </div>
+    <div id="coachNutriBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <!-- COACH: PROGRAMS -->
+  <section id="ctab-cprogram" style="display:none">
+    <div class="coach-head">
+      <div>
+        <h2 class="coach-title" data-i18n="programs_title">Programs</h2>
+        <p class="coach-sub" data-i18n="programs_sub"></p>
+      </div>
+    </div>
+    <div id="coachProgramBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+  </section>
+
+  <div class="foot" data-i18n-html="foot">muay thai · jujitsu · strength · <b>everything else</b></div>
+</main>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""></div>
+
+<script>
+/* ===================== i18n ===================== */
+const LANGS = ["en","fr","ar","de"];
+const LANG_NAMES = {en:"English", fr:"Français", ar:"العربية", de:"Deutsch"};
+const RTL_LANGS = ["ar"];
+let lang = "en";
+
+// Disciplines kept as stable IDs; labels translated per language.
+const DISC_IDS = ["muaythai","jujitsu","strength","boxing","grappling","cardio","other"];
+const DISC_SHORT = {muaythai:"MT",jujitsu:"JJ",strength:"ST",boxing:"BX",grappling:"GR",cardio:"CA",other:"·"};
+
+const I18N = {
+  en:{
+    brand_sub:"Fight logbook", logout:"Log out",
+    gate_who:"Who are you?", gate_pick_lead:"Choose your profile to log in.",
+    gate_back:"← Change profile", gate_new_title:"Create your password",
+    pw_new:"New password", pw_confirm:"Confirm", pw:"Password",
+    enter:"Enter", create_enter:"Create & enter",
+    email:"Email", gate_note_supabase:"Data is shared across the camp. Forgot your password? Ask the coach to reset it.",
+    gate_note:"Friends-only, serverless site: your password is hashed and stored in the site. Don't reuse an important password (email, bank). Pick a code just for the camp.",
+    coach:"Coach", athlete:"Athlete", to_setup:"To set up", login:"Log in",
+    err_pw_short:"Choose at least 4 characters.", err_pw_match:"The two passwords don't match.", err_pw_wrong:"Wrong password.",
+    hero_h1:"ROUND|BY ROUND.", hero_p:"Every session counts. Log your attendance, your performance and your discipline — the coach tracks progress and leaves feedback.",
+    hero_coach_h1:"COACH|VIEW.", hero_coach_p:"Run the camp: track attendance, rate sessions and set objectives.",
+    tab_log:"New session", tab_feed:"Journal", tab_camp:"The camp",
+    ctab_dash:"Dashboard", ctab_journal:"Journal & feedback",
+    record:"Log", session_today:"Today's session", discipline:"Discipline",
+    date:"Date", duration:"Duration (min)", feeling:"Feeling / intensity",
+    feel_light:"Light recovery", feel_standard:"Standard", feel_hard:"Hard", feel_spar:"Sparring / competition",
+    ex_sets:"Exercises & sets", optional:"(optional)", add_ex:"+ Add exercise", add_set:"+ Set",
+    ex_placeholder:"Exercise (e.g. Squat, Heavy bag)",
+    personal_note:"Personal note", note_placeholder:"Worked on low kicks, guard to fix…",
+    progress_photo:"Progress photo", add_photo:"＋ Add a photo", compressing:"Compressing…",
+    validate:"Confirm session", saved:"✓ Session saved", saving:"Saving…",
+    save_fail:"Saving failed, try again.", coach_no_log:"The coach doesn't log — pick an athlete above.",
+    recent:"Latest sessions", total_count:"{n} in total", loading:"Loading…",
+    filter_athlete:"Filter by athlete", all_camp:"All the camp",
+    empty_none:"Nothing yet", empty_first:"Log your first session on the left.",
+    no_session:"No session", change_filter:"Change filter or log a session.",
+    minutes:"Minutes", exercises:"Exercises", sets:"Sets",
+    note:"Note", athlete_note:"Athlete note", coach_feedback:"Coach feedback",
+    leave_feedback:"Leave feedback…", send:"Send", save_btn:"Save",
+    rating:"Rating", your_feedback:"Your feedback", edit:"Edit", delete:"Delete",
+    del_session_confirm:"Delete this session?", del_feedback_confirm:"Delete your feedback on this session?",
+    sessions_word:"Sessions", hours_cumulated:"h total",
+    no_session_yet:"No session yet", rest:"Rest", training:"Training", days:"days",
+    streak_current:"🔥 Current", streak_best:"★ Record",
+    tech_goals:"Technical objectives", goal_none_coach:"No objective set — add one below.",
+    goal_none_athlete:"No technical objective yet.", goal_placeholder:"e.g. work on ground guard",
+    dashboard:"Dashboard", dash_sub:"Camp overview — attendance, streaks and objectives.",
+    journal_title:"Journal & feedback", journal_sub:"Rate, comment and manage your feedback session by session.",
+    active:"Active", inactive_since:"Inactive for {n}d", no_session_badge:"No session", days_ago:"{n}d ago",
+    total_sessions:"{n} session(s) total", days_this_month:"Days this month", last_disc:"Last disc.",
+    coach_journal_empty:"Athletes' sessions will appear here.",
+    foot:"muay thai · jujitsu · strength · <b>everything else</b>",
+    months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+    dow:["M","T","W","T","F","S","S"],
+    disc:{muaythai:"Muay Thai",jujitsu:"Jujitsu",strength:"Strength / Gym",boxing:"Boxing",grappling:"Grappling",cardio:"Cardio",other:"Other"},
+    coach_name:"Coach",
+    tab_nutrition:"Nutrition", tab_program:"My program",
+    nutrition_title:"Nutrition", nutrition_sub:"Log your daily intake and hit your targets.",
+    macros:"Macros", micros:"Vitamins & minerals", set_targets:"Set targets", targets:"Targets",
+    calories:"Calories", protein:"Protein", carbs:"Carbs", fat:"Fat", fiber:"Fiber",
+    water:"Water", sugar:"Sugar", sodium:"Sodium",
+    vit_a:"Vitamin A", vit_c:"Vitamin C", vit_d:"Vitamin D", vit_b12:"Vitamin B12",
+    iron:"Iron", calcium:"Calcium", magnesium:"Magnesium", potassium:"Potassium", zinc:"Zinc", omega3:"Omega-3",
+    unit_kcal:"kcal", unit_g:"g", unit_mg:"mg", unit_mcg:"µg", unit_l:"L",
+    save_nutrition:"Save the day", nutrition_saved:"✓ Saved", of_target:"of {t}", no_target:"No target",
+    edit_targets:"Edit targets", done:"Done", target_ph:"Target",
+    program_title:"My program", program_sub:"Write and organize your own training plan.",
+    programs_title:"Programs", programs_sub:"View each athlete's training plan.",
+    nutrition_coach_sub:"View each athlete's daily intake.", ctab_nutrition:"Nutrition",
+    program_coach_sub:"{name}'s training plan (read-only).",
+    add_day:"+ Add a day", day_name_ph:"Day name (e.g. Monday — Push)",
+    add_block:"+ Add exercise/block", block_ph:"e.g. Bench press 4×8, or Roadwork 5 km",
+    program_empty:"No program yet.", program_empty_coach:"This athlete hasn't written a program yet.",
+    remove:"Remove", nutrition_none:"Nothing logged for this day.",
+    view_athlete:"Athlete", nutrition_day:"Day",
+    tab_space:"My space", space_title:"My space", space_sub:"Track your weight and personal progress.",
+    weight:"Weight", weight_kg:"Weight (kg)", target_weight:"Target weight", log_weight:"Log weight",
+    weight_today:"Today's weight", weight_history:"Weight history", weight_none:"No weight logged yet.",
+    weight_saved:"✓ Weight saved", current_weight:"Current", to_target:"To target",
+    coach_note_nutri:"Coach note on nutrition", coach_note_program:"Coach note on program",
+    leave_note:"Leave a note…", coach_note_label:"Coach note",
+    leaderboard:"Leaderboard", leaderboard_sub:"Camp ranking by overall score.",
+    score:"Score", rank:"Rank", pts:"pts",
+    lb_sessions:"Sessions", lb_active:"Active days", lb_streak:"Best streak",
+    weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
+    per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
+    prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
+    pr_exercise:"Exercise", pr_best:"Best", weekly_none:"No weekly goal set.",
+  },
+  fr:{
+    brand_sub:"Carnet de combat", logout:"Déconnexion",
+    gate_who:"Qui es-tu ?", gate_pick_lead:"Choisis ton profil pour te connecter.",
+    gate_back:"← Changer de profil", gate_new_title:"Crée ton mot de passe",
+    pw_new:"Nouveau mot de passe", pw_confirm:"Confirme", pw:"Mot de passe",
+    enter:"Entrer", create_enter:"Créer et entrer",
+    email:"Email", gate_note_supabase:"Les données sont partagées dans le camp. Mot de passe oublié ? Demande au moniteur de le réinitialiser.",
+    gate_note:"Site entre potes, sans serveur : ton mot de passe est haché et stocké dans le site. Ne réutilise pas un mot de passe important (mail, banque). Prends un code dédié au camp.",
+    coach:"Moniteur", athlete:"Athlète", to_setup:"À configurer", login:"Connexion",
+    err_pw_short:"Choisis au moins 4 caractères.", err_pw_match:"Les deux mots de passe ne correspondent pas.", err_pw_wrong:"Mot de passe incorrect.",
+    hero_h1:"ROUND|PAR ROUND.", hero_p:"Chaque séance compte. Note ta présence, tes perfs et ta discipline — le moniteur suit la progression et laisse ses retours.",
+    hero_coach_h1:"VUE|MONITEUR.", hero_coach_p:"Pilote le camp : suis l'assiduité, note les séances et fixe les objectifs.",
+    tab_log:"Nouvelle séance", tab_feed:"Journal", tab_camp:"Le camp",
+    ctab_dash:"Tableau de bord", ctab_journal:"Journal & retours",
+    record:"Enregistrer", session_today:"Séance du jour", discipline:"Discipline",
+    date:"Date", duration:"Durée (min)", feeling:"Ressenti / intensité",
+    feel_light:"Récup légère", feel_standard:"Standard", feel_hard:"Dure", feel_spar:"Sparring / compétition",
+    ex_sets:"Exercices & séries", optional:"(optionnel)", add_ex:"+ Ajouter un exercice", add_set:"+ Série",
+    ex_placeholder:"Exercice (ex. Squat, Sac lourd)",
+    personal_note:"Note perso", note_placeholder:"Travail des low kicks, garde à corriger…",
+    progress_photo:"Photo de progrès", add_photo:"＋ Ajouter une photo", compressing:"Compression…",
+    validate:"Valider la séance", saved:"✓ Séance validée", saving:"Enregistrement…",
+    save_fail:"Échec de l'enregistrement, réessaie.", coach_no_log:"Le moniteur ne loggue pas — choisis un athlète en haut.",
+    recent:"Dernières séances", total_count:"{n} au total", loading:"Chargement…",
+    filter_athlete:"Filtrer par athlète", all_camp:"Tout le camp",
+    empty_none:"Rien pour l'instant", empty_first:"Enregistre ta première séance à gauche.",
+    no_session:"Aucune séance", change_filter:"Change de filtre ou enregistre une séance.",
+    minutes:"Minutes", exercises:"Exercices", sets:"Séries",
+    note:"Note", athlete_note:"Note athlète", coach_feedback:"Retour moniteur",
+    leave_feedback:"Laisser un retour…", send:"Envoyer", save_btn:"Enregistrer",
+    rating:"Note", your_feedback:"Ton retour", edit:"Modifier", delete:"Supprimer",
+    del_session_confirm:"Supprimer cette séance ?", del_feedback_confirm:"Supprimer ton retour sur cette séance ?",
+    sessions_word:"Séances", hours_cumulated:"h cumulées",
+    no_session_yet:"Pas encore de séance", rest:"Repos", training:"Entraînement", days:"jours",
+    streak_current:"🔥 En cours", streak_best:"★ Record",
+    tech_goals:"Objectifs techniques", goal_none_coach:"Aucun objectif fixé — ajoute-en un ci-dessous.",
+    goal_none_athlete:"Pas d'objectif technique pour l'instant.", goal_placeholder:"ex. travailler la garde au sol",
+    dashboard:"Tableau de bord", dash_sub:"Vue d'ensemble du camp — assiduité, séries et objectifs.",
+    journal_title:"Journal & retours", journal_sub:"Note, commente et gère tes retours séance par séance.",
+    active:"Actif", inactive_since:"Inactif depuis {n} j", no_session_badge:"Aucune séance", days_ago:"Il y a {n} j",
+    total_sessions:"{n} séance(s) au total", days_this_month:"Jours ce mois", last_disc:"Dernière disc.",
+    coach_journal_empty:"Les séances des athlètes apparaîtront ici.",
+    foot:"muay thaï · jujitsu · muscu · <b>tout le reste</b>",
+    months:["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
+    dow:["L","M","M","J","V","S","D"],
+    disc:{muaythai:"Muay Thaï",jujitsu:"Jujitsu",strength:"Muscu / Salle",boxing:"Boxe",grappling:"Grappling",cardio:"Cardio",other:"Autre"},
+    coach_name:"Moniteur",
+    tab_nutrition:"Nutrition", tab_program:"Mon programme",
+    nutrition_title:"Nutrition", nutrition_sub:"Note tes apports du jour et atteins tes objectifs.",
+    macros:"Macros", micros:"Vitamines & minéraux", set_targets:"Définir des objectifs", targets:"Objectifs",
+    calories:"Calories", protein:"Protéines", carbs:"Glucides", fat:"Lipides", fiber:"Fibres",
+    water:"Eau", sugar:"Sucre", sodium:"Sodium",
+    vit_a:"Vitamine A", vit_c:"Vitamine C", vit_d:"Vitamine D", vit_b12:"Vitamine B12",
+    iron:"Fer", calcium:"Calcium", magnesium:"Magnésium", potassium:"Potassium", zinc:"Zinc", omega3:"Oméga-3",
+    unit_kcal:"kcal", unit_g:"g", unit_mg:"mg", unit_mcg:"µg", unit_l:"L",
+    save_nutrition:"Enregistrer la journée", nutrition_saved:"✓ Enregistré", of_target:"sur {t}", no_target:"Pas d'objectif",
+    edit_targets:"Modifier les objectifs", done:"Terminé", target_ph:"Objectif",
+    program_title:"Mon programme", program_sub:"Écris et organise ton propre plan d'entraînement.",
+    programs_title:"Programmes", programs_sub:"Consulte le plan d'entraînement de chaque athlète.",
+    nutrition_coach_sub:"Consulte les apports quotidiens de chaque athlète.", ctab_nutrition:"Nutrition",
+    program_coach_sub:"Plan d'entraînement de {name} (lecture seule).",
+    add_day:"+ Ajouter un jour", day_name_ph:"Nom du jour (ex. Lundi — Poussée)",
+    add_block:"+ Ajouter un exercice/bloc", block_ph:"ex. Développé couché 4×8, ou Footing 5 km",
+    program_empty:"Pas encore de programme.", program_empty_coach:"Cet athlète n'a pas encore écrit de programme.",
+    remove:"Retirer", nutrition_none:"Rien de noté pour ce jour.",
+    view_athlete:"Athlète", nutrition_day:"Jour",
+    tab_space:"Mon espace", space_title:"Mon espace", space_sub:"Suis ton poids et ta progression perso.",
+    weight:"Poids", weight_kg:"Poids (kg)", target_weight:"Poids cible", log_weight:"Enregistrer le poids",
+    weight_today:"Poids du jour", weight_history:"Historique du poids", weight_none:"Aucun poids enregistré.",
+    weight_saved:"✓ Poids enregistré", current_weight:"Actuel", to_target:"Vers l'objectif",
+    coach_note_nutri:"Note du moniteur sur la nutrition", coach_note_program:"Note du moniteur sur le programme",
+    leave_note:"Laisser un mot…", coach_note_label:"Note du moniteur",
+    leaderboard:"Classement", leaderboard_sub:"Classement du camp par score global.",
+    score:"Score", rank:"Rang", pts:"pts",
+    lb_sessions:"Séances", lb_active:"Jours actifs", lb_streak:"Meilleure série",
+    weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
+    per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
+    prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
+    pr_exercise:"Exercice", pr_best:"Record", weekly_none:"Aucun objectif hebdo défini.",
+  },
+  ar:{
+    brand_sub:"سجل القتال", logout:"تسجيل الخروج",
+    gate_who:"من أنت؟", gate_pick_lead:"اختر ملفك للدخول.",
+    gate_back:"→ تغيير الملف", gate_new_title:"أنشئ كلمة المرور",
+    pw_new:"كلمة مرور جديدة", pw_confirm:"تأكيد", pw:"كلمة المرور",
+    enter:"دخول", create_enter:"إنشاء ودخول",
+    email:"البريد الإلكتروني", gate_note_supabase:"البيانات مشتركة داخل النادي. نسيت كلمة المرور؟ اطلب من المدرب إعادة تعيينها.",
+    gate_note:"موقع بين الأصدقاء بدون خادم: كلمة مرورك مُشفّرة ومخزّنة في الموقع. لا تُعد استخدام كلمة مرور مهمة (البريد، البنك). اختر رمزًا خاصًا بالنادي.",
+    coach:"المدرب", athlete:"لاعب", to_setup:"للإعداد", login:"دخول",
+    err_pw_short:"اختر 4 أحرف على الأقل.", err_pw_match:"كلمتا المرور غير متطابقتين.", err_pw_wrong:"كلمة مرور خاطئة.",
+    hero_h1:"جولة|بعد جولة.", hero_p:"كل حصة تهمّ. سجّل حضورك وأداءك وتخصّصك — يتابع المدرب التقدّم ويترك ملاحظاته.",
+    hero_coach_h1:"عرض|المدرب.", hero_coach_p:"أدر النادي: تابع الحضور، قيّم الحصص وحدّد الأهداف.",
+    tab_log:"حصة جديدة", tab_feed:"السجل", tab_camp:"النادي",
+    ctab_dash:"لوحة القيادة", ctab_journal:"السجل والملاحظات",
+    record:"تسجيل", session_today:"حصة اليوم", discipline:"التخصص",
+    date:"التاريخ", duration:"المدة (دقيقة)", feeling:"الإحساس / الشدة",
+    feel_light:"استشفاء خفيف", feel_standard:"عادي", feel_hard:"قوي", feel_spar:"سباريـنغ / منافسة",
+    ex_sets:"التمارين والمجموعات", optional:"(اختياري)", add_ex:"+ إضافة تمرين", add_set:"+ مجموعة",
+    ex_placeholder:"تمرين (مثل: سكوات، كيس ثقيل)",
+    personal_note:"ملاحظة شخصية", note_placeholder:"العمل على الركلات المنخفضة، تصحيح الحراسة…",
+    progress_photo:"صورة التقدّم", add_photo:"＋ إضافة صورة", compressing:"جارٍ الضغط…",
+    validate:"تأكيد الحصة", saved:"✓ تم حفظ الحصة", saving:"جارٍ الحفظ…",
+    save_fail:"فشل الحفظ، حاول مجددًا.", coach_no_log:"المدرب لا يسجّل حصصًا — اختر لاعبًا في الأعلى.",
+    recent:"آخر الحصص", total_count:"{n} إجمالًا", loading:"جارٍ التحميل…",
+    filter_athlete:"تصفية حسب اللاعب", all_camp:"كل النادي",
+    empty_none:"لا شيء بعد", empty_first:"سجّل حصتك الأولى على اليسار.",
+    no_session:"لا توجد حصة", change_filter:"غيّر التصفية أو سجّل حصة.",
+    minutes:"دقائق", exercises:"تمارين", sets:"مجموعات",
+    note:"ملاحظة", athlete_note:"ملاحظة اللاعب", coach_feedback:"ملاحظة المدرب",
+    leave_feedback:"اترك ملاحظة…", send:"إرسال", save_btn:"حفظ",
+    rating:"التقييم", your_feedback:"ملاحظتك", edit:"تعديل", delete:"حذف",
+    del_session_confirm:"حذف هذه الحصة؟", del_feedback_confirm:"حذف ملاحظتك على هذه الحصة؟",
+    sessions_word:"حصص", hours_cumulated:"ساعة إجمالًا",
+    no_session_yet:"لا توجد حصة بعد", rest:"راحة", training:"تدريب", days:"أيام",
+    streak_current:"🔥 حالية", streak_best:"★ الرقم القياسي",
+    tech_goals:"الأهداف التقنية", goal_none_coach:"لا هدف محدّد — أضف واحدًا أدناه.",
+    goal_none_athlete:"لا هدف تقني بعد.", goal_placeholder:"مثال: العمل على الحراسة الأرضية",
+    dashboard:"لوحة القيادة", dash_sub:"نظرة عامة على النادي — الحضور، السلاسل والأهداف.",
+    journal_title:"السجل والملاحظات", journal_sub:"قيّم، علّق وأدر ملاحظاتك حصة بحصة.",
+    active:"نشط", inactive_since:"غير نشط منذ {n} يوم", no_session_badge:"لا توجد حصة", days_ago:"منذ {n} يوم",
+    total_sessions:"{n} حصة إجمالًا", days_this_month:"أيام هذا الشهر", last_disc:"آخر تخصص",
+    coach_journal_empty:"ستظهر حصص اللاعبين هنا.",
+    foot:"مواي تاي · جوجيتسو · تقوية · <b>وكل الباقي</b>",
+    months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
+    dow:["إث","ثل","أر","خم","جم","سب","أح"],
+    disc:{muaythai:"مواي تاي",jujitsu:"جوجيتسو",strength:"تقوية / صالة",boxing:"ملاكمة",grappling:"مصارعة",cardio:"كارديو",other:"أخرى"},
+    coach_name:"المدرب",
+    tab_nutrition:"التغذية", tab_program:"برنامجي",
+    nutrition_title:"التغذية", nutrition_sub:"سجّل مدخولك اليومي وحقّق أهدافك.",
+    macros:"العناصر الكبرى", micros:"الفيتامينات والمعادن", set_targets:"تحديد الأهداف", targets:"الأهداف",
+    calories:"سعرات", protein:"بروتين", carbs:"كربوهيدرات", fat:"دهون", fiber:"ألياف",
+    water:"ماء", sugar:"سكر", sodium:"صوديوم",
+    vit_a:"فيتامين A", vit_c:"فيتامين C", vit_d:"فيتامين D", vit_b12:"فيتامين B12",
+    iron:"حديد", calcium:"كالسيوم", magnesium:"مغنيسيوم", potassium:"بوتاسيوم", zinc:"زنك", omega3:"أوميغا-3",
+    unit_kcal:"سعرة", unit_g:"غ", unit_mg:"مغ", unit_mcg:"ميكروغ", unit_l:"ل",
+    save_nutrition:"حفظ اليوم", nutrition_saved:"✓ تم الحفظ", of_target:"من {t}", no_target:"لا هدف",
+    edit_targets:"تعديل الأهداف", done:"تم", target_ph:"الهدف",
+    program_title:"برنامجي", program_sub:"اكتب ونظّم خطة تدريبك الخاصة.",
+    programs_title:"البرامج", programs_sub:"اطّلع على خطة تدريب كل لاعب.",
+    nutrition_coach_sub:"اطّلع على المدخول اليومي لكل لاعب.", ctab_nutrition:"التغذية",
+    program_coach_sub:"خطة تدريب {name} (للقراءة فقط).",
+    add_day:"+ إضافة يوم", day_name_ph:"اسم اليوم (مثل: الإثنين — دفع)",
+    add_block:"+ إضافة تمرين/مقطع", block_ph:"مثل: بنش برس 4×8، أو جري 5 كم",
+    program_empty:"لا يوجد برنامج بعد.", program_empty_coach:"لم يكتب هذا اللاعب برنامجًا بعد.",
+    remove:"إزالة", nutrition_none:"لا شيء مسجّل لهذا اليوم.",
+    view_athlete:"لاعب", nutrition_day:"اليوم",
+    tab_space:"مساحتي", space_title:"مساحتي", space_sub:"تابع وزنك وتقدّمك الشخصي.",
+    weight:"الوزن", weight_kg:"الوزن (كغ)", target_weight:"الوزن المستهدف", log_weight:"تسجيل الوزن",
+    weight_today:"وزن اليوم", weight_history:"سجل الوزن", weight_none:"لا وزن مسجّل بعد.",
+    weight_saved:"✓ تم حفظ الوزن", current_weight:"الحالي", to_target:"نحو الهدف",
+    coach_note_nutri:"ملاحظة المدرب على التغذية", coach_note_program:"ملاحظة المدرب على البرنامج",
+    leave_note:"اترك ملاحظة…", coach_note_label:"ملاحظة المدرب",
+    leaderboard:"الترتيب", leaderboard_sub:"ترتيب النادي حسب النقاط الإجمالية.",
+    score:"النقاط", rank:"المركز", pts:"نقطة",
+    lb_sessions:"حصص", lb_active:"أيام النشاط", lb_streak:"أفضل سلسلة",
+    weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
+    per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
+    prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
+    pr_exercise:"تمرين", pr_best:"الأفضل", weekly_none:"لا هدف أسبوعي محدّد.",
+  },
+  de:{
+    brand_sub:"Kampf-Logbuch", logout:"Abmelden",
+    gate_who:"Wer bist du?", gate_pick_lead:"Wähle dein Profil zum Anmelden.",
+    gate_back:"← Profil wechseln", gate_new_title:"Erstelle dein Passwort",
+    pw_new:"Neues Passwort", pw_confirm:"Bestätigen", pw:"Passwort",
+    enter:"Eintreten", create_enter:"Erstellen & eintreten",
+    email:"E-Mail", gate_note_supabase:"Die Daten werden im Camp geteilt. Passwort vergessen? Bitte den Trainer, es zurückzusetzen.",
+    gate_note:"Private, serverlose Seite: dein Passwort wird gehasht und in der Seite gespeichert. Verwende kein wichtiges Passwort (E-Mail, Bank). Nimm einen eigenen Code fürs Camp.",
+    coach:"Trainer", athlete:"Athlet", to_setup:"Einzurichten", login:"Anmelden",
+    err_pw_short:"Wähle mindestens 4 Zeichen.", err_pw_match:"Die beiden Passwörter stimmen nicht überein.", err_pw_wrong:"Falsches Passwort.",
+    hero_h1:"RUNDE|FÜR RUNDE.", hero_p:"Jede Einheit zählt. Erfasse Anwesenheit, Leistung und Disziplin — der Trainer verfolgt den Fortschritt und gibt Feedback.",
+    hero_coach_h1:"TRAINER|ANSICHT.", hero_coach_p:"Leite das Camp: verfolge Anwesenheit, bewerte Einheiten und setze Ziele.",
+    tab_log:"Neue Einheit", tab_feed:"Journal", tab_camp:"Das Camp",
+    ctab_dash:"Dashboard", ctab_journal:"Journal & Feedback",
+    record:"Erfassen", session_today:"Heutige Einheit", discipline:"Disziplin",
+    date:"Datum", duration:"Dauer (Min)", feeling:"Gefühl / Intensität",
+    feel_light:"Leichte Erholung", feel_standard:"Standard", feel_hard:"Hart", feel_spar:"Sparring / Wettkampf",
+    ex_sets:"Übungen & Sätze", optional:"(optional)", add_ex:"+ Übung hinzufügen", add_set:"+ Satz",
+    ex_placeholder:"Übung (z. B. Kniebeuge, Sandsack)",
+    personal_note:"Eigene Notiz", note_placeholder:"An Low Kicks gearbeitet, Deckung verbessern…",
+    progress_photo:"Fortschrittsfoto", add_photo:"＋ Foto hinzufügen", compressing:"Komprimiere…",
+    validate:"Einheit bestätigen", saved:"✓ Einheit gespeichert", saving:"Speichern…",
+    save_fail:"Speichern fehlgeschlagen, versuch es erneut.", coach_no_log:"Der Trainer erfasst keine Einheiten — wähle oben einen Athleten.",
+    recent:"Letzte Einheiten", total_count:"{n} insgesamt", loading:"Lädt…",
+    filter_athlete:"Nach Athlet filtern", all_camp:"Das ganze Camp",
+    empty_none:"Noch nichts", empty_first:"Erfasse links deine erste Einheit.",
+    no_session:"Keine Einheit", change_filter:"Filter ändern oder eine Einheit erfassen.",
+    minutes:"Minuten", exercises:"Übungen", sets:"Sätze",
+    note:"Notiz", athlete_note:"Athleten-Notiz", coach_feedback:"Trainer-Feedback",
+    leave_feedback:"Feedback hinterlassen…", send:"Senden", save_btn:"Speichern",
+    rating:"Bewertung", your_feedback:"Dein Feedback", edit:"Bearbeiten", delete:"Löschen",
+    del_session_confirm:"Diese Einheit löschen?", del_feedback_confirm:"Dein Feedback zu dieser Einheit löschen?",
+    sessions_word:"Einheiten", hours_cumulated:"Std. gesamt",
+    no_session_yet:"Noch keine Einheit", rest:"Ruhe", training:"Training", days:"Tage",
+    streak_current:"🔥 Aktuell", streak_best:"★ Rekord",
+    tech_goals:"Technische Ziele", goal_none_coach:"Kein Ziel gesetzt — füge unten eins hinzu.",
+    goal_none_athlete:"Noch kein technisches Ziel.", goal_placeholder:"z. B. Bodendeckung üben",
+    dashboard:"Dashboard", dash_sub:"Camp-Überblick — Anwesenheit, Serien und Ziele.",
+    journal_title:"Journal & Feedback", journal_sub:"Bewerte, kommentiere und verwalte dein Feedback Einheit für Einheit.",
+    active:"Aktiv", inactive_since:"Inaktiv seit {n} T", no_session_badge:"Keine Einheit", days_ago:"vor {n} T",
+    total_sessions:"{n} Einheit(en) gesamt", days_this_month:"Tage diesen Monat", last_disc:"Letzte Disz.",
+    coach_journal_empty:"Die Einheiten der Athleten erscheinen hier.",
+    foot:"Muay Thai · Jujitsu · Kraft · <b>alles andere</b>",
+    months:["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
+    dow:["M","D","M","D","F","S","S"],
+    disc:{muaythai:"Muay Thai",jujitsu:"Jujitsu",strength:"Kraft / Studio",boxing:"Boxen",grappling:"Grappling",cardio:"Cardio",other:"Andere"},
+    coach_name:"Trainer",
+    tab_nutrition:"Ernährung", tab_program:"Mein Plan",
+    nutrition_title:"Ernährung", nutrition_sub:"Erfasse deine tägliche Zufuhr und erreiche deine Ziele.",
+    macros:"Makros", micros:"Vitamine & Mineralstoffe", set_targets:"Ziele festlegen", targets:"Ziele",
+    calories:"Kalorien", protein:"Protein", carbs:"Kohlenhydrate", fat:"Fett", fiber:"Ballaststoffe",
+    water:"Wasser", sugar:"Zucker", sodium:"Natrium",
+    vit_a:"Vitamin A", vit_c:"Vitamin C", vit_d:"Vitamin D", vit_b12:"Vitamin B12",
+    iron:"Eisen", calcium:"Kalzium", magnesium:"Magnesium", potassium:"Kalium", zinc:"Zink", omega3:"Omega-3",
+    unit_kcal:"kcal", unit_g:"g", unit_mg:"mg", unit_mcg:"µg", unit_l:"L",
+    save_nutrition:"Tag speichern", nutrition_saved:"✓ Gespeichert", of_target:"von {t}", no_target:"Kein Ziel",
+    edit_targets:"Ziele bearbeiten", done:"Fertig", target_ph:"Ziel",
+    program_title:"Mein Plan", program_sub:"Schreibe und organisiere deinen eigenen Trainingsplan.",
+    programs_title:"Pläne", programs_sub:"Sieh dir den Trainingsplan jedes Athleten an.",
+    nutrition_coach_sub:"Sieh dir die tägliche Zufuhr jedes Athleten an.", ctab_nutrition:"Ernährung",
+    program_coach_sub:"Trainingsplan von {name} (nur Ansicht).",
+    add_day:"+ Tag hinzufügen", day_name_ph:"Tagesname (z. B. Montag — Push)",
+    add_block:"+ Übung/Block hinzufügen", block_ph:"z. B. Bankdrücken 4×8, oder Dauerlauf 5 km",
+    program_empty:"Noch kein Plan.", program_empty_coach:"Dieser Athlet hat noch keinen Plan geschrieben.",
+    remove:"Entfernen", nutrition_none:"Nichts für diesen Tag erfasst.",
+    view_athlete:"Athlet", nutrition_day:"Tag",
+    tab_space:"Mein Bereich", space_title:"Mein Bereich", space_sub:"Verfolge dein Gewicht und deinen Fortschritt.",
+    weight:"Gewicht", weight_kg:"Gewicht (kg)", target_weight:"Zielgewicht", log_weight:"Gewicht erfassen",
+    weight_today:"Heutiges Gewicht", weight_history:"Gewichtsverlauf", weight_none:"Noch kein Gewicht erfasst.",
+    weight_saved:"✓ Gewicht gespeichert", current_weight:"Aktuell", to_target:"Bis zum Ziel",
+    coach_note_nutri:"Trainer-Notiz zur Ernährung", coach_note_program:"Trainer-Notiz zum Plan",
+    leave_note:"Notiz hinterlassen…", coach_note_label:"Trainer-Notiz",
+    leaderboard:"Rangliste", leaderboard_sub:"Camp-Rangliste nach Gesamtpunktzahl.",
+    score:"Punkte", rank:"Rang", pts:"Pkt",
+    lb_sessions:"Einheiten", lb_active:"Aktive Tage", lb_streak:"Beste Serie",
+    weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
+    per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
+    prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
+    pr_exercise:"Übung", pr_best:"Bestwert", weekly_none:"Kein Wochenziel festgelegt.",
+  }
+};
+function t(key, vars){
+  let s = (I18N[lang] && I18N[lang][key]!==undefined) ? I18N[lang][key] : (I18N.en[key]!==undefined?I18N.en[key]:key);
+  if(vars) Object.keys(vars).forEach(k=>{ s = s.replace(new RegExp("\\{"+k+"\\}","g"), vars[k]); });
+  return s;
+}
+function discLabel(id){
+  if(I18N[lang].disc[id]) return I18N[lang].disc[id];
+  if(I18N.en.disc[id]) return I18N.en.disc[id];
+  return id; // legacy raw label stored before i18n
+}
+function isRTL(){ return RTL_LANGS.includes(lang); }
+function displayName(a){ return a.role==="coach" ? t("coach_name") : a.name; }
+
+const DISCIPLINES = DISC_IDS; // back-compat: iterate IDs, display via discLabel()
+
+/* nutrition fields: key -> unit key */
+const MACRO_FIELDS = [
+  {k:"calories", u:"unit_kcal"},
+  {k:"protein", u:"unit_g"},
+  {k:"carbs", u:"unit_g"},
+  {k:"fat", u:"unit_g"},
+  {k:"fiber", u:"unit_g"},
+  {k:"sugar", u:"unit_g"},
+  {k:"water", u:"unit_l"},
+];
+const MICRO_FIELDS = [
+  {k:"vit_a", u:"unit_mcg"},
+  {k:"vit_c", u:"unit_mg"},
+  {k:"vit_d", u:"unit_mcg"},
+  {k:"vit_b12", u:"unit_mcg"},
+  {k:"iron", u:"unit_mg"},
+  {k:"calcium", u:"unit_mg"},
+  {k:"magnesium", u:"unit_mg"},
+  {k:"potassium", u:"unit_mg"},
+  {k:"zinc", u:"unit_mg"},
+  {k:"sodium", u:"unit_mg"},
+  {k:"omega3", u:"unit_g"},
+];
+const ALL_NUTRIENTS = [...MACRO_FIELDS, ...MICRO_FIELDS];
+
+/* apply translations to static [data-i18n] elements + dir + rebuild dynamic parts */
+function applyI18n(){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = isRTL() ? "rtl" : "ltr";
+  document.body.classList.toggle("rtl", isRTL());
+  // text content
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  // innerHTML variants (allow simple tags)
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{
+    el.innerHTML = t(el.getAttribute("data-i18n-html"));
+  });
+  // placeholders
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph")));
+  });
+  // hero (depends on role)
+  updateHero();
+  // brand subs
+  document.querySelectorAll(".brand .sub, .gate-brand .sub").forEach(el=>el.textContent=t("brand_sub"));
+  // rebuild things that are generated in JS
+  if(document.getElementById("discPick")) buildDiscPick();
+  buildIntensityOptions();
+  updateMonthLabel();
+  // language selectors reflect current
+  document.querySelectorAll(".lang-select").forEach(sel=>sel.value=lang);
+  // re-render current views
+  if(me) renderAll();
+  // refresh nutrition/program if their section is visible
+  const nut=document.getElementById("tab-nutrition");
+  if(nut && nut.style.display!=="none" && me && me!=="coach") renderNutrition();
+  const prog=document.getElementById("tab-program");
+  if(prog && prog.style.display!=="none" && me && me!=="coach") renderProgram();
+  const space=document.getElementById("tab-space");
+  if(space && space.style.display!=="none" && me && me!=="coach") renderSpace();
+  const cprog=document.getElementById("ctab-cprogram");
+  if(cprog && cprog.style.display!=="none" && me==="coach") renderProgram();
+  const cnut=document.getElementById("ctab-cnutrition");
+  if(cnut && cnut.style.display!=="none" && me==="coach") renderCoachNutrition();
+}
+function updateHero(){
+  const h=document.querySelector(".hero .title h1");
+  const p=document.querySelector(".hero .title p");
+  if(!h||!p) return;
+  const isCoach = me==="coach";
+  const key = isCoach ? "hero_coach_h1" : "hero_h1";
+  const parts = t(key).split("|");
+  h.innerHTML = `${parts[0]||""}<br><em>${parts[1]||""}</em>`;
+  p.textContent = isCoach ? t("hero_coach_p") : t("hero_p");
+}
+function setLang(l){
+  if(!LANGS.includes(l)) l="en";
+  lang=l;
+  applyI18n();
+}
+let theme = "dark";
+function applyTheme(){
+  document.body.classList.toggle("light", theme==="light");
+  document.querySelectorAll(".theme-toggle").forEach(b=>b.textContent = theme==="light"?"☀":"◐");
+}
+function toggleTheme(){ theme = theme==="light"?"dark":"light"; applyTheme(); }
+
+function buildLangSelect(el){
+  if(!el) return;
+  el.innerHTML = LANGS.map(l=>`<option value="${l}">${LANG_NAMES[l]}</option>`).join("");
+  el.value=lang;
+  el.onchange=()=>setLang(el.value);
+}
+function buildIntensityOptions(){
+  const sel=document.getElementById("fIntensity");
+  if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML =
+    `<option value="">—</option>`+
+    `<option value="light">${t("feel_light")}</option>`+
+    `<option value="standard">${t("feel_standard")}</option>`+
+    `<option value="hard">${t("feel_hard")}</option>`+
+    `<option value="spar">${t("feel_spar")}</option>`;
+  sel.value=cur;
+}
+const INTENSITY_IDS={light:"feel_light",standard:"feel_standard",hard:"feel_hard",spar:"feel_spar"};
+function intensityLabel(v){
+  if(!v) return "";
+  if(INTENSITY_IDS[v]) return t(INTENSITY_IDS[v]);
+  return v; // legacy stored label
+}
+
+
+const ATHLETES = [
+  {id:"coach", name:"Moniteur", color:"#d8a53a", role:"coach"},
+  {id:"a1", name:"Kumeil", color:"#c9262c", role:"athlete"},
+  {id:"a2", name:"Barir", color:"#3f7cc9", role:"athlete"},
+  {id:"a3", name:"Mark", color:"#4f9d69", role:"athlete"},
+];
+const byId = id => ATHLETES.find(a=>a.id===id);
+const initials = n => n.split(/[\s]/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const avatarText = a => a.role==="coach" ? "★" : initials(a.name);
+
+let sessions = [];
+let me = null;            // set after login = current user's slot ('a1'|'coach'…)
+let myRole = null;        // 'athlete' | 'coach'
+let pendingUser = null;   // (unused with Supabase Auth, kept for compatibility)
+
+/* ===================== SUPABASE CLIENT + STORAGE SHIM =====================
+   window.storage is reimplemented on top of Supabase so every existing
+   load/save function keeps working unchanged. Routing by key prefix:
+     - "sess:<id>"  -> table public.sessions
+     - everything else -> table public.kv
+   owner_slot is derived from the key so RLS can authorize writes.
+========================================================================== */
+let sb = null; // supabase client
+let realtimeChannel = null;
+function initSupabase(){
+  if(sb) return sb;
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+  return sb;
+}
+
+// derive which slot "owns" a given kv key (for RLS + writes)
+function ownerSlotForKey(key){
+  // sessions handled separately; here only kv keys
+  if(key.startsWith("nutri:")){
+    // "nutri:targets" is coach-agnostic athlete-owned; "nutri:<slot>:<day>"
+    const parts=key.split(":");
+    if(parts[1]==="targets") return me;          // written by the athlete themselves
+    return parts[1];                              // nutri:<slot>:<day>
+  }
+  if(key.startsWith("prog:"))   return key.slice(5);
+  if(key.startsWith("weight:")) return key.slice(7);
+  if(key.startsWith("coach:"))  return "coach";   // coach:goals, coach:notes
+  if(key.startsWith("weekly:")) return me || "coach";
+  return me || "coach";
+}
+
+window.storage = {
+  async get(key /*, shared */){
+    if(key.startsWith("sess:")){
+      const id=key.slice(5);
+      const { data, error } = await sb.from("sessions").select("data").eq("id", id).maybeSingle();
+      if(error||!data) return null;
+      return { key, value: JSON.stringify(data.data) };
+    }
+    const { data, error } = await sb.from("kv").select("value").eq("k", key).maybeSingle();
+    if(error||!data) return null;
+    return { key, value: JSON.stringify(data.value) };
+  },
+  async set(key, valueStr /*, shared */){
+    const value = JSON.parse(valueStr);
+    if(key.startsWith("sess:")){
+      const id=key.slice(5);
+      const row={ id, owner_slot: value.athlete, data: value,
+                  coach_note: value.coachNote||"", coach_rating: value.coachRating||0,
+                  updated_at: new Date().toISOString() };
+      const { error } = await sb.from("sessions").upsert(row);
+      if(error) throw error;
+      return { key, value: valueStr };
+    }
+    const row={ k:key, owner_slot: ownerSlotForKey(key), value, updated_at:new Date().toISOString() };
+    const { error } = await sb.from("kv").upsert(row);
+    if(error) throw error;
+    return { key, value: valueStr };
+  },
+  async delete(key /*, shared */){
+    if(key.startsWith("sess:")){
+      const id=key.slice(5);
+      const { error } = await sb.from("sessions").delete().eq("id", id);
+      if(error) throw error;
+      return { key, deleted:true };
+    }
+    const { error } = await sb.from("kv").delete().eq("k", key);
+    if(error) throw error;
+    return { key, deleted:true };
+  },
+  async list(prefix /*, shared */){
+    if(prefix.startsWith("sess:")){
+      const { data, error } = await sb.from("sessions").select("id");
+      if(error||!data) return { keys:[] };
+      return { keys: data.map(r=>"sess:"+r.id) };
+    }
+    const { data, error } = await sb.from("kv").select("k").like("k", prefix+"%");
+    if(error||!data) return { keys:[] };
+    return { keys: data.map(r=>r.k) };
+  }
+};
+
+async function sha256(txt){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+let goals = {}; // { "athleteId": { "Discipline": "objectif technique" } }
+async function loadGoals(){
+  try{ const g = await window.storage.get("coach:goals", true); goals = g&&g.value ? JSON.parse(g.value) : {}; }
+  catch(e){ goals = {}; }
+}
+async function saveGoals(){ await window.storage.set("coach:goals", JSON.stringify(goals), true); }
+
+// nutrition: per athlete per day  key: nutri:<athlete>:<YYYY-MM-DD> -> {calories:.., ...}
+let nutriTargets = {}; // { athleteId: {calories:.., protein:..} }
+async function loadNutriTargets(){
+  try{ const g=await window.storage.get("nutri:targets", true); nutriTargets = g&&g.value?JSON.parse(g.value):{}; }
+  catch(e){ nutriTargets={}; }
+}
+async function saveNutriTargets(){ await window.storage.set("nutri:targets", JSON.stringify(nutriTargets), true); }
+async function loadNutriDay(athleteId, day){
+  try{ const g=await window.storage.get("nutri:"+athleteId+":"+day, true); return g&&g.value?JSON.parse(g.value):{}; }
+  catch(e){ return {}; }
+}
+async function saveNutriDay(athleteId, day, data){
+  await window.storage.set("nutri:"+athleteId+":"+day, JSON.stringify(data), true);
+}
+
+// programs: prog:<athlete> -> [{name, blocks:[..]}]
+let programs = {}; // cache { athleteId: [days] }
+async function loadPrograms(){
+  try{
+    const r=await window.storage.list("prog:", true);
+    const keys=(r&&r.keys)?r.keys:[];
+    programs={};
+    for(const k of keys){
+      try{ const g=await window.storage.get(k, true); if(g&&g.value){ programs[k.slice(5)]=JSON.parse(g.value); } }catch(e){}
+    }
+  }catch(e){ programs={}; }
+}
+async function saveProgram(athleteId){
+  await window.storage.set("prog:"+athleteId, JSON.stringify(programs[athleteId]||[]), true);
+}
+
+// weight: weight:<athlete> -> {target:number|null, entries:[{date,kg}]}
+let weights = {};
+async function loadWeights(){
+  try{
+    const r=await window.storage.list("weight:", true);
+    const keys=(r&&r.keys)?r.keys:[];
+    weights={};
+    for(const k of keys){
+      try{ const g=await window.storage.get(k, true); if(g&&g.value){ weights[k.slice(7)]=JSON.parse(g.value); } }catch(e){}
+    }
+  }catch(e){ weights={}; }
+}
+async function saveWeight(athleteId){
+  await window.storage.set("weight:"+athleteId, JSON.stringify(weights[athleteId]||{target:null,entries:[]}), true);
+}
+
+// coach notes on nutrition (per athlete, standing) and program (per athlete)
+let coachNotes = {}; // { "nutri:athleteId": "text", "prog:athleteId": "text" }
+async function loadCoachNotes(){
+  try{ const g=await window.storage.get("coach:notes", true); coachNotes = g&&g.value?JSON.parse(g.value):{}; }
+  catch(e){ coachNotes={}; }
+}
+async function saveCoachNotes(){ await window.storage.set("coach:notes", JSON.stringify(coachNotes), true); }
+
+// weekly session goals: { athleteId: number }
+let weeklyGoals = {};
+async function loadWeeklyGoals(){
+  try{ const g=await window.storage.get("weekly:goals", true); weeklyGoals = g&&g.value?JSON.parse(g.value):{}; }
+  catch(e){ weeklyGoals={}; }
+}
+async function saveWeeklyGoals(){ await window.storage.set("weekly:goals", JSON.stringify(weeklyGoals), true); }
+
+/* ---------- storage ---------- */
+async function loadSessions(){
+  try{
+    const r = await window.storage.list("sess:", true);
+    const keys = (r && r.keys) ? r.keys : [];
+    const out = [];
+    for(const k of keys){
+      try{ const g = await window.storage.get(k, true); if(g&&g.value) out.push(JSON.parse(g.value)); }catch(e){}
+    }
+    sessions = out.sort((a,b)=> (b.date+b.id).localeCompare(a.date+a.id));
+  }catch(e){ sessions = []; }
+}
+async function saveSession(s){ await window.storage.set("sess:"+s.id, JSON.stringify(s), true); }
+async function delSession(id){ try{ await window.storage.delete("sess:"+id, true); }catch(e){} }
+async function updateSession(s){ await window.storage.set("sess:"+s.id, JSON.stringify(s), true); }
+
+/* ---------- login (Supabase Auth) ---------- */
+// Loaded from public.profiles after sign-in; overrides the static ATHLETES defaults.
+async function loadProfiles(){
+  const { data, error } = await sb.from("profiles").select("slot,display_name,role,color");
+  if(error||!data) return;
+  data.forEach(p=>{
+    const a=ATHLETES.find(x=>x.id===p.slot);
+    if(a){ a.name=p.display_name; a.role=p.role; a.color=p.color||a.color; }
+  });
+}
+async function submitGate(){
+  const err=document.getElementById("gateErr");
+  err.textContent="";
+  const email=document.getElementById("authEmail").value.trim();
+  const pw=document.getElementById("authPw").value;
+  if(!email||!pw){ err.textContent=t("err_pw_wrong"); return; }
+  const btn=document.getElementById("gateSubmit");
+  btn.disabled=true; btn.textContent=t("saving");
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled=false; btn.textContent=t("enter");
+  if(error){ err.textContent=t("err_pw_wrong"); return; }
+  await afterLogin();
+}
+// resolve current session -> slot/role, then enter the app
+async function afterLogin(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user) return;
+  const { data:prof, error } = await sb.from("profiles").select("slot,role").eq("id", user.id).maybeSingle();
+  if(error||!prof){ document.getElementById("gateErr").textContent="No profile linked to this account."; await sb.auth.signOut(); return; }
+  me = prof.slot;
+  myRole = prof.role;
+  await loadProfiles();
+  await reloadAll();
+  enterApp();
+}
+function enterApp(){
+  document.getElementById("gate").style.display="none";
+  buildSessionBadge();
+  applyRoleView();
+  renderAll();
+  subscribeRealtime();
+}
+async function reloadAll(){
+  await Promise.all([loadSessions(), loadGoals(), loadNutriTargets(), loadPrograms(), loadWeights(), loadCoachNotes(), loadWeeklyGoals()]);
+}
+// Realtime: when any table changes, reload and re-render (debounced).
+let realtimeTimer=null;
+function scheduleRefresh(){
+  clearTimeout(realtimeTimer);
+  realtimeTimer=setTimeout(async()=>{ await reloadAll(); if(me) renderAll(); }, 400);
+}
+function subscribeRealtime(){
+  if(realtimeChannel) return;
+  realtimeChannel = sb.channel("camp-changes")
+    .on("postgres_changes", { event:"*", schema:"public", table:"sessions" }, scheduleRefresh)
+    .on("postgres_changes", { event:"*", schema:"public", table:"kv" }, scheduleRefresh)
+    .subscribe();
+}
+function applyRoleView(){
+  const isCoach = me==="coach";
+  document.getElementById("tabsAthlete").style.display = isCoach?"none":"";
+  document.getElementById("tabsCoach").style.display = isCoach?"":"none";
+  updateHero();
+  ["log","feed","nutrition","program","space","stats"].forEach(x=>{const el=document.getElementById("tab-"+x);if(el)el.style.display="none";});
+  ["dash","journal","cnutrition","cprogram"].forEach(x=>{const el=document.getElementById("ctab-"+x);if(el)el.style.display="none";});
+  if(isCoach){
+    document.getElementById("ctab-dash").style.display="";
+    document.querySelectorAll("#tabsCoach .tab").forEach((el,i)=>el.classList.toggle("on",i===0));
+  }else{
+    document.getElementById("tab-log").style.display="";
+    document.querySelectorAll("#tabsAthlete .tab").forEach((el,i)=>el.classList.toggle("on",i===0));
+  }
+}
+async function logout(){
+  try{ if(realtimeChannel){ await sb.removeChannel(realtimeChannel); realtimeChannel=null; } }catch(e){}
+  try{ await sb.auth.signOut(); }catch(e){}
+  me=null; myRole=null;
+  document.getElementById("gate").style.display="grid";
+  document.getElementById("authEmail").value="";
+  document.getElementById("authPw").value="";
+  document.getElementById("gateErr").textContent="";
+}
+function buildSessionBadge(){
+  const a=byId(me);
+  document.getElementById("sessionBadge").innerHTML =
+    `<div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+     <b>${esc(displayName(a))}</b>`;
+}
+function fillFilter(){
+  const filt = document.getElementById("filterAthlete");
+  const cur=filt.value;
+  filt.innerHTML = `<option value="">${t("all_camp")}</option>` +
+    ATHLETES.filter(a=>a.role==="athlete")
+      .map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("");
+  filt.value=cur;
+}
+function buildWeek(){
+  const w = document.getElementById("week");
+  const days = I18N[lang].dow;
+  const today = new Date();
+  const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay()+6)%7));
+  let html="";
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const on = d.toDateString()===today.toDateString();
+    html+=`<div class="d ${on?"on":""}"><span>${days[i]}</span><b>${d.getDate()}</b></div>`;
+  }
+  w.innerHTML=html;
+}
+function buildDiscPick(){
+  const p = document.getElementById("discPick");
+  let cur = selectedDisc() || DISC_IDS[0];
+  p.innerHTML = DISC_IDS.map(id=>`<button type="button" data-d="${id}" class="${id===cur?"on":""}">${discLabel(id)}</button>`).join("");
+  p.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    p.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+  });
+}
+function selectedDisc(){ const b=document.querySelector("#discPick button.on"); return b?b.dataset.d:null; }
+
+/* ---------- exercise builder ---------- */
+function addExercise(){
+  const wrap = document.getElementById("exWrap");
+  const el = document.createElement("div");
+  el.className="exset";
+  el.innerHTML=`
+    <div class="exhead">
+      <input placeholder="${esc(t("ex_placeholder"))}" class="exname">
+      <button type="button" title="${esc(t("delete"))}">×</button>
+    </div>
+    <div class="sets"></div>
+    <button class="mini addset" type="button" style="margin-top:8px">${t("add_set")}</button>`;
+  el.querySelector(".exhead button").onclick=()=>el.remove();
+  const sets = el.querySelector(".sets");
+  const addSet=()=>{
+    const c=document.createElement("div");c.className="setchip";
+    c.innerHTML=`<input type="number" placeholder="kg" class="w"><span class="x">×</span><input type="number" placeholder="reps" class="r"><button type="button">×</button>`;
+    c.querySelector("button").onclick=()=>c.remove();
+    sets.appendChild(c);
+  };
+  el.querySelector(".addset").onclick=addSet;
+  addSet();
+  wrap.appendChild(el);
+}
+function collectExercises(){
+  const out=[];
+  document.querySelectorAll("#exWrap .exset").forEach(ex=>{
+    const name=ex.querySelector(".exname").value.trim();
+    if(!name)return;
+    const sets=[];
+    ex.querySelectorAll(".setchip").forEach(c=>{
+      const w=c.querySelector(".w").value, r=c.querySelector(".r").value;
+      if(w||r) sets.push({w:w||null,r:r||null});
+    });
+    out.push({name,sets});
+  });
+  return out;
+}
+
+/* ---------- photos ---------- */
+let pendingPhoto = null; // compressed dataURL for the session being logged
+
+// upload a dataURL to Supabase Storage under <slot>/<sessionId>.jpg, return public URL
+async function uploadPhoto(sessionId, dataURL){
+  const res = await fetch(dataURL);
+  const blob = await res.blob();
+  const path = `${me}/${sessionId}.jpg`;
+  const { error } = await sb.storage.from("photos").upload(path, blob, { upsert:true, contentType:"image/jpeg" });
+  if(error){ console.error("photo upload failed", error); return null; }
+  const { data } = sb.storage.from("photos").getPublicUrl(path);
+  return data ? data.publicUrl : null;
+}
+
+function compressImage(file, maxDim=1280, quality=0.72){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let {width:w,height:h}=img;
+        if(w>h && w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; }
+        else if(h>=w && h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; }
+        const c=document.createElement("canvas"); c.width=w; c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(c.toDataURL("image/jpeg",quality));
+      };
+      img.onerror=()=>reject(new Error("image"));
+      img.src=reader.result;
+    };
+    reader.onerror=()=>reject(new Error("read"));
+    reader.readAsDataURL(file);
+  });
+}
+async function onPhotoPick(e){
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  const lbl=document.getElementById("photoLabel");
+  lbl.textContent=t("compressing");
+  try{
+    pendingPhoto=await compressImage(file);
+    document.getElementById("photoImg").src=pendingPhoto;
+    document.getElementById("photoPreview").style.display="";
+    document.getElementById("photoDrop").style.display="none";
+  }catch(err){
+    lbl.textContent=t("add_photo");
+    alert(t("save_fail"));
+  }
+}
+function clearPhoto(){
+  pendingPhoto=null;
+  document.getElementById("fPhoto").value="";
+  document.getElementById("photoPreview").style.display="none";
+  document.getElementById("photoDrop").style.display="";
+  document.getElementById("photoLabel").textContent=t("add_photo");
+}
+function openLightbox(src){
+  document.getElementById("lightboxImg").src=src;
+  document.getElementById("lightbox").classList.add("on");
+}
+function exLine(sets){
+  if(!sets.length) return "";
+  return sets.map(s=>{
+    if(s.w&&s.r) return `${s.w}kg × ${s.r}`;
+    if(s.r) return `× ${s.r}`;
+    if(s.w) return `${s.w}kg`;
+    return "";
+  }).filter(Boolean).join("  ·  ");
+}
+function sessionCard(s, showCoach){
+  const a = byId(s.athlete) || {name:s.athlete,color:"#888"};
+  const totalSets = (s.exercises||[]).reduce((n,e)=>n+e.sets.length,0);
+  const exHtml = (s.exercises||[]).map(e=>`
+    <div class="exrow"><span class="n">${esc(e.name)}</span><span class="s">${esc(exLine(e.sets))}</span></div>`).join("");
+  const stars = n => "★★★★★☆☆☆☆☆".slice(5-n,10-n);
+  const ratingBadge = s.coachRating ? `<span class="rating-badge" title="${esc(t("coach_feedback"))}">${stars(s.coachRating)} ${s.coachRating}/5</span>` : "";
+  const coachNote = (s.coachNote||s.coachRating) ? `<div class="note"><b>${t("coach_feedback")} ${ratingBadge}</b>${esc(s.coachNote||"")}</div>`:"";
+  const canDelete = me===s.athlete;
+  const durTxt = s.duration?" · "+s.duration+" "+t("minutes").toLowerCase():"";
+  const intTxt = s.intensity?" · "+esc(intensityLabel(s.intensity)):"";
+  const prBadge = sessionHasPR(s) ? `<span class="pr-badge">${t("pr_new")}</span>` : "";
+  return `<div class="sess">
+    <div class="sess-h">
+      <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+      <div class="meta"><b>${esc(displayName(a))}</b><span>${fmtDate(s.date)}${durTxt}${intTxt}</span></div>
+      ${prBadge}
+      <div class="tag">${esc(discLabel(s.discipline))}</div>
+    </div>
+    <div class="sess-b">
+      <div class="stats">
+        <div class="stat"><b>${s.duration||"—"}</b><span>${t("minutes")}</span></div>
+        <div class="stat"><b>${(s.exercises||[]).length||"—"}</b><span>${t("exercises")}</span></div>
+        <div class="stat"><b>${totalSets||"—"}</b><span>${t("sets")}</span></div>
+      </div>
+      ${exHtml?`<div class="exlist">${exHtml}</div>`:""}
+      ${s.photo?`<div class="sess-photo"><img src="${s.photo}" alt="" data-zoom></div>`:""}
+      ${s.note?`<div class="note" style="border-left-color:var(--smoke)"><b style="color:var(--smoke)">${t("note")}</b>${esc(s.note)}</div>`:""}
+      ${coachNote}
+      ${canDelete?`<div style="text-align:${isRTL()?"left":"right"};margin-top:8px"><button class="del" data-del="${s.id}">${t("delete")}</button></div>`:""}
+    </div>
+  </div>`;
+}
+function wireCards(root){
+  root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  root.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+    if(b.dataset.confirm!=="1"){
+      b.dataset.confirm="1";
+      b.classList.add("confirm");
+      b.textContent=t("delete")+" ?";
+      setTimeout(()=>{ if(b.dataset.confirm==="1"){ b.dataset.confirm="0"; b.classList.remove("confirm"); b.textContent=t("delete"); } },3000);
+      return;
+    }
+    const id=b.dataset.del;
+    await delSession(id);
+    sessions = sessions.filter(x=>x.id!==id);
+    renderAll();
+  });
+}
+function renderFeeds(){
+  const recent = document.getElementById("recentFeed");
+  const rc = document.getElementById("recentCount");
+  rc.textContent = t("total_count",{n:sessions.length});
+  if(!sessions.length){
+    recent.innerHTML=`<div class="empty"><b>${t("empty_none")}</b>${t("empty_first")}</div>`;
+  }else{
+    recent.innerHTML = sessions.slice(0,4).map(s=>sessionCard(s,false)).join("");
+    wireCards(recent);
+  }
+  const full=document.getElementById("fullFeed");
+  const filt=document.getElementById("filterAthlete").value;
+  const list = filt?sessions.filter(s=>s.athlete===filt):sessions;
+  if(!list.length){
+    full.innerHTML=`<div class="empty"><b>${t("no_session")}</b>${t("change_filter")}</div>`;
+  }else{
+    full.innerHTML=list.map(s=>sessionCard(s,true)).join("");
+    wireCards(full);
+  }
+}
+function renderRoster(){
+  const r=document.getElementById("roster");
+  r.innerHTML = ATHLETES.filter(a=>a.role==="athlete").map(a=>{
+    const mine = sessions.filter(s=>s.athlete===a.id);
+    const mins = mine.reduce((n,s)=>n+(+s.duration||0),0);
+    const counts={};
+    mine.forEach(s=>counts[s.discipline]=(counts[s.discipline]||0)+1);
+    const max=Math.max(1,...Object.values(counts));
+    const bars=Object.entries(counts).sort((x,y)=>y[1]-x[1]).slice(0,4).map(([d,c])=>`
+      <div class="b"><div class="t"><span>${esc(discLabel(d))}</span><span>${c}</span></div>
+      <div class="track"><div class="fill" style="width:${Math.round(c/max*100)}%"></div></div></div>`).join("")
+      || `<div class="t" style="color:var(--smoke);font-size:11px">${t("no_session_yet")}</div>`;
+    return `<div class="athlete">
+      <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+      <h3>${esc(displayName(a))}</h3>
+      <div class="big ${mine.length?"":"z"}">${mine.length}</div>
+      <div class="lbl">${t("sessions_word")} · ${Math.round(mins/60*10)/10}${t("hours_cumulated")}</div>
+      <div class="discbar">${bars}</div>
+      ${cubeGridHTML(a.id)}
+      ${(function(){const st=computeStreaks(a.id);return `<div class="streaks">
+        <div class="streak"><b>${st.current}</b><span>${t("streak_current")}</span></div>
+        <div class="streak"><b>${st.best}</b><span>${t("streak_best")}</span></div>
+      </div>`;})()}
+      ${goalsHTML(a.id)}
+    </div>`;
+  }).join("");
+  wireGoals();
+  renderLeaderboard();
+}
+
+/* ---------- nutrition ---------- */
+let nutriDay = new Date().toISOString().slice(0,10);
+let nutriCache = {}; // current day's data for `me`
+let nutriEditingTargets = false;
+
+async function renderNutrition(){
+  const root=document.getElementById("nutriBody");
+  if(!root) return;
+  const dateInput=document.getElementById("nDate");
+  if(dateInput && dateInput.value!==nutriDay) dateInput.value=nutriDay;
+  root.innerHTML=`<div class="loading">${t("loading")}</div>`;
+  nutriCache = await loadNutriDay(me, nutriDay);
+  const targets = nutriTargets[me] || {};
+  const group = (title, fields) => `
+    <div class="nutri-group">
+      <div class="nutri-group-h">${title}</div>
+      <div class="nutri-grid">
+        ${fields.map(f=>{
+          const val = nutriCache[f.k]!==undefined?nutriCache[f.k]:"";
+          const tgt = targets[f.k];
+          const unit = t(f.u);
+          const pct = (tgt && val!=="") ? Math.min(100, Math.round((+val/+tgt)*100)) : 0;
+          return `<div class="nutri-item">
+            <label>${t(f.k)} <span class="nutri-unit">${unit}</span></label>
+            <input type="number" min="0" step="any" data-nk="${f.k}" value="${val}" placeholder="0">
+            ${tgt?`<div class="nutri-bar"><div class="nutri-fill" style="width:${pct}%"></div></div>
+              <div class="nutri-tgt">${t("of_target",{t:tgt+" "+unit})}</div>`
+              :`<div class="nutri-tgt dim">${t("no_target")}</div>`}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  root.innerHTML = `
+    ${group(t("macros"), MACRO_FIELDS)}
+    ${group(t("micros"), MICRO_FIELDS)}
+    ${coachNotes["nutri:"+me]?`<div class="note"><b>${t("coach_note_label")}</b>${esc(coachNotes["nutri:"+me])}</div>`:""}
+    <button class="btn" id="nSave">${t("save_nutrition")}</button>
+    <div id="nMsg" style="text-align:center;margin-top:8px;height:14px"></div>`;
+  // wire inputs (auto-track into cache)
+  root.querySelectorAll("[data-nk]").forEach(inp=>{
+    inp.oninput=()=>{ const v=inp.value; if(v==="") delete nutriCache[inp.dataset.nk]; else nutriCache[inp.dataset.nk]=+v; };
+  });
+  document.getElementById("nSave").onclick=async()=>{
+    const msg=document.getElementById("nMsg");
+    msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
+    try{
+      await saveNutriDay(me, nutriDay, nutriCache);
+      msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("nutrition_saved")}</span>`;
+      setTimeout(()=>{msg.innerHTML="";},2000);
+      renderNutrition();
+    }catch(e){ msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${t("save_fail")}</span>`; }
+  };
+}
+function openTargetsEditor(){
+  const root=document.getElementById("nutriBody");
+  const targets = nutriTargets[me] || {};
+  const group = (title, fields) => `
+    <div class="nutri-group">
+      <div class="nutri-group-h">${title}</div>
+      <div class="nutri-grid">
+        ${fields.map(f=>`<div class="nutri-item">
+          <label>${t(f.k)} <span class="nutri-unit">${t(f.u)}</span></label>
+          <input type="number" min="0" step="any" data-tk="${f.k}" value="${targets[f.k]!==undefined?targets[f.k]:""}" placeholder="${esc(t("target_ph"))}">
+        </div>`).join("")}
+      </div>
+    </div>`;
+  root.innerHTML = `
+    <div class="nutri-targets-head">${t("set_targets")}</div>
+    ${group(t("macros"), MACRO_FIELDS)}
+    ${group(t("micros"), MICRO_FIELDS)}
+    <button class="btn" id="tSave">${t("done")}</button>`;
+  document.getElementById("tSave").onclick=async()=>{
+    const obj={};
+    root.querySelectorAll("[data-tk]").forEach(inp=>{ if(inp.value!=="") obj[inp.dataset.tk]=+inp.value; });
+    nutriTargets[me]=obj;
+    await saveNutriTargets();
+    renderNutrition();
+  };
+}
+
+/* ---------- coach nutrition (read-only) ---------- */
+let coachNutriDay = new Date().toISOString().slice(0,10);
+async function renderCoachNutrition(){
+  const root=document.getElementById("coachNutriBody");
+  if(!root) return;
+  const sel=document.getElementById("cnAthlete");
+  if(sel && !sel.options.length){
+    sel.innerHTML=ATHLETES.filter(a=>a.role==="athlete").map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("");
+  }
+  const athleteId = sel && sel.value ? sel.value : "a1";
+  const dateInput=document.getElementById("cnDate");
+  if(dateInput && dateInput.value!==coachNutriDay) dateInput.value=coachNutriDay;
+  root.innerHTML=`<div class="loading">${t("loading")}</div>`;
+  const data = await loadNutriDay(athleteId, coachNutriDay);
+  const targets = nutriTargets[athleteId] || {};
+  if(!Object.keys(data).length){
+    root.innerHTML=`<div class="empty"><b>${t("nutrition_none")}</b></div>`+coachNoteBox("nutri", athleteId);
+    wireCoachNoteBox(root, "nutri", athleteId, renderCoachNutrition);
+    return;
+  }
+  const group = (title, fields) => {
+    const items = fields.map(f=>{
+      const val = data[f.k]!==undefined?data[f.k]:null;
+      if(val===null) return "";
+      const tgt = targets[f.k];
+      const unit = t(f.u);
+      const pct = tgt ? Math.min(100, Math.round((+val/+tgt)*100)) : 0;
+      return `<div class="nutri-item">
+        <label>${t(f.k)} <span class="nutri-unit">${unit}</span></label>
+        <div class="nutri-readval">${val} ${unit}</div>
+        ${tgt?`<div class="nutri-bar"><div class="nutri-fill" style="width:${pct}%"></div></div>
+          <div class="nutri-tgt">${t("of_target",{t:tgt+" "+unit})}</div>`:""}
+      </div>`;
+    }).join("");
+    if(!items.trim()) return "";
+    return `<div class="nutri-group"><div class="nutri-group-h">${title}</div><div class="nutri-grid">${items}</div></div>`;
+  };
+  root.innerHTML = group(t("macros"), MACRO_FIELDS) + group(t("micros"), MICRO_FIELDS) + coachNoteBox("nutri", athleteId);
+  wireCoachNoteBox(root, "nutri", athleteId, renderCoachNutrition);
+}
+function coachNoteBox(kind, athleteId){
+  const key=kind+":"+athleteId;
+  const existing=coachNotes[key]||"";
+  const label = kind==="nutri"?t("coach_note_nutri"):t("coach_note_program");
+  return `<div class="coach-note-box">
+    <div class="cnb-h">${label}</div>
+    <div class="cnb-row">
+      <input data-cnote="${key}" value="${esc(existing)}" placeholder="${esc(t("leave_note"))}">
+      <button data-cnotesave="${key}">${t("save_btn")}</button>
+    </div>
+  </div>`;
+}
+function wireCoachNoteBox(root, kind, athleteId, rerender){
+  root.querySelectorAll("[data-cnotesave]").forEach(b=>b.onclick=async()=>{
+    const key=b.dataset.cnotesave;
+    const inp=root.querySelector(`[data-cnote="${key}"]`);
+    coachNotes[key]=inp.value.trim();
+    await saveCoachNotes();
+    if(rerender) rerender();
+  });
+}
+
+/* ---------- program ---------- */
+function renderProgram(){
+  const isCoach = me==="coach";
+  const root=document.getElementById(isCoach?"coachProgramBody":"programBody");
+  if(!root) return;
+  const targetAthlete = isCoach ? (document.getElementById("progAthlete")?document.getElementById("progAthlete").value:"a1") : me;
+  const prog = programs[targetAthlete] || [];
+  let html = "";
+  if(isCoach){
+    html += `<div class="field" style="max-width:220px;margin-bottom:18px">
+      <label>${t("view_athlete")}</label>
+      <select id="progAthlete">${ATHLETES.filter(a=>a.role==="athlete").map(a=>`<option value="${a.id}" ${a.id===targetAthlete?"selected":""}>${esc(a.name)}</option>`).join("")}</select>
+    </div>`;
+  }
+  if(!prog.length){
+    html += `<div class="empty"><b>${isCoach?t("program_empty_coach"):t("program_empty")}</b></div>`;
+  }
+  html += `<div class="prog-days">` + prog.map((day,di)=>`
+    <div class="prog-day">
+      <div class="prog-day-h">
+        ${isCoach?`<span class="prog-day-name">${esc(day.name||"")}</span>`
+          :`<input class="prog-day-name-input" data-dayname="${di}" value="${esc(day.name||"")}" placeholder="${esc(t("day_name_ph"))}">`}
+        ${isCoach?"":`<button class="prog-del" data-dayremove="${di}" title="${esc(t("remove"))}">×</button>`}
+      </div>
+      <div class="prog-blocks">
+        ${(day.blocks||[]).map((b,bi)=>`
+          <div class="prog-block">
+            ${isCoach?`<span class="prog-block-txt">${esc(b)}</span>`
+              :`<input class="prog-block-input" data-block="${di}:${bi}" value="${esc(b)}" placeholder="${esc(t("block_ph"))}">
+                 <button class="prog-block-del" data-blockremove="${di}:${bi}" title="${esc(t("remove"))}">×</button>`}
+          </div>`).join("")}
+        ${isCoach?"":`<button class="mini" data-addblock="${di}">${t("add_block")}</button>`}
+      </div>
+    </div>`).join("") + `</div>`;
+  if(!isCoach){
+    html += `<button class="mini prog-addday" id="progAddDay" style="margin-top:14px">${t("add_day")}</button>`;
+  }
+  // coach note on program
+  const noteKey="prog:"+targetAthlete;
+  if(isCoach){
+    html += coachNoteBox("prog", targetAthlete);
+  }else if(coachNotes[noteKey]){
+    html += `<div class="note" style="margin-top:16px"><b>${t("coach_note_label")}</b>${esc(coachNotes[noteKey])}</div>`;
+  }
+  root.innerHTML = html;
+  wireProgram(targetAthlete, isCoach, root);
+  if(isCoach) wireCoachNoteBox(root, "prog", targetAthlete, renderProgram);
+}
+function wireProgram(athleteId, isCoach, root){
+  if(isCoach){
+    const sel=document.getElementById("progAthlete");
+    if(sel) sel.onchange=renderProgram;
+    return;
+  }
+  const ensure=()=>{ if(!programs[athleteId]) programs[athleteId]=[]; return programs[athleteId]; };
+  const persist=async()=>{ await saveProgram(athleteId); };
+  root.querySelectorAll("[data-dayname]").forEach(inp=>{
+    inp.onchange=async()=>{ const p=ensure(); p[+inp.dataset.dayname].name=inp.value; await persist(); };
+  });
+  root.querySelectorAll("[data-block]").forEach(inp=>{
+    inp.onchange=async()=>{ const [di,bi]=inp.dataset.block.split(":").map(Number); const p=ensure(); p[di].blocks[bi]=inp.value; await persist(); };
+  });
+  root.querySelectorAll("[data-addblock]").forEach(b=>b.onclick=async()=>{
+    const di=+b.dataset.addblock; const p=ensure(); if(!p[di].blocks)p[di].blocks=[]; p[di].blocks.push(""); await persist(); renderProgram();
+  });
+  root.querySelectorAll("[data-blockremove]").forEach(b=>b.onclick=async()=>{
+    const [di,bi]=b.dataset.blockremove.split(":").map(Number); const p=ensure(); p[di].blocks.splice(bi,1); await persist(); renderProgram();
+  });
+  root.querySelectorAll("[data-dayremove]").forEach(b=>b.onclick=async()=>{
+    const di=+b.dataset.dayremove; const p=ensure(); p.splice(di,1); await persist(); renderProgram();
+  });
+  const addDay=document.getElementById("progAddDay");
+  if(addDay) addDay.onclick=async()=>{ const p=ensure(); p.push({name:"",blocks:[""]}); await persist(); renderProgram(); };
+}
+
+/* ---------- my space: weight ---------- */
+function weightSparkline(entries){
+  if(entries.length<2) return "";
+  const w=560, h=140, pad=24;
+  const kgs=entries.map(e=>e.kg);
+  const min=Math.min(...kgs), max=Math.max(...kgs);
+  const range=(max-min)||1;
+  const n=entries.length;
+  const x=i=> pad + (i/(n-1))*(w-2*pad);
+  const y=kg=> pad + (1-(kg-min)/range)*(h-2*pad);
+  const pts=entries.map((e,i)=>`${x(i).toFixed(1)},${y(e.kg).toFixed(1)}`).join(" ");
+  const dots=entries.map((e,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(e.kg).toFixed(1)}" r="3" fill="var(--blood)"/>`).join("");
+  return `<svg viewBox="0 0 ${w} ${h}" class="weight-svg" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="var(--blood)" stroke-width="2"/>
+    ${dots}
+  </svg>`;
+}
+async function renderSpace(){
+  const root=document.getElementById("spaceBody");
+  if(!root) return;
+  const w = weights[me] || {target:null, entries:[]};
+  const entries=(w.entries||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const last=entries.length?entries[entries.length-1].kg:null;
+  const target=w.target;
+  const diff=(last!=null && target!=null)?(last-target):null;
+  const today=new Date().toISOString().slice(0,10);
+  const todayVal = entries.find(e=>e.date===today);
+  const wg = weeklyGoals[me] || 0;
+  const doneWeek = sessionsThisWeek(me);
+  const pctWeek = wg? Math.min(100, Math.round((doneWeek/wg)*100)) : 0;
+  const circ=2*Math.PI*52;
+  const dash= wg ? circ*(1 - Math.min(1, doneWeek/wg)) : circ;
+  const reached = wg && doneWeek>=wg;
+  const prs = computePRs(me);
+  const prEntries = Object.entries(prs).sort((a,b)=>b[1].kg-a[1].kg);
+  root.innerHTML = `
+    <div class="grid two">
+      <div class="nutri-group">
+        <div class="nutri-group-h">${t("weight_today")}</div>
+        <div class="row">
+          <div class="field"><label>${t("weight_kg")}</label><input type="number" min="0" step="0.1" id="wKg" value="${todayVal?todayVal.kg:""}" placeholder="75.0"></div>
+          <div class="field"><label>${t("target_weight")}</label><input type="number" min="0" step="0.1" id="wTarget" value="${target!=null?target:""}" placeholder="70.0"></div>
+        </div>
+        <button class="btn" id="wSave">${t("log_weight")}</button>
+        <div id="wMsg" style="text-align:center;margin-top:8px;height:14px"></div>
+      </div>
+      <div class="nutri-group">
+        <div class="nutri-group-h">${t("weight_history")}</div>
+        ${last!=null?`
+          <div class="weight-stats">
+            <div class="stat"><b>${last} kg</b><span>${t("current_weight")}</span></div>
+            ${target!=null?`<div class="stat"><b>${diff>0?"+":""}${diff.toFixed(1)} kg</b><span>${t("to_target")}</span></div>`:""}
+          </div>
+          ${entries.length>=2?weightSparkline(entries):""}
+        `:`<div class="goal-empty">${t("weight_none")}</div>`}
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:16px">
+      <div class="nutri-group">
+        <div class="nutri-group-h">${t("weekly_goal")}</div>
+        <div class="weekly-wrap">
+          <div class="ring ${reached?"reached":""}">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" class="ring-bg"/>
+              <circle cx="60" cy="60" r="52" class="ring-fg" style="stroke-dasharray:${circ.toFixed(1)};stroke-dashoffset:${dash.toFixed(1)}"/>
+            </svg>
+            <div class="ring-center"><b>${doneWeek}${wg?`<i>/${wg}</i>`:""}</b><span>${t("this_week")}</span></div>
+          </div>
+          <div class="weekly-side">
+            ${wg?`<div class="weekly-lbl">${reached?`<span style="color:var(--win)">${t("goal_reached")}</span>`:`${pctWeek}%`}</div>`:`<div class="goal-empty">${t("weekly_none")}</div>`}
+            <div class="weekly-set">
+              <input type="number" min="1" max="14" id="wgInput" value="${wg||""}" placeholder="4">
+              <span class="weekly-unit">${t("per_week")}</span>
+              <button class="mini" id="wgSave">${t("set_weekly")}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nutri-group">
+        <div class="nutri-group-h">${t("prs")}</div>
+        ${prEntries.length?`<div class="pr-list">
+          ${prEntries.map(([name,pr])=>`<div class="pr-row">
+            <span class="pr-name">${esc(name)}</span>
+            <span class="pr-val">${pr.kg} kg${pr.reps?` × ${esc(pr.reps)}`:""}</span>
+          </div>`).join("")}
+        </div>`:`<div class="goal-empty">${t("pr_none")}</div>`}
+      </div>
+    </div>`;
+  document.getElementById("wSave").onclick=async()=>{
+    const kg=parseFloat(document.getElementById("wKg").value);
+    const tg=document.getElementById("wTarget").value;
+    const msg=document.getElementById("wMsg");
+    if(!weights[me]) weights[me]={target:null,entries:[]};
+    weights[me].target = tg!==""?parseFloat(tg):null;
+    if(!isNaN(kg)){
+      const ex=weights[me].entries.find(e=>e.date===today);
+      if(ex) ex.kg=kg; else weights[me].entries.push({date:today,kg});
+    }
+    msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
+    try{ await saveWeight(me); msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("weight_saved")}</span>`; setTimeout(()=>{msg.innerHTML="";},2000); renderSpace(); }
+    catch(e){ msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${t("save_fail")}</span>`; }
+  };
+  const wgSave=document.getElementById("wgSave");
+  if(wgSave) wgSave.onclick=async()=>{
+    const v=parseInt(document.getElementById("wgInput").value,10);
+    if(v>0){ weeklyGoals[me]=v; } else { delete weeklyGoals[me]; }
+    await saveWeeklyGoals(); renderSpace();
+  };
+}
+
+/* ---------- leaderboard ---------- */
+function computeScore(athleteId){
+  const mine=sessions.filter(s=>s.athlete===athleteId);
+  const nSessions=mine.length;
+  // active days this month
+  const active=activeDaysForMonth(athleteId, viewMonth.y, viewMonth.m).size;
+  const st=computeStreaks(athleteId);
+  // combined score: sessions*10 + activeDays*5 + bestStreak*8
+  const score = nSessions*10 + active*5 + st.best*8;
+  return {score, nSessions, active, best:st.best};
+}
+function renderLeaderboard(root){
+  root = root || document.getElementById("leaderboard");
+  if(!root) return;
+  const rows=ATHLETES.filter(a=>a.role==="athlete").map(a=>({a, ...computeScore(a.id)}))
+    .sort((x,y)=>y.score-x.score);
+  const medals=["🥇","🥈","🥉"];
+  root.innerHTML=`
+    <div class="lb">
+      <div class="lb-head">
+        <h3>${t("leaderboard")}</h3>
+        <span>${t("leaderboard_sub")}</span>
+      </div>
+      ${rows.map((r,i)=>`
+        <div class="lb-row ${i===0?"lead":""}">
+          <div class="lb-rank">${medals[i]||("#"+(i+1))}</div>
+          <div class="avatar" style="background:${r.a.color}">${avatarText(r.a)}</div>
+          <div class="lb-name">${esc(r.a.name)}</div>
+          <div class="lb-metrics">
+            <span><b>${r.nSessions}</b> ${t("lb_sessions")}</span>
+            <span><b>${r.active}</b> ${t("lb_active")}</span>
+            <span><b>${r.best}</b> ${t("lb_streak")}</span>
+          </div>
+          <div class="lb-score">${r.score}<i>${t("pts")}</i></div>
+        </div>`).join("")}
+    </div>`;
+}
+
+function wireGoals(){
+  const root=document.getElementById("roster");
+  root.querySelectorAll("[data-goaladd]").forEach(b=>b.onclick=async()=>{
+    const aid=b.dataset.goaladd;
+    const disc=root.querySelector(`[data-goaldisc="${aid}"]`).value;
+    const txt=root.querySelector(`[data-goaltxt="${aid}"]`).value.trim();
+    if(!txt)return;
+    if(!goals[aid])goals[aid]={};
+    goals[aid][disc]=txt;
+    await saveGoals(); renderRoster();
+  });
+  root.querySelectorAll("[data-goaldel]").forEach(b=>b.onclick=async()=>{
+    const [aid,disc]=b.dataset.goaldel.split("|");
+    if(goals[aid]){ delete goals[aid][disc]; await saveGoals(); renderRoster(); }
+  });
+}
+/* ---------- streaks ---------- */
+function allActiveDates(athleteId){
+  // Set of "YYYY-MM-DD" with >=1 session
+  const set=new Set();
+  sessions.forEach(s=>{ if(s.athlete===athleteId && s.date) set.add(s.date); });
+  return set;
+}
+function dayKey(d){ return d.toISOString().slice(0,10); }
+function computeStreaks(athleteId){
+  const dates=allActiveDates(athleteId);
+  if(!dates.size) return {best:0, current:0};
+  // best streak: sort dates, count consecutive calendar days
+  const sorted=[...dates].sort();
+  let best=1, run=1;
+  for(let i=1;i<sorted.length;i++){
+    const prev=new Date(sorted[i-1]+"T00:00");
+    const cur=new Date(sorted[i]+"T00:00");
+    const diff=Math.round((cur-prev)/86400000);
+    if(diff===1){ run++; best=Math.max(best,run); }
+    else if(diff===0){ /* same day, ignore */ }
+    else { run=1; }
+  }
+  // current streak: count back from today (or yesterday) while consecutive
+  let current=0;
+  const today=new Date(); today.setHours(0,0,0,0);
+  let cursor=new Date(today);
+  // allow streak to be "alive" if trained today OR yesterday
+  if(!dates.has(dayKey(cursor))){
+    cursor.setDate(cursor.getDate()-1);
+    if(!dates.has(dayKey(cursor))) return {best, current:0};
+  }
+  while(dates.has(dayKey(cursor))){
+    current++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+  return {best, current};
+}
+
+/* sessions logged in the current calendar week (Mon–Sun) */
+function sessionsThisWeek(athleteId){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const monday=new Date(today); monday.setDate(today.getDate()-((today.getDay()+6)%7));
+  const mondayKey=dayKey(monday);
+  const sunday=new Date(monday); sunday.setDate(monday.getDate()+6);
+  const sundayKey=dayKey(sunday);
+  const days=new Set();
+  sessions.forEach(s=>{ if(s.athlete===athleteId && s.date>=mondayKey && s.date<=sundayKey) days.add(s.date); });
+  return days.size;
+}
+/* personal records: best weight per exercise name (max kg across all sets) */
+function computePRs(athleteId){
+  const prs={}; // name -> {kg, reps, date}
+  sessions.filter(s=>s.athlete===athleteId).forEach(s=>{
+    (s.exercises||[]).forEach(ex=>{
+      const name=(ex.name||"").trim(); if(!name) return;
+      (ex.sets||[]).forEach(set=>{
+        const kg=parseFloat(set.w); if(isNaN(kg)) return;
+        if(!prs[name] || kg>prs[name].kg){ prs[name]={kg, reps:set.r||null, date:s.date}; }
+      });
+    });
+  });
+  return prs;
+}
+/* is this session's set a new PR at the moment it was logged? (for badge) */
+function sessionHasPR(s){
+  if(!s.exercises) return false;
+  const athletePRs=computePRs(s.athlete);
+  // a session "holds" a PR if any of its sets equals the athlete's best for that exercise
+  return (s.exercises||[]).some(ex=>{
+    const name=(ex.name||"").trim(); if(!name) return false;
+    const best=athletePRs[name]; if(!best) return false;
+    return (ex.sets||[]).some(set=>parseFloat(set.w)===best.kg && best.date===s.date);
+  });
+}
+
+function renderAll(){
+  if(me==="coach"){
+    fillCoachFilter();
+    renderCoachDash();
+    renderCoachJournal();
+  }else{
+    renderFeeds();
+    renderRoster();
+  }
+}
+
+/* ---------- coach views ---------- */
+function fillCoachFilter(){
+  const f=document.getElementById("coachFilter");
+  if(!f) return;
+  const cur=f.value;
+  f.innerHTML=`<option value="">${t("all_camp")}</option>`+
+    ATHLETES.filter(a=>a.role==="athlete").map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("");
+  f.value=cur;
+}
+function lastSessionFor(athleteId){
+  const mine=sessions.filter(s=>s.athlete===athleteId);
+  if(!mine.length) return null;
+  return mine.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+}
+function daysSince(dateStr){
+  const d=new Date(dateStr+"T00:00"); const now=new Date(); now.setHours(0,0,0,0);
+  return Math.round((now-d)/86400000);
+}
+function renderCoachDash(){
+  const root=document.getElementById("coachDash");
+  if(!root) return;
+  const cml=document.getElementById("cMonthLabel");
+  if(cml) cml.textContent=monthLabelText();
+  root.innerHTML = `<div id="coachLeaderboard"></div><div class="c-dash-grid">` + ATHLETES.filter(a=>a.role==="athlete").map(a=>{
+    const mine=sessions.filter(s=>s.athlete===a.id);
+    const last=lastSessionFor(a.id);
+    const since=last?daysSince(last.date):null;
+    const st=computeStreaks(a.id);
+    const active=activeDaysForMonth(a.id, viewMonth.y, viewMonth.m);
+    const daysInMonth=new Date(viewMonth.y, viewMonth.m+1, 0).getDate();
+    let alert="";
+    if(since===null) alert=`<span class="c-alert warn">${t("no_session_badge")}</span>`;
+    else if(since>=4) alert=`<span class="c-alert warn">${t("inactive_since",{n:since})}</span>`;
+    else if(since<=1) alert=`<span class="c-alert ok">${t("active")}</span>`;
+    else alert=`<span class="c-alert">${t("days_ago",{n:since})}</span>`;
+    return `<div class="c-card">
+      <div class="c-card-h">
+        <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+        <div class="c-card-id"><b>${esc(a.name)}</b><span>${t("total_sessions",{n:mine.length})}</span></div>
+        ${alert}
+      </div>
+      <div class="c-metrics">
+        <div class="c-metric"><b>${active.size}<i>/${daysInMonth}</i></b><span>${t("days_this_month")}</span></div>
+        <div class="c-metric"><b>${st.current}</b><span>${t("streak_current")}</span></div>
+        <div class="c-metric"><b>${st.best}</b><span>${t("streak_best")}</span></div>
+        <div class="c-metric"><b>${last?esc(discLabel(last.discipline)):"—"}</b><span>${t("last_disc")}</span></div>
+      </div>
+      ${cubeGridHTML(a.id)}
+      ${goalsHTML(a.id)}
+    </div>`;
+  }).join("") + `</div>`;
+  wireGoalsIn(root);
+  renderLeaderboard(document.getElementById("coachLeaderboard"));
+}
+function wireGoalsIn(root){
+  root.querySelectorAll("[data-goaladd]").forEach(b=>b.onclick=async()=>{
+    const aid=b.dataset.goaladd;
+    const disc=root.querySelector(`[data-goaldisc="${aid}"]`).value;
+    const txt=root.querySelector(`[data-goaltxt="${aid}"]`).value.trim();
+    if(!txt)return;
+    if(!goals[aid])goals[aid]={};
+    goals[aid][disc]=txt;
+    await saveGoals(); renderCoachDash();
+  });
+  root.querySelectorAll("[data-goaldel]").forEach(b=>b.onclick=async()=>{
+    const [aid,disc]=b.dataset.goaldel.split("|");
+    if(goals[aid]){ delete goals[aid][disc]; await saveGoals(); renderCoachDash(); }
+  });
+}
+function renderCoachJournal(){
+  const root=document.getElementById("coachJournal");
+  if(!root) return;
+  const filt=document.getElementById("coachFilter")?document.getElementById("coachFilter").value:"";
+  const list=(filt?sessions.filter(s=>s.athlete===filt):sessions);
+  if(!list.length){
+    root.innerHTML=`<div class="empty"><b>${t("no_session")}</b>${t("coach_journal_empty")}</div>`;
+    return;
+  }
+  root.innerHTML=list.map(s=>coachSessionCard(s)).join("");
+  wireCoachCards(root);
+}
+function coachSessionCard(s){
+  const a=byId(s.athlete)||{name:s.athlete,color:"#888"};
+  const totalSets=(s.exercises||[]).reduce((n,e)=>n+e.sets.length,0);
+  const exHtml=(s.exercises||[]).map(e=>`<div class="exrow"><span class="n">${esc(e.name)}</span><span class="s">${esc(exLine(e.sets))}</span></div>`).join("");
+  const stars=n=>"★★★★★☆☆☆☆☆".slice(5-n,10-n);
+  const hasFeedback = s.coachNote||s.coachRating;
+  const durTxt = s.duration?" · "+s.duration+" "+t("minutes").toLowerCase():"";
+  const intTxt = s.intensity?" · "+esc(intensityLabel(s.intensity)):"";
+  const feedbackView = hasFeedback ? `
+    <div class="note c-feedback">
+      <b>${t("your_feedback")} ${s.coachRating?`<span class="rating-badge">${stars(s.coachRating)} ${s.coachRating}/5</span>`:""}</b>
+      ${esc(s.coachNote||"")}
+      <div class="c-fb-actions">
+        <button class="c-fb-edit" data-edit="${s.id}">${t("edit")}</button>
+        <button class="c-fb-del" data-fbdel="${s.id}">${t("delete")}</button>
+      </div>
+    </div>`:"";
+  const editor = `
+    <div class="coachbox-rich" data-editor="${s.id}" style="display:${hasFeedback?"none":""}">
+      <div class="rate-row">
+        <span class="rate-lbl">${t("rating")}</span>
+        <span class="stars" data-rate="${s.id}">${[1,2,3,4,5].map(i=>`<button data-star="${i}">${s.coachRating&&i<=s.coachRating?"★":"☆"}</button>`).join("")}</span>
+      </div>
+      <div class="coachbox">
+        <input placeholder="${esc(t("leave_feedback"))}" data-note="${s.id}" value="${esc(s.coachNote||"")}">
+        <button data-send="${s.id}">${hasFeedback?t("save_btn"):t("send")}</button>
+      </div>
+    </div>`;
+  return `<div class="sess c-sess">
+    <div class="sess-h">
+      <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+      <div class="meta"><b>${esc(a.name)}</b><span>${fmtDate(s.date)}${durTxt}${intTxt}</span></div>
+      <div class="tag">${esc(discLabel(s.discipline))}</div>
+    </div>
+    <div class="sess-b">
+      <div class="stats">
+        <div class="stat"><b>${s.duration||"—"}</b><span>${t("minutes")}</span></div>
+        <div class="stat"><b>${(s.exercises||[]).length||"—"}</b><span>${t("exercises")}</span></div>
+        <div class="stat"><b>${totalSets||"—"}</b><span>${t("sets")}</span></div>
+      </div>
+      ${exHtml?`<div class="exlist">${exHtml}</div>`:""}
+      ${s.photo?`<div class="sess-photo"><img src="${s.photo}" alt="" data-zoom></div>`:""}
+      ${s.note?`<div class="note" style="border-left-color:var(--smoke)"><b style="color:var(--smoke)">${t("athlete_note")}</b>${esc(s.note)}</div>`:""}
+      ${feedbackView}
+      ${editor}
+    </div>
+  </div>`;
+}
+function wireCoachCards(root){
+  root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  const picked={};
+  root.querySelectorAll("[data-rate]").forEach(span=>{
+    const id=span.dataset.rate;
+    const s=sessions.find(x=>x.id===id);
+    picked[id]=s&&s.coachRating?s.coachRating:0;
+    const btns=[...span.querySelectorAll("[data-star]")];
+    btns.forEach(btn=>btn.onclick=()=>{
+      const v=+btn.dataset.star; picked[id]=v;
+      btns.forEach(b=>b.textContent=(+b.dataset.star<=v)?"★":"☆");
+    });
+  });
+  root.querySelectorAll("[data-send]").forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.send;
+    const txt=root.querySelector(`[data-note="${id}"]`).value.trim();
+    const rating=picked[id]||0;
+    if(!txt && !rating) return;
+    const s=sessions.find(x=>x.id===id); if(!s)return;
+    // coach feedback goes through the security-definer RPC (column-level RLS)
+    const { error } = await sb.rpc("set_coach_feedback", { p_id:id, p_note:txt, p_rating:rating });
+    if(!error){ s.coachNote=txt; s.coachRating=rating; }
+    renderCoachJournal();
+  });
+  root.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.edit;
+    const ed=root.querySelector(`[data-editor="${id}"]`);
+    const fb=b.closest(".c-feedback");
+    if(ed)ed.style.display="";
+    if(fb)fb.style.display="none";
+  });
+  root.querySelectorAll("[data-fbdel]").forEach(b=>b.onclick=async()=>{
+    if(b.dataset.confirm!=="1"){
+      b.dataset.confirm="1"; b.textContent=t("delete")+" ?"; b.style.color="var(--blood)";
+      setTimeout(()=>{ if(b.dataset.confirm==="1"){ b.dataset.confirm="0"; b.textContent=t("delete"); b.style.color=""; } },3000);
+      return;
+    }
+    const id=b.dataset.fbdel;
+    const s=sessions.find(x=>x.id===id); if(!s)return;
+    const { error } = await sb.rpc("set_coach_feedback", { p_id:id, p_note:"", p_rating:0 });
+    if(!error){ s.coachNote=""; s.coachRating=0; }
+    renderCoachJournal();
+  });
+}
+
+/* ---------- coach technical goals ---------- */
+function goalsHTML(athleteId){
+  const g = goals[athleteId] || {};
+  const entries = Object.entries(g).filter(([d,txt])=>txt&&txt.trim());
+  const isCoach = me==="coach";
+  const list = entries.length
+    ? entries.map(([d,txt])=>`<div class="goal-row">
+        <span class="goal-disc">${esc(discLabel(d))}</span>
+        <span class="goal-txt">${esc(txt)}</span>
+        ${isCoach?`<button class="goal-del" data-goaldel="${athleteId}|${esc(d)}" title="${esc(t("delete"))}">×</button>`:""}
+      </div>`).join("")
+    : `<div class="goal-empty">${isCoach?t("goal_none_coach"):t("goal_none_athlete")}</div>`;
+  const editor = isCoach ? `
+    <div class="goal-editor">
+      <select data-goaldisc="${athleteId}">${DISC_IDS.map(id=>`<option value="${id}">${discLabel(id)}</option>`).join("")}</select>
+      <input data-goaltxt="${athleteId}" placeholder="${esc(t("goal_placeholder"))}">
+      <button data-goaladd="${athleteId}">OK</button>
+    </div>`:"";
+  return `<div class="goals">
+    <div class="goals-h">${t("tech_goals")} ${isCoach?`<span class="coach-tag">${t("coach")}</span>`:''}</div>
+    ${list}${editor}
+  </div>`;
+}
+
+/* ---------- month cube grid ---------- */
+let viewMonth = (function(){ const d=new Date(); return {y:d.getFullYear(), m:d.getMonth()}; })();
+
+function activeDaysForMonth(athleteId, y, m){
+  // returns a Set of day-numbers (1..31) with >=1 session that month
+  const set = new Set();
+  const prefix = `${y}-${String(m+1).padStart(2,"0")}-`;
+  sessions.forEach(s=>{
+    if(s.athlete===athleteId && s.date && s.date.startsWith(prefix)){
+      const day = parseInt(s.date.slice(8,10),10);
+      if(day>=1) set.add(day);
+    }
+  });
+  return set;
+}
+function cubeGridHTML(athleteId){
+  const {y,m} = viewMonth;
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const firstDow = (new Date(y, m, 1).getDay()+6)%7; // 0=Monday
+  const active = activeDaysForMonth(athleteId, y, m);
+  const today = new Date();
+  const isThisMonth = today.getFullYear()===y && today.getMonth()===m;
+  const todayDate = today.getDate();
+
+  let cells = I18N[lang].dow.map(d=>`<div class="dow">${d}</div>`).join("");
+  for(let i=0;i<firstDow;i++) cells+=`<div class="cube pad"></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const on = active.has(day);
+    const isToday = isThisMonth && day===todayDate;
+    const isFuture = isThisMonth && day>todayDate;
+    const cls = ["cube", on?"on":"", isToday?"today":"", isFuture?"future":""].filter(Boolean).join(" ");
+    cells+=`<div class="${cls}">${day}</div>`;
+  }
+  return `<div class="cube-grid">${cells}</div>
+    <div class="cube-legend">
+      <span><span class="swatch" style="background:var(--ink);border:1px solid var(--line)"></span>${t("rest")}
+            <span class="swatch" style="background:var(--blood)"></span>${t("training")}</span>
+      <span class="cube-count">${active.size}/${daysInMonth} ${t("days")}</span>
+    </div>`;
+}
+function monthLabelText(){ return `${I18N[lang].months[viewMonth.m]} ${viewMonth.y}`; }
+function updateMonthLabel(){
+  const a=document.getElementById("monthLabel"); if(a) a.textContent=monthLabelText();
+  const b=document.getElementById("cMonthLabel"); if(b) b.textContent=monthLabelText();
+}
+function shiftMonth(delta){
+  let m=viewMonth.m+delta, y=viewMonth.y;
+  if(m<0){m=11;y--;} else if(m>11){m=0;y++;}
+  viewMonth={y,m};
+  updateMonthLabel();
+  renderRoster();
+}
+function shiftMonthCoach(delta){
+  let m=viewMonth.m+delta, y=viewMonth.y;
+  if(m<0){m=11;y--;} else if(m>11){m=0;y++;}
+  viewMonth={y,m};
+  renderCoachDash();
+}
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+const LOCALES={en:"en-US",fr:"fr-FR",ar:"ar",de:"de-DE"};
+function fmtDate(iso){
+  try{const d=new Date(iso+"T00:00");return d.toLocaleDateString(LOCALES[lang]||"en-US",{weekday:"short",day:"numeric",month:"short"});}catch(e){return iso;}
+}
+
+/* ---------- save flow ---------- */
+async function doSave(){
+  const btn=document.getElementById("save");
+  const msg=document.getElementById("saveMsg");
+  const s={
+    id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    athlete: me==="coach" ? "a1" : me,
+    discipline: selectedDisc(),
+    date: document.getElementById("fDate").value || new Date().toISOString().slice(0,10),
+    duration: document.getElementById("fDur").value || "",
+    intensity: document.getElementById("fIntensity").value || "",
+    note: document.getElementById("fNote").value.trim(),
+    exercises: collectExercises(),
+    photo: null,
+    coachNote:"",
+    ts: Date.now()
+  };
+  if(me==="coach"){ msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${esc(t("coach_no_log"))}</span>`; return; }
+  btn.disabled=true; msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
+  try{
+    // upload progress photo to Storage (if any), keep only the URL
+    if(pendingPhoto){
+      s.photo = await uploadPhoto(s.id, pendingPhoto);
+    }
+    await saveSession(s);
+    sessions.unshift(s);
+    sessions.sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+    document.getElementById("fDur").value="";
+    document.getElementById("fIntensity").value="";
+    document.getElementById("fNote").value="";
+    document.getElementById("exWrap").innerHTML="";
+    clearPhoto();
+    msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("saved")}</span>`;
+    setTimeout(()=>msg.innerHTML="",2500);
+    renderAll();
+  }catch(e){
+    msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${esc(t("save_fail"))}</span>`;
+  }finally{ btn.disabled=false; }
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("#tabsAthlete .tab").forEach(el=>el.onclick=()=>{
+  document.querySelectorAll("#tabsAthlete .tab").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on");
+  ["log","feed","nutrition","program","space","stats"].forEach(id=>document.getElementById("tab-"+id).style.display = id===el.dataset.tab?"":"none");
+  if(el.dataset.tab==="nutrition") renderNutrition();
+  if(el.dataset.tab==="program") renderProgram();
+  if(el.dataset.tab==="space") renderSpace();
+});
+document.querySelectorAll("#tabsCoach .tab").forEach(el=>el.onclick=()=>{
+  document.querySelectorAll("#tabsCoach .tab").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on");
+  ["dash","journal","cnutrition","cprogram"].forEach(id=>document.getElementById("ctab-"+id).style.display = id===el.dataset.ctab?"":"none");
+  if(el.dataset.ctab==="dash") renderCoachDash();
+  if(el.dataset.ctab==="journal") renderCoachJournal();
+  if(el.dataset.ctab==="cnutrition") renderCoachNutrition();
+  if(el.dataset.ctab==="cprogram") renderProgram();
+});
+
+/* ---------- init ---------- */
+(async function(){
+  buildWeek();
+  buildDiscPick();
+  fillFilter();
+  document.getElementById("fDate").value=new Date().toISOString().slice(0,10);
+  document.getElementById("addEx").onclick=addExercise;
+  document.getElementById("save").onclick=doSave;
+  document.getElementById("fPhoto").onchange=onPhotoPick;
+  document.getElementById("photoRemove").onclick=clearPhoto;
+  document.getElementById("lightbox").onclick=()=>document.getElementById("lightbox").classList.remove("on");
+  document.getElementById("filterAthlete").onchange=renderFeeds;
+  document.getElementById("mPrev").onclick=()=>shiftMonth(-1);
+  document.getElementById("mNext").onclick=()=>shiftMonth(1);
+  updateMonthLabel();
+  // coach view wiring
+  document.getElementById("coachFilter").onchange=renderCoachJournal;
+  document.getElementById("cmPrev").onclick=()=>{ shiftMonthCoach(-1); };
+  document.getElementById("cmNext").onclick=()=>{ shiftMonthCoach(1); };
+  // login wiring (Supabase Auth)
+  document.getElementById("gateSubmit").onclick=submitGate;
+  document.getElementById("logout").onclick=logout;
+  ["authEmail","authPw"].forEach(idp=>{
+    const el=document.getElementById(idp);
+    if(el) el.addEventListener("keydown",e=>{if(e.key==="Enter")submitGate();});
+  });
+  // language selectors
+  buildLangSelect(document.getElementById("langGate"));
+  buildLangSelect(document.getElementById("langHeader"));
+  // theme toggles
+  applyTheme();
+  ["themeToggle","themeToggleGate"].forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=toggleTheme; });
+  // nutrition date nav
+  const nDate=document.getElementById("nDate");
+  if(nDate){ nDate.value=nutriDay; nDate.onchange=()=>{ nutriDay=nDate.value; renderNutrition(); }; }
+  const shiftNutri=(d)=>{ const dt=new Date(nutriDay+"T00:00"); dt.setDate(dt.getDate()+d); nutriDay=dt.toISOString().slice(0,10); if(nDate)nDate.value=nutriDay; renderNutrition(); };
+  if(document.getElementById("nPrev")) document.getElementById("nPrev").onclick=()=>shiftNutri(-1);
+  if(document.getElementById("nNext")) document.getElementById("nNext").onclick=()=>shiftNutri(1);
+  if(document.getElementById("nTargets")) document.getElementById("nTargets").onclick=openTargetsEditor;
+  // coach nutrition controls
+  const cnDate=document.getElementById("cnDate");
+  if(cnDate){ cnDate.value=coachNutriDay; cnDate.onchange=()=>{ coachNutriDay=cnDate.value; renderCoachNutrition(); }; }
+  const cnShift=(d)=>{ const dt=new Date(coachNutriDay+"T00:00"); dt.setDate(dt.getDate()+d); coachNutriDay=dt.toISOString().slice(0,10); if(cnDate)cnDate.value=coachNutriDay; renderCoachNutrition(); };
+  if(document.getElementById("cnPrev")) document.getElementById("cnPrev").onclick=()=>cnShift(-1);
+  if(document.getElementById("cnNext")) document.getElementById("cnNext").onclick=()=>cnShift(1);
+  if(document.getElementById("cnAthlete")) document.getElementById("cnAthlete").onchange=renderCoachNutrition;
+  applyI18n();
+  // init Supabase; if a session already exists (returning user), go straight in
+  if(SUPABASE_URL.startsWith("http")){
+    initSupabase();
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await afterLogin(); }
+  }else{
+    document.getElementById("gateErr").textContent="⚠ Supabase not configured (edit SUPABASE_URL / SUPABASE_ANON).";
+  }
+})();
+</script>
+</body>
+</html>
