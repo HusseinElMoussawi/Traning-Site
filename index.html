@@ -451,27 +451,27 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 body.rtl .rm-title{text-align:right}
 
 /* ---------- roadmap side rail ---------- */
-.rmrail{position:fixed;top:0;left:0;bottom:0;width:104px;background:var(--panel);border-right:1px solid var(--line);z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.rmrail{position:fixed;top:0;left:0;bottom:0;width:116px;background:transparent;z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;flex-direction:column;justify-content:center;align-items:center}
 .rmrail-inner{display:flex;flex-direction:column;align-items:center;margin:auto 0}
 .rmrail-item{background:none;border:none;padding:0;cursor:pointer;display:block;position:relative}
 .rmrail-item:disabled{cursor:default}
-.rmrail-node{position:relative;width:64px;height:64px;display:grid;place-items:center}
+.rmrail-node{position:relative;width:76px;height:76px;display:grid;place-items:center}
 .rmrail-node svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .rmrail-bg{fill:none;stroke:var(--line);stroke-width:5}
 .rmrail-fg{fill:none;stroke:var(--blood);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
-.rmrail-num{font-family:'Oswald';font-weight:700;font-size:22px;color:var(--smoke);z-index:1}
+.rmrail-num{font-family:'Oswald';font-weight:700;font-size:26px;color:var(--smoke);z-index:1}
 .rmrail-node.active .rmrail-num{color:var(--blood)}
 .rmrail-node.active{animation:flamePulse 2.2s ease-in-out infinite}
 .rmrail-node.mastered .rmrail-fg{stroke:var(--blood)}
 .rmrail-node.mastered .rmrail-num{color:var(--blood)}
 .rmrail-item:hover .rmrail-num{color:var(--chalk)}
-.rmrail-line{width:3px;height:26px;background:var(--line);border-radius:3px;position:relative;overflow:hidden;margin:3px 0}
+.rmrail-line{width:3px;height:40px;background:var(--line);border-radius:3px;position:relative;overflow:hidden;margin:4px 0}
 .rmrail-line-fill{position:absolute;top:0;left:0;width:100%;background:var(--blood);transition:height .6s cubic-bezier(.2,.8,.2,1)}
 /* shift content right when the rail is visible */
-body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:104px}
+body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:116px}
 /* RTL: rail on the right instead */
-body.rtl .rmrail{left:auto;right:0;border-right:none;border-left:1px solid var(--line)}
-body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:104px}
+body.rtl .rmrail{left:auto;right:0}
+body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:116px}
 /* hide rail on small screens (handled later) */
 @media(max-width:720px){.rmrail{display:none!important}body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:0}body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-right:0}}
 
@@ -2261,7 +2261,7 @@ function renderRail(athleteId, readonly){
   if(!list.length){ rail.style.display="none"; document.body.classList.remove("has-rail"); return; }
   rail.style.display="";
   document.body.classList.add("has-rail");
-  const size=64;
+  const size=76;
   const nodes = list.map((m,i)=>{
     const pct=milestoneProgress(athleteId,m);
     const mastered=pct>=100;
