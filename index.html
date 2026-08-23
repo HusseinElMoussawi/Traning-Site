@@ -450,6 +450,31 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .rm-row select,.rm-row input{flex:1;min-width:80px}
 body.rtl .rm-title{text-align:right}
 
+/* ---------- roadmap side rail ---------- */
+.rmrail{position:fixed;top:0;left:0;bottom:0;width:76px;background:var(--panel);border-right:1px solid var(--line);z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;justify-content:center}
+.rmrail-inner{display:flex;flex-direction:column;align-items:center}
+.rmrail-item{background:none;border:none;padding:0;cursor:pointer;display:block;position:relative}
+.rmrail-item:disabled{cursor:default}
+.rmrail-node{position:relative;width:46px;height:46px;display:grid;place-items:center}
+.rmrail-node svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.rmrail-bg{fill:none;stroke:var(--line);stroke-width:4}
+.rmrail-fg{fill:none;stroke:var(--blood);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+.rmrail-num{font-family:'Oswald';font-weight:700;font-size:15px;color:var(--smoke);z-index:1}
+.rmrail-node.active .rmrail-num{color:var(--blood)}
+.rmrail-node.active{animation:flamePulse 2.2s ease-in-out infinite}
+.rmrail-node.mastered .rmrail-fg{stroke:var(--blood)}
+.rmrail-node.mastered .rmrail-num{color:var(--blood)}
+.rmrail-item:hover .rmrail-num{color:var(--chalk)}
+.rmrail-line{width:3px;height:20px;background:var(--line);border-radius:3px;position:relative;overflow:hidden;margin:2px 0}
+.rmrail-line-fill{position:absolute;top:0;left:0;width:100%;background:var(--blood);transition:height .6s cubic-bezier(.2,.8,.2,1)}
+/* shift content right when the rail is visible */
+body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:76px}
+/* RTL: rail on the right instead */
+body.rtl .rmrail{left:auto;right:0;border-right:none;border-left:1px solid var(--line)}
+body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:76px}
+/* hide rail on small screens (handled later) */
+@media(max-width:720px){.rmrail{display:none!important}body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:0}body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-right:0}}
+
 /* ---------- weekly goal ring ---------- */
 .weekly-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .ring{position:relative;width:120px;height:120px;flex-shrink:0}
@@ -524,6 +549,9 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 </style>
 </head>
 <body>
+
+<!-- ROADMAP RAIL (fixed left) -->
+<aside class="rmrail" id="rmRail" style="display:none"></aside>
 
 <header>
   <div class="bar">
@@ -1535,6 +1563,8 @@ async function logout(){
   try{ await sb.auth.signOut(); }catch(e){}
   me=null; myRole=null;
   document.getElementById("gate").style.display="grid";
+  const rail=document.getElementById("rmRail"); if(rail) rail.style.display="none";
+  document.body.classList.remove("has-rail");
   document.getElementById("authEmail").value="";
   document.getElementById("authPw").value="";
   document.getElementById("gateErr").textContent="";
@@ -2211,6 +2241,52 @@ function wireRoadmap(athleteId, root){
   });
 }
 
+/* ---------- roadmap side rail (circular % around each node) ---------- */
+function ringNode(index, pct, mastered, active, size){
+  const r=(size-8)/2, c=2*Math.PI*r, off=c*(1-pct/100);
+  const cls=["rmrail-node", mastered?"mastered":"", active?"active":""].filter(Boolean).join(" ");
+  return `<div class="${cls}" title="${pct}%">
+    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" class="rmrail-bg"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" class="rmrail-fg"
+        style="stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${off.toFixed(1)}"/>
+    </svg>
+    <span class="rmrail-num">${mastered?"✓":(index+1)}</span>
+  </div>`;
+}
+function renderRail(athleteId, readonly){
+  const rail=document.getElementById("rmRail");
+  if(!rail) return;
+  const list = roadmaps[athleteId] || [];
+  if(!list.length){ rail.style.display="none"; document.body.classList.remove("has-rail"); return; }
+  rail.style.display="";
+  document.body.classList.add("has-rail");
+  const size=46;
+  const nodes = list.map((m,i)=>{
+    const pct=milestoneProgress(athleteId,m);
+    const mastered=pct>=100;
+    const prevMastered = i===0 || milestoneProgress(athleteId,list[i-1])>=100;
+    const active=!mastered && prevMastered;
+    const connector = i<list.length-1 ? `<div class="rmrail-line"><div class="rmrail-line-fill" style="height:${pct}%"></div></div>` : "";
+    return `<button class="rmrail-item" ${readonly?"":`data-railedit="${i}"`} ${readonly?"disabled":""}>
+      ${ringNode(i,pct,mastered,active,size)}
+    </button>${connector}`;
+  }).join("");
+  rail.innerHTML = `<div class="rmrail-inner">${nodes}</div>`;
+  if(!readonly){
+    rail.querySelectorAll("[data-railedit]").forEach(b=>b.onclick=()=>{
+      const i=b.dataset.railedit;
+      // go to My space, then open the matching milestone editor
+      const tab=document.querySelector('#tabsAthlete .tab[data-tab="space"]');
+      if(tab) tab.click();
+      setTimeout(()=>{
+        const form=document.querySelector(`#roadmapWrap [data-rmform="${i}"]`);
+        if(form){ form.style.display=""; form.scrollIntoView({behavior:"smooth",block:"center"}); }
+      },80);
+    });
+  }
+}
+
 /* ---------- leaderboard ---------- */
 function computeScore(athleteId){
   const mine=sessions.filter(s=>s.athlete===athleteId);
@@ -2348,6 +2424,7 @@ function renderAll(){
   }else{
     renderFeeds();
     renderRoster();
+    renderRail(me, false);
   }
 }
 
@@ -2404,6 +2481,10 @@ function renderCoachDash(){
   }).join("") + `</div>`;
   wireGoalsIn(root);
   renderLeaderboard(document.getElementById("coachLeaderboard"));
+  // coach rail: read-only, shows the filtered athlete (or first athlete)
+  const f=document.getElementById("coachFilter");
+  const railAthlete = (f && f.value) ? f.value : (ATHLETES.find(a=>a.role==="athlete")||{}).id;
+  if(railAthlete) renderRail(railAthlete, true);
 }
 function wireGoalsIn(root){
   root.querySelectorAll("[data-goaladd]").forEach(b=>b.onclick=async()=>{
@@ -2668,7 +2749,8 @@ document.querySelectorAll("#tabsCoach .tab").forEach(el=>el.onclick=()=>{
   document.querySelectorAll("#tabsCoach .tab").forEach(x=>x.classList.remove("on"));
   el.classList.add("on");
   ["dash","journal","cnutrition","cprogram"].forEach(id=>document.getElementById("ctab-"+id).style.display = id===el.dataset.ctab?"":"none");
-  if(el.dataset.ctab==="dash") renderCoachDash();
+  if(el.dataset.ctab==="dash"){ renderCoachDash(); }
+  else { const rail=document.getElementById("rmRail"); if(rail){rail.style.display="none";} document.body.classList.remove("has-rail"); }
   if(el.dataset.ctab==="journal") renderCoachJournal();
   if(el.dataset.ctab==="cnutrition") renderCoachNutrition();
   if(el.dataset.ctab==="cprogram") renderProgram();
