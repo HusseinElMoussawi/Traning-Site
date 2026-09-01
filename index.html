@@ -102,13 +102,13 @@ header{
 /* ---------- hero strip ---------- */
 .hero{
   max-width:1080px;margin:0 auto;padding:34px 22px 8px;
-  display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+  display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
 }
 .hero .title h1{font-size:clamp(34px,6vw,58px);font-weight:700;line-height:.92}
 .hero .title h1 em{font-style:normal;color:var(--blood);}
 .hero-quote{font-size:clamp(26px,4.4vw,44px)!important;line-height:1.45!important;text-align:right}
+.hero-quote em{color:var(--chalk)}
 .hero-quote .hero-attr{display:block;font-size:clamp(14px,2vw,20px);color:var(--gold);font-weight:600;margin-bottom:10px;letter-spacing:0}
-.hero-quote em{color:var(--blood)}
 .hero .title p{color:var(--smoke);margin-top:6px;max-width:44ch;font-size:14px}
 .week{
   display:flex;gap:2px;border:1px solid var(--line);border-radius:3px;overflow:hidden;
