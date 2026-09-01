@@ -106,6 +106,9 @@ header{
 }
 .hero .title h1{font-size:clamp(34px,6vw,58px);font-weight:700;line-height:.92}
 .hero .title h1 em{font-style:normal;color:var(--blood);}
+.hero-quote{font-size:clamp(26px,4.4vw,44px)!important;line-height:1.45!important;text-align:right}
+.hero-quote .hero-attr{display:block;font-size:clamp(14px,2vw,20px);color:var(--gold);font-weight:600;margin-bottom:10px;letter-spacing:0}
+.hero-quote em{color:var(--blood)}
 .hero .title p{color:var(--smoke);margin-top:6px;max-width:44ch;font-size:14px}
 .week{
   display:flex;gap:2px;border:1px solid var(--line);border-radius:3px;overflow:hidden;
@@ -140,8 +143,11 @@ main{max-width:1080px;margin:0 auto;padding:20px 22px 90px}
 .field label{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke);margin-bottom:6px}
 .field input,.field select,.field textarea{
   width:100%;background:var(--ink);border:1px solid var(--line);color:var(--chalk);
-  padding:11px 12px;font-size:14px;border-radius:3px;
+  padding:11px 12px;font-size:14px;border-radius:3px;box-sizing:border-box;height:44px;
 }
+.field textarea{height:auto}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.7);cursor:pointer}
+body.light input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--blood);outline-offset:0;border-color:var(--blood)}
 .disc-pick{display:flex;flex-wrap:wrap;gap:7px}
 .disc-pick button{
@@ -149,8 +155,8 @@ main{max-width:1080px;margin:0 auto;padding:20px 22px 90px}
   padding:9px 13px;border-radius:2px;font-size:13px;font-weight:500;letter-spacing:.02em;
 }
 .disc-pick button.on{background:var(--blood);border-color:var(--blood);color:#fff}
-.row{display:flex;gap:10px}
-.row .field{flex:1}
+.row{display:flex;gap:10px;align-items:flex-end}
+.row .field{flex:1;margin-bottom:15px}
 .exset{border:1px dashed var(--line);border-radius:3px;padding:12px;margin-bottom:10px;background:var(--panel-2)}
 .exset .exhead{display:flex;gap:8px;margin-bottom:8px}
 .exset .exhead input{flex:1}
@@ -603,8 +609,8 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 
 <section class="hero">
   <div class="title">
-    <h1>ROUND<br><em>BY ROUND.</em></h1>
-    <p>Every session counts. Log your attendance, your performance and your discipline — the coach tracks progress and leaves feedback.</p>
+    <h1 class="hero-quote" dir="rtl"><span class="hero-attr">قال الإمامُ الصادقُ عليه السلام</span>إنَّ المؤمنَ يخشعُ لهُ كلُّ شيء<br><em>ويهابهُ كلُّ شيء</em></h1>
+    <p style="display:none"></p>
   </div>
   <div class="week" id="week"></div>
 </section>
@@ -1242,11 +1248,12 @@ function updateHero(){
   const h=document.querySelector(".hero .title h1");
   const p=document.querySelector(".hero .title p");
   if(!h||!p) return;
-  const isCoach = me==="coach";
-  const key = isCoach ? "hero_coach_h1" : "hero_h1";
-  const parts = t(key).split("|");
-  h.innerHTML = `${parts[0]||""}<br><em>${parts[1]||""}</em>`;
-  p.textContent = isCoach ? t("hero_coach_p") : t("hero_p");
+  // Arabic slogan shown on the home page in every language (attribution + two lines)
+  h.innerHTML = `<span class="hero-attr">قال الإمامُ الصادقُ عليه السلام</span>`
+    + `إنَّ المؤمنَ يخشعُ لهُ كلُّ شيء<br><em>ويهابهُ كلُّ شيء</em>`;
+  h.setAttribute("dir","rtl");
+  h.classList.add("hero-quote");
+  p.style.display="none";
 }
 function setLang(l){
   if(!LANGS.includes(l)) l="en";
