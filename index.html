@@ -880,7 +880,7 @@ const I18N = {
     view_athlete:"Athlete", nutrition_day:"Day",
     tab_space:"My space", space_title:"My space", space_sub:"Track your weight and personal progress.",
     weight:"Weight", weight_kg:"Weight (kg)", target_weight:"Target weight", log_weight:"Log weight",
-    weight_today:"Today's weight", weight_history:"Weight history", weight_none:"No weight logged yet.", weight_entries:"All entries",
+    weight_today:"Today's weight", weight_history:"Weight history", weight_none:"No weight logged yet.", weight_entries:"All entries", weight_date:"Date",
     weight_saved:"✓ Weight saved", current_weight:"Current", to_target:"To target",
     coach_note_nutri:"Coach note on nutrition", coach_note_program:"Coach note on program",
     leave_note:"Leave a note…", coach_note_label:"Coach note",
@@ -966,7 +966,7 @@ const I18N = {
     view_athlete:"Athlète", nutrition_day:"Jour",
     tab_space:"Mon espace", space_title:"Mon espace", space_sub:"Suis ton poids et ta progression perso.",
     weight:"Poids", weight_kg:"Poids (kg)", target_weight:"Poids cible", log_weight:"Enregistrer le poids",
-    weight_today:"Poids du jour", weight_history:"Historique du poids", weight_none:"Aucun poids enregistré.", weight_entries:"Toutes les entrées",
+    weight_today:"Poids du jour", weight_history:"Historique du poids", weight_none:"Aucun poids enregistré.", weight_entries:"Toutes les entrées", weight_date:"Date",
     weight_saved:"✓ Poids enregistré", current_weight:"Actuel", to_target:"Vers l'objectif",
     coach_note_nutri:"Note du moniteur sur la nutrition", coach_note_program:"Note du moniteur sur le programme",
     leave_note:"Laisser un mot…", coach_note_label:"Note du moniteur",
@@ -1052,7 +1052,7 @@ const I18N = {
     view_athlete:"لاعب", nutrition_day:"اليوم",
     tab_space:"مساحتي", space_title:"مساحتي", space_sub:"تابع وزنك وتقدّمك الشخصي.",
     weight:"الوزن", weight_kg:"الوزن (كغ)", target_weight:"الوزن المستهدف", log_weight:"تسجيل الوزن",
-    weight_today:"وزن اليوم", weight_history:"سجل الوزن", weight_none:"لا وزن مسجّل بعد.", weight_entries:"كل الإدخالات",
+    weight_today:"وزن اليوم", weight_history:"سجل الوزن", weight_none:"لا وزن مسجّل بعد.", weight_entries:"كل الإدخالات", weight_date:"التاريخ",
     weight_saved:"✓ تم حفظ الوزن", current_weight:"الحالي", to_target:"نحو الهدف",
     coach_note_nutri:"ملاحظة المدرب على التغذية", coach_note_program:"ملاحظة المدرب على البرنامج",
     leave_note:"اترك ملاحظة…", coach_note_label:"ملاحظة المدرب",
@@ -1138,7 +1138,7 @@ const I18N = {
     view_athlete:"Athlet", nutrition_day:"Tag",
     tab_space:"Mein Bereich", space_title:"Mein Bereich", space_sub:"Verfolge dein Gewicht und deinen Fortschritt.",
     weight:"Gewicht", weight_kg:"Gewicht (kg)", target_weight:"Zielgewicht", log_weight:"Gewicht erfassen",
-    weight_today:"Heutiges Gewicht", weight_history:"Gewichtsverlauf", weight_none:"Noch kein Gewicht erfasst.", weight_entries:"Alle Einträge",
+    weight_today:"Heutiges Gewicht", weight_history:"Gewichtsverlauf", weight_none:"Noch kein Gewicht erfasst.", weight_entries:"Alle Einträge", weight_date:"Datum",
     weight_saved:"✓ Gewicht gespeichert", current_weight:"Aktuell", to_target:"Bis zum Ziel",
     coach_note_nutri:"Trainer-Notiz zur Ernährung", coach_note_program:"Trainer-Notiz zum Plan",
     leave_note:"Notiz hinterlassen…", coach_note_label:"Trainer-Notiz",
@@ -2079,6 +2079,7 @@ async function renderSpace(){
       <div class="nutri-group">
         <div class="nutri-group-h">${t("weight_today")}</div>
         <div class="row">
+          <div class="field"><label>${t("weight_date")}</label><input type="date" id="wDate" value="${today}" max="${today}"></div>
           <div class="field"><label>${t("weight_kg")}</label><input type="number" min="0" step="0.1" id="wKg" value="${todayVal?todayVal.kg:""}" placeholder="75.0"></div>
           <div class="field"><label>${t("target_weight")}</label><input type="number" min="0" step="0.1" id="wTarget" value="${target!=null?target:""}" placeholder="70.0"></div>
         </div>
@@ -2141,12 +2142,13 @@ async function renderSpace(){
   document.getElementById("wSave").onclick=async()=>{
     const kg=parseFloat(document.getElementById("wKg").value);
     const tg=document.getElementById("wTarget").value;
+    const chosenDate=document.getElementById("wDate").value || today;
     const msg=document.getElementById("wMsg");
     if(!weights[me]) weights[me]={target:null,entries:[]};
     weights[me].target = tg!==""?parseFloat(tg):null;
     if(!isNaN(kg)){
-      const ex=weights[me].entries.find(e=>e.date===today);
-      if(ex) ex.kg=kg; else weights[me].entries.push({date:today,kg});
+      const ex=weights[me].entries.find(e=>e.date===chosenDate);
+      if(ex) ex.kg=kg; else weights[me].entries.push({date:chosenDate,kg});
     }
     msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
     try{ await saveWeight(me); msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("weight_saved")}</span>`; setTimeout(()=>{msg.innerHTML="";},2000); renderSpace(); }
