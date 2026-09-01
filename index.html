@@ -451,7 +451,7 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 body.rtl .rm-title{text-align:right}
 
 /* ---------- roadmap side rail ---------- */
-.rmrail{position:fixed;top:0;left:48px;bottom:0;width:116px;background:transparent;z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.rmrail{position:fixed;top:0;left:0;bottom:0;width:190px;background:transparent;z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;flex-direction:column;justify-content:center;align-items:center}
 .rmrail-inner{display:flex;flex-direction:column;align-items:center;margin:auto 0;width:100%}
 .rmrail-item{background:none;border:none;padding:0;cursor:pointer;display:flex;justify-content:center;width:100%;position:relative}
 .rmrail-item:disabled{cursor:default}
@@ -468,10 +468,10 @@ body.rtl .rm-title{text-align:right}
 .rmrail-line{width:3px;height:40px;background:var(--line);border-radius:3px;position:relative;overflow:hidden;margin:4px 0}
 .rmrail-line-fill{position:absolute;top:0;left:0;width:100%;background:var(--blood);transition:height .6s cubic-bezier(.2,.8,.2,1)}
 /* shift content right when the rail is visible */
-body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:164px}
+body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:190px}
 /* RTL: rail on the right instead */
-body.rtl .rmrail{left:auto;right:48px}
-body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:164px}
+body.rtl .rmrail{left:auto;right:0}
+body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:190px}
 /* hide rail on small screens (handled later) */
 @media(max-width:720px){.rmrail{display:none!important}body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:0}body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-right:0}}
 
