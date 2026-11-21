@@ -528,6 +528,20 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .notif-time{font-size:11px;color:var(--smoke)}
 #notifBadge{background:var(--blood);color:#fff;border-radius:999px;font-size:10px;min-width:16px;height:16px;display:inline-grid;place-items:center;padding:0 4px;margin-inline-start:4px}
 
+/* ---------- Instagram-style gallery ---------- */
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:14px;border-radius:8px;overflow:hidden}
+.gal-cell{aspect-ratio:1;overflow:hidden;background:var(--ink)}
+.gal-cell img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .2s}
+.gal-cell img:hover{transform:scale(1.05)}
+
+/* ---------- roster card (home) ---------- */
+.athlete-head{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:0}
+.roster-level{font-family:'Oswald';font-weight:600;font-size:15px;margin-top:2px}
+.roster-metrics{display:flex;justify-content:center;gap:28px;margin:12px 0}
+.rm-stat{text-align:center}
+.rm-stat b{font-family:'Oswald';font-size:24px;font-weight:700;display:block;line-height:1}
+.rm-stat span{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--smoke)}
+
 /* ---------- roadmap (journey) ---------- */
 .rm-lead{color:var(--smoke);font-size:12px;margin:-4px 0 14px}
 .rm-list{display:flex;flex-direction:column}
@@ -1951,11 +1965,20 @@ function renderFeeds(){
     wireCards(recent);
   }
 }
+// Instagram-style photo gallery for an athlete's sessions (newest first)
+function galleryHTML(athleteId){
+  const photos=sessions.filter(s=>s.athlete===athleteId && s.photo)
+    .sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  if(!photos.length) return "";
+  return `<div class="gallery">${photos.slice(0,9).map(s=>`
+    <div class="gal-cell"><img src="${s.photo}" alt="" data-zoom></div>`).join("")}</div>`;
+}
 function renderRoster(){
   const r=document.getElementById("roster");
+  if(!r) return;
   r.innerHTML = ATHLETES.filter(a=>a.role==="athlete").map(a=>{
     const mine = sessions.filter(s=>s.athlete===a.id);
-    const mins = mine.reduce((n,s)=>n+(+s.duration||0),0);
+    const lv = computeLevel(a.id);
     const counts={};
     mine.forEach(s=>counts[s.discipline]=(counts[s.discipline]||0)+1);
     const max=Math.max(1,...Object.values(counts));
@@ -1964,20 +1987,23 @@ function renderRoster(){
       <div class="track"><div class="fill" style="width:${Math.round(c/max*100)}%"></div></div></div>`).join("")
       || `<div class="t" style="color:var(--smoke);font-size:11px">${t("no_session_yet")}</div>`;
     return `<div class="athlete">
-      <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
-      <h3>${esc(displayName(a))}</h3>
-      <div class="big ${mine.length?"":"z"}">${mine.length}</div>
-      <div class="lbl">${t("sessions_word")} · ${Math.round(mins/60*10)/10}${t("hours_cumulated")}</div>
+      <button class="athlete-head" data-rosterview="${a.id}">
+        <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+        <h3>${esc(displayName(a))}</h3>
+        <div class="roster-level" style="color:${a.color}">${t("level")} ${lv.level}</div>
+      </button>
+      <div class="roster-metrics">
+        <div class="rm-stat"><b>${mine.length}</b><span>${t("sessions_word")}</span></div>
+        <div class="rm-stat"><b>${lv.sparrings}</b><span>${t("sparring")}</span></div>
+      </div>
       <div class="discbar">${bars}</div>
-      ${cubeGridHTML(a.id)}
-      ${(function(){const st=computeStreaks(a.id);return `<div class="streaks">
-        <div class="streak"><b>${st.current}</b><span>${t("streak_current")}</span></div>
-        <div class="streak"><b>${st.best}</b><span>${t("streak_best")}</span></div>
-      </div>`;})()}
+      ${galleryHTML(a.id)}
       ${goalsHTML(a.id)}
     </div>`;
   }).join("");
   wireGoals();
+  r.querySelectorAll("[data-rosterview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.rosterview));
+  r.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
   renderLeaderboard();
 }
 
@@ -2574,6 +2600,7 @@ function openProfileViewer(athleteId){
       <div class="pv-stars" id="pvStars">${stars(myR)}</div>
       <span class="pv-avg">${t("avg_rating")}: ${avg?avg.toFixed(1):"—"}</span>
     </div>
+    ${galleryHTML(athleteId)}
     <div class="pv-sessions">
       ${sess.length?sess.map(s=>sessionCard(s,true)).join(""):`<div class="empty"><b>${t("no_session")}</b></div>`}
     </div>
