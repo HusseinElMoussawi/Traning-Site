@@ -439,6 +439,95 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .lb-score i{font-style:normal;font-size:11px;color:var(--smoke);display:block;line-height:1;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:600px){.lb-metrics{display:none}.lb-name{flex:1}}
 
+/* ---------- NEW: 3-circle leaderboard ---------- */
+.lb-circles{display:flex;justify-content:center;align-items:flex-end;gap:14px;flex-wrap:wrap;padding:20px 10px 24px}
+.lb-circle{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;padding:0}
+.lb-medal{font-size:22px}
+.lb-ring{position:relative}
+.lb-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.lb-ring-bg{fill:none;stroke:var(--line);stroke-width:7}
+.lb-ring-fg{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.lb-ring-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.lb-lvl-label{display:block;font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.lb-ring-center b{font-family:'Oswald';font-size:40px;font-weight:700;line-height:1}
+.lb-photo{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2px solid var(--line);margin-top:-6px}
+.lb-photo img{width:100%;height:100%;object-fit:cover}
+.lb-circle .lb-name{font-size:15px;flex:none;text-align:center}
+.lb-circle.lead .lb-ring-center b{font-size:48px}
+
+/* ---------- self-rating dots ---------- */
+.rate-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.rate-label{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);min-width:110px}
+.rate-dots{display:flex;gap:4px;flex-wrap:wrap}
+.rate-dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--ink);color:var(--smoke);font-size:11px;cursor:pointer;transition:all .12s}
+.rate-dot.on{background:var(--blood);border-color:var(--blood);color:#fff}
+.rate-dot:hover{border-color:var(--blood)}
+
+/* ---------- sparring toggle ---------- */
+.spar-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--chalk);text-transform:none;letter-spacing:0}
+.spar-toggle input{display:none}
+.spar-box{width:44px;height:24px;border-radius:999px;background:var(--ink);border:1px solid var(--line);position:relative;transition:background .15s;flex-shrink:0}
+.spar-box::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--smoke);transition:transform .15s,background .15s}
+.spar-toggle input:checked+.spar-box{background:var(--blood);border-color:var(--blood)}
+.spar-toggle input:checked+.spar-box::after{transform:translateX(20px);background:#fff}
+.spar-badge{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--blood);color:#fff;padding:3px 8px;border-radius:999px;font-weight:700}
+
+/* ---------- session rating display + video + social ---------- */
+.sess-rating{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.sr-item{display:flex;flex-direction:column;background:var(--ink);border:1px solid var(--line-soft);border-radius:8px;padding:6px 10px;min-width:70px}
+.sr-item span{font-family:'Archivo Narrow';font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--smoke)}
+.sr-item b{font-family:'Oswald';font-size:16px;color:var(--chalk)}
+.sr-item b i{font-style:normal;font-size:10px;color:var(--smoke)}
+.sess-video{display:block;position:relative;margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9;background:var(--ink)}
+.sess-video img{width:100%;height:100%;object-fit:cover;opacity:.85}
+.sess-video-ph{width:100%;height:100%;background:linear-gradient(135deg,var(--panel-2),var(--ink))}
+.sess-video-play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(201,38,44,.9);color:#fff;display:grid;place-items:center;font-size:20px;padding-left:4px}
+.sess-video-label{position:absolute;bottom:8px;left:10px;font-family:'Archivo Narrow';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:4px}
+.sess-social{display:flex;align-items:center;gap:10px;margin-top:12px}
+.like-btn,.cmt-btn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--smoke);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .12s}
+.like-btn .heart{color:var(--smoke);transition:color .12s}
+.like-btn.on{border-color:var(--blood);color:var(--blood)}
+.like-btn.on .heart{color:var(--blood)}
+.like-btn:hover,.cmt-btn:hover{border-color:var(--blood)}
+.cmt-box{margin-top:10px;background:var(--ink);border:1px solid var(--line-soft);border-radius:8px;padding:10px}
+.cmt-row{font-size:13px;margin-bottom:6px;color:var(--chalk)}
+.cmt-row b{color:var(--blood)}
+.cmt-del{background:none;border:none;color:var(--smoke);cursor:pointer;font-size:14px}
+.cmt-add{display:flex;gap:6px;margin-top:8px}
+.cmt-add input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--chalk);border-radius:8px;padding:8px 10px;font-size:13px}
+.cmt-add button{background:var(--blood);border:none;color:#fff;border-radius:8px;padding:0 16px;cursor:pointer;font-size:15px}
+
+/* ---------- profile viewer overlay ---------- */
+.pv-overlay{position:fixed;inset:0;z-index:100;background:rgba(5,5,7,.92);overflow-y:auto;padding:24px 16px}
+.pv-card{max-width:680px;margin:0 auto}
+.pv-close{background:none;border:1px solid var(--line);color:var(--chalk);border-radius:999px;padding:8px 16px;cursor:pointer;margin-bottom:18px;font-size:13px}
+.pv-top{display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.pv-photo{width:96px;height:96px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0}
+.pv-photo img{width:100%;height:100%;object-fit:cover}
+.pv-id h2{font-family:'Oswald';font-size:26px;font-weight:700}
+.pv-level{font-family:'Oswald';font-size:18px;font-weight:600}
+.pv-rate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.pv-rate>span{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.pv-stars{display:flex;gap:4px}
+.pv-star{background:none;border:none;font-size:24px;color:var(--line);cursor:pointer;line-height:1}
+.pv-star.on{color:var(--gold)}
+.pv-avg{margin-inline-start:auto;color:var(--gold);font-weight:600}
+
+/* ---------- admin profiles grid + notifications ---------- */
+.prof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.prof-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s}
+.prof-card:hover{border-color:var(--blood)}
+.prof-card b{font-family:'Oswald';font-size:16px}
+.prof-lvl{font-family:'Oswald';font-weight:600;font-size:14px}
+.prof-avg{font-size:12px;color:var(--gold)}
+.notif-list{display:flex;flex-direction:column;gap:8px}
+.notif-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px}
+.notif-row.unread{border-color:var(--blood)}
+.notif-kind{font-size:18px}
+.notif-row b{font-size:14px;display:block}
+.notif-time{font-size:11px;color:var(--smoke)}
+#notifBadge{background:var(--blood);color:#fff;border-radius:999px;font-size:10px;min-width:16px;height:16px;display:inline-grid;place-items:center;padding:0 4px;margin-inline-start:4px}
+
 /* ---------- roadmap (journey) ---------- */
 .rm-lead{color:var(--smoke);font-size:12px;margin:-4px 0 14px}
 .rm-list{display:flex;flex-direction:column}
@@ -582,6 +671,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
       <button class="theme-toggle" id="themeToggle" aria-label="Theme" title="Theme">◐</button>
       <select class="lang-select" id="langHeader" aria-label="Language"></select>
       <div class="session-badge" id="sessionBadge"></div>
+      <span id="notifBadge" style="display:none"></span>
       <button class="logout" id="logout" data-i18n="logout">Log out</button>
     </div>
   </div>
@@ -602,7 +692,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
       <div id="gateLogin">
         <h2 data-i18n="gate_who">Sign in</h2>
         <p class="lead" data-i18n="gate_pick_lead">Enter your camp email and password.</p>
-        <div class="field"><label data-i18n="email">Email</label><input type="email" id="authEmail" autocomplete="username" placeholder="kumeil@lecamp.local"></div>
+        <div class="field"><label data-i18n="email">Email</label><input type="email" id="authEmail" autocomplete="username" placeholder="your.email@example.com"></div>
         <div class="field"><label data-i18n="pw">Password</label><input type="password" id="authPw" autocomplete="current-password"></div>
         <div class="gate-err" id="gateErr"></div>
         <button class="btn" id="gateSubmit" data-i18n="enter">Enter</button>
@@ -622,18 +712,15 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 
 <main>
   <div class="tabs" id="tabsAthlete">
-    <button class="tab on" data-tab="log" data-i18n="tab_log">New session</button>
-    <button class="tab" data-tab="feed" data-i18n="tab_feed">Journal</button>
-    <button class="tab" data-tab="nutrition" data-i18n="tab_nutrition">Nutrition</button>
-    <button class="tab" data-tab="program" data-i18n="tab_program">My program</button>
-    <button class="tab" data-tab="space" data-i18n="tab_space">My space</button>
-    <button class="tab" data-tab="stats" data-i18n="tab_camp">The camp</button>
+    <button class="tab on" data-tab="stats" data-i18n="nav_home">Home</button>
+    <button class="tab" data-tab="log" data-i18n="nav_add">Add session</button>
+    <button class="tab" data-tab="space" data-i18n="nav_myprofile">My profile</button>
+    <button class="tab" data-tab="editing" data-i18n="nav_editing">Editing</button>
   </div>
   <div class="tabs" id="tabsCoach" style="display:none">
-    <button class="tab on" data-ctab="dash" data-i18n="ctab_dash">Dashboard</button>
-    <button class="tab" data-ctab="journal" data-i18n="ctab_journal">Journal &amp; feedback</button>
-    <button class="tab" data-ctab="cnutrition" data-i18n="ctab_nutrition">Nutrition</button>
-    <button class="tab" data-ctab="cprogram" data-i18n="programs_title">Programs</button>
+    <button class="tab on" data-ctab="dash" data-i18n="nav_home">Home</button>
+    <button class="tab" data-ctab="profiles" data-i18n="nav_profiles">Profiles</button>
+    <button class="tab" data-ctab="notifs" data-i18n="notifications">Notifications</button>
   </div>
 
   <!-- LOG -->
@@ -647,22 +734,23 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
         </div>
         <div class="row">
           <div class="field"><label data-i18n="date">Date</label><input type="date" id="fDate"></div>
-          <div class="field"><label data-i18n="duration">Duration (min)</label><input type="number" id="fDur" min="0" placeholder="90"></div>
+          <div class="field"><label data-i18n="session_time">Time</label><input type="time" id="fTime"></div>
         </div>
+
+        <!-- sparring toggle -->
         <div class="field">
-          <label data-i18n="feeling">Feeling / intensity</label>
-          <select id="fIntensity"></select>
+          <label class="spar-toggle"><input type="checkbox" id="fSparring"><span class="spar-box"></span><span data-i18n="did_sparring">Did sparring today</span></label>
         </div>
 
-        <div class="field" style="margin-bottom:8px">
-          <label><span data-i18n="ex_sets">Exercises &amp; sets</span> <span style="color:var(--smoke);text-transform:none;letter-spacing:0" data-i18n="optional">(optional)</span></label>
+        <!-- self rating 1..10 -->
+        <div class="field" style="margin-bottom:6px">
+          <label data-i18n="rate_session">Rate this session</label>
         </div>
-        <div id="exWrap"></div>
-        <button class="mini" id="addEx" type="button" data-i18n="add_ex">+ Add exercise</button>
+        <div id="ratingWrap"></div>
 
-        <div class="field" style="margin-top:16px">
-          <label data-i18n="personal_note">Personal note</label>
-          <textarea id="fNote" rows="2" data-i18n-ph="note_placeholder"></textarea>
+        <div class="field" style="margin-top:14px">
+          <label><span data-i18n="video_link">Video link</span> <span style="color:var(--smoke);text-transform:none;letter-spacing:0" data-i18n="optional">(optional)</span></label>
+          <input type="url" id="fVideo" data-i18n-ph="video_ph" placeholder="Paste a video URL">
         </div>
         <div class="field">
           <label><span data-i18n="progress_photo">Progress photo</span> <span style="color:var(--smoke);text-transform:none;letter-spacing:0" data-i18n="optional">(optional)</span></label>
@@ -682,129 +770,60 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 
     <div>
       <div class="panel" style="margin-bottom:16px">
-        <div class="card-h"><h3 data-i18n="recent">Latest sessions</h3><span class="hint" id="recentCount">—</span></div>
+        <div class="card-h"><h3 data-i18n="my_sessions">My sessions</h3><span class="hint" id="recentCount">—</span></div>
         <div class="card-b" id="recentFeed"><div class="loading" data-i18n="loading">Loading…</div></div>
       </div>
     </div>
   </section>
 
-  <!-- FEED -->
-  <section id="tab-feed" style="display:none">
-    <div class="field" style="max-width:260px;margin-bottom:18px">
-      <label data-i18n="filter_athlete">Filter by athlete</label>
-      <select id="filterAthlete"></select>
-    </div>
-    <div id="fullFeed"><div class="loading" data-i18n="loading">Loading…</div></div>
+  <!-- EDITING (weight / journey / programs) -->
+  <section id="tab-editing" style="display:none">
+    <div id="editingBody"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- NUTRITION -->
-  <section id="tab-nutrition" style="display:none">
-    <div class="coach-head">
-      <div>
-        <h2 class="coach-title" data-i18n="nutrition_title">Nutrition</h2>
-        <p class="coach-sub" data-i18n="nutrition_sub">Log your daily intake.</p>
-      </div>
-      <div class="nutri-nav">
-        <button id="nPrev" class="mnav-btn" title="‹">‹</button>
-        <input type="date" id="nDate" class="nutri-date">
-        <button id="nNext" class="mnav-btn" title="›">›</button>
-        <button id="nTargets" class="mini" data-i18n="edit_targets" style="margin-inline-start:8px">Edit targets</button>
-      </div>
-    </div>
-    <div id="nutriBody"><div class="loading" data-i18n="loading">Loading…</div></div>
-  </section>
-
-  <!-- MY PROGRAM -->
-  <section id="tab-program" style="display:none">
-    <div class="coach-head">
-      <div>
-        <h2 class="coach-title" data-i18n="program_title">My program</h2>
-        <p class="coach-sub" data-i18n="program_sub">Write your own plan.</p>
-      </div>
-    </div>
-    <div id="programBody"><div class="loading" data-i18n="loading">Loading…</div></div>
-  </section>
-
-  <!-- MY SPACE (weight) -->
+  <!-- MY PROFILE (weight + journey) -->
   <section id="tab-space" style="display:none">
     <div class="coach-head">
       <div>
-        <h2 class="coach-title" data-i18n="space_title">My space</h2>
-        <p class="coach-sub" data-i18n="space_sub">Track your weight.</p>
+        <h2 class="coach-title" data-i18n="nav_myprofile">My profile</h2>
       </div>
     </div>
     <div id="spaceBody"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- STATS -->
+  <!-- HOME (leaderboard + roster, no calendar) -->
   <section id="tab-stats" style="display:none">
     <div id="leaderboard"></div>
-    <div class="month-nav">
-      <button id="mPrev" class="mnav-btn" title="Mois précédent">‹</button>
-      <div class="month-label" id="monthLabel">—</div>
-      <button id="mNext" class="mnav-btn" title="Mois suivant">›</button>
-    </div>
     <div class="roster" id="roster"></div>
   </section>
 
-  <!-- COACH: DASHBOARD -->
+  <!-- COACH: HOME -->
   <section id="ctab-dash" style="display:none">
-    <div class="coach-head">
-      <div>
-        <h2 class="coach-title" data-i18n="dashboard">Dashboard</h2>
-        <p class="coach-sub" data-i18n="dash_sub">Camp overview.</p>
-      </div>
-      <div class="month-nav" style="margin:0">
-        <button id="cmPrev" class="mnav-btn" title="‹">‹</button>
-        <div class="month-label" id="cMonthLabel" style="min-width:150px;font-size:15px">—</div>
-        <button id="cmNext" class="mnav-btn" title="›">›</button>
-      </div>
-    </div>
     <div id="coachDash"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- COACH: JOURNAL & FEEDBACK -->
-  <section id="ctab-journal" style="display:none">
+  <!-- COACH: PROFILES -->
+  <section id="ctab-profiles" style="display:none">
     <div class="coach-head">
       <div>
-        <h2 class="coach-title" data-i18n="journal_title">Journal &amp; feedback</h2>
-        <p class="coach-sub" data-i18n="journal_sub">Rate, comment and manage your feedback.</p>
-      </div>
-      <div class="field" style="max-width:220px;margin:0">
-        <label data-i18n="filter_athlete">Filter by athlete</label>
-        <select id="coachFilter"></select>
+        <h2 class="coach-title" data-i18n="nav_profiles">Profiles</h2>
       </div>
     </div>
-    <div id="coachJournal"><div class="loading" data-i18n="loading">Loading…</div></div>
+    <div id="profilesBody"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- COACH: NUTRITION -->
-  <section id="ctab-cnutrition" style="display:none">
+  <!-- COACH: NOTIFICATIONS -->
+  <section id="ctab-notifs" style="display:none">
     <div class="coach-head">
       <div>
-        <h2 class="coach-title" data-i18n="nutrition_title">Nutrition</h2>
-        <p class="coach-sub" data-i18n="nutrition_coach_sub">View each athlete's intake.</p>
-      </div>
-      <div class="nutri-nav">
-        <select id="cnAthlete" class="nutri-date"></select>
-        <button id="cnPrev" class="mnav-btn" title="‹">‹</button>
-        <input type="date" id="cnDate" class="nutri-date">
-        <button id="cnNext" class="mnav-btn" title="›">›</button>
+        <h2 class="coach-title" data-i18n="notifications">Notifications</h2>
       </div>
     </div>
-    <div id="coachNutriBody"><div class="loading" data-i18n="loading">Loading…</div></div>
+    <div id="notifsBody"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- COACH: PROGRAMS -->
-  <section id="ctab-cprogram" style="display:none">
-    <div class="coach-head">
-      <div>
-        <h2 class="coach-title" data-i18n="programs_title">Programs</h2>
-        <p class="coach-sub" data-i18n="programs_sub"></p>
-      </div>
-    </div>
-    <div id="coachProgramBody"><div class="loading" data-i18n="loading">Loading…</div></div>
-  </section>
+  <!-- PROFILE VIEWER (overlay) -->
+  <div id="profileViewer" class="pv-overlay" style="display:none"></div>
 
   <div class="foot" data-i18n-html="foot">muay thai · jujitsu · strength · <b>everything else</b></div>
 </main>
@@ -895,9 +914,17 @@ const I18N = {
     weight_saved:"✓ Weight saved", current_weight:"Current", to_target:"To target",
     coach_note_nutri:"Coach note on nutrition", coach_note_program:"Coach note on program",
     leave_note:"Leave a note…", coach_note_label:"Coach note",
-    leaderboard:"Leaderboard", leaderboard_sub:"Camp ranking by overall score.",
+    leaderboard:"Leaderboard", leaderboard_sub:"Camp ranking by level.",
     score:"Score", rank:"Rank", pts:"pts",
     lb_sessions:"Sessions", lb_active:"Active days", lb_streak:"Best streak",
+    level:"Level", levels:"Levels", sparring:"Sparring", did_sparring:"Did sparring today",
+    nav_home:"Home", nav_profiles:"Profiles", nav_add:"Add session", nav_myprofile:"My profile", nav_editing:"Editing",
+    my_sessions:"My sessions", video_link:"Video link", video_ph:"Paste a video URL",
+    rate_session:"Rate this session", fatigue:"Fatigue", efficiency:"Efficiency", new_skill:"Learned a skill", satisfaction:"Satisfaction", gratitude:"Gratitude",
+    session_time:"Time", likes:"Likes", comments:"Comments", add_comment:"Add a comment…", rate_profile:"Rate this profile",
+    notifications:"Notifications", no_notifs:"No notifications yet.", announcement:"Announcement", send_announcement:"Send to the camp",
+    announcement_ph:"Write an announcement…", viewer_mode:"Viewer mode", back:"← Back", like:"Like", liked:"Liked",
+    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating",
     weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
@@ -981,9 +1008,17 @@ const I18N = {
     weight_saved:"✓ Poids enregistré", current_weight:"Actuel", to_target:"Vers l'objectif",
     coach_note_nutri:"Note du moniteur sur la nutrition", coach_note_program:"Note du moniteur sur le programme",
     leave_note:"Laisser un mot…", coach_note_label:"Note du moniteur",
-    leaderboard:"Classement", leaderboard_sub:"Classement du camp par score global.",
+    leaderboard:"Classement", leaderboard_sub:"Classement du camp par niveau.",
     score:"Score", rank:"Rang", pts:"pts",
     lb_sessions:"Séances", lb_active:"Jours actifs", lb_streak:"Meilleure série",
+    level:"Niveau", levels:"Niveaux", sparring:"Sparring", did_sparring:"Sparring aujourd'hui",
+    nav_home:"Accueil", nav_profiles:"Profils", nav_add:"Nouvelle séance", nav_myprofile:"Mon profil", nav_editing:"Modifier",
+    my_sessions:"Mes séances", video_link:"Lien vidéo", video_ph:"Colle une URL vidéo",
+    rate_session:"Évalue ta séance", fatigue:"Fatigue", efficiency:"Efficacité", new_skill:"Nouvelle technique", satisfaction:"Satisfaction", gratitude:"Gratitude",
+    session_time:"Heure", likes:"J'aime", comments:"Commentaires", add_comment:"Ajoute un commentaire…", rate_profile:"Note ce profil",
+    notifications:"Notifications", no_notifs:"Aucune notification.", announcement:"Annonce", send_announcement:"Envoyer au camp",
+    announcement_ph:"Écris une annonce…", viewer_mode:"Mode lecture", back:"← Retour", like:"J'aime", liked:"Aimé",
+    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note",
     weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
@@ -1067,9 +1102,17 @@ const I18N = {
     weight_saved:"✓ تم حفظ الوزن", current_weight:"الحالي", to_target:"نحو الهدف",
     coach_note_nutri:"ملاحظة المدرب على التغذية", coach_note_program:"ملاحظة المدرب على البرنامج",
     leave_note:"اترك ملاحظة…", coach_note_label:"ملاحظة المدرب",
-    leaderboard:"الترتيب", leaderboard_sub:"ترتيب النادي حسب النقاط الإجمالية.",
+    leaderboard:"الترتيب", leaderboard_sub:"ترتيب النادي حسب المستوى.",
     score:"النقاط", rank:"المركز", pts:"نقطة",
     lb_sessions:"حصص", lb_active:"أيام النشاط", lb_streak:"أفضل سلسلة",
+    level:"المستوى", levels:"المستويات", sparring:"سباررينغ", did_sparring:"سباررينغ اليوم",
+    nav_home:"الرئيسية", nav_profiles:"الملفات", nav_add:"حصة جديدة", nav_myprofile:"ملفي", nav_editing:"تعديل",
+    my_sessions:"حصصي", video_link:"رابط فيديو", video_ph:"الصق رابط فيديو",
+    rate_session:"قيّم حصتك", fatigue:"الإرهاق", efficiency:"الكفاءة", new_skill:"مهارة جديدة", satisfaction:"الرضا", gratitude:"الامتنان",
+    session_time:"الوقت", likes:"إعجابات", comments:"تعليقات", add_comment:"أضف تعليقًا…", rate_profile:"قيّم هذا الملف",
+    notifications:"الإشعارات", no_notifs:"لا إشعارات بعد.", announcement:"إعلان", send_announcement:"إرسال للنادي",
+    announcement_ph:"اكتب إعلانًا…", viewer_mode:"وضع القراءة", back:"← رجوع", like:"إعجاب", liked:"أعجبني",
+    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك",
     weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
@@ -1153,9 +1196,17 @@ const I18N = {
     weight_saved:"✓ Gewicht gespeichert", current_weight:"Aktuell", to_target:"Bis zum Ziel",
     coach_note_nutri:"Trainer-Notiz zur Ernährung", coach_note_program:"Trainer-Notiz zum Plan",
     leave_note:"Notiz hinterlassen…", coach_note_label:"Trainer-Notiz",
-    leaderboard:"Rangliste", leaderboard_sub:"Camp-Rangliste nach Gesamtpunktzahl.",
+    leaderboard:"Rangliste", leaderboard_sub:"Camp-Rangliste nach Level.",
     score:"Punkte", rank:"Rang", pts:"Pkt",
     lb_sessions:"Einheiten", lb_active:"Aktive Tage", lb_streak:"Beste Serie",
+    level:"Level", levels:"Level", sparring:"Sparring", did_sparring:"Heute gesparrt",
+    nav_home:"Start", nav_profiles:"Profile", nav_add:"Neue Einheit", nav_myprofile:"Mein Profil", nav_editing:"Bearbeiten",
+    my_sessions:"Meine Einheiten", video_link:"Video-Link", video_ph:"Video-URL einfügen",
+    rate_session:"Bewerte deine Einheit", fatigue:"Ermüdung", efficiency:"Effizienz", new_skill:"Neue Technik", satisfaction:"Zufriedenheit", gratitude:"Dankbarkeit",
+    session_time:"Zeit", likes:"Likes", comments:"Kommentare", add_comment:"Kommentar hinzufügen…", rate_profile:"Profil bewerten",
+    notifications:"Benachrichtigungen", no_notifs:"Noch keine Benachrichtigungen.", announcement:"Ankündigung", send_announcement:"An das Camp senden",
+    announcement_ph:"Ankündigung schreiben…", viewer_mode:"Ansichtsmodus", back:"← Zurück", like:"Like", liked:"Geliked",
+    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung",
     weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
@@ -1231,23 +1282,10 @@ function applyI18n(){
   document.querySelectorAll(".brand .sub, .gate-brand .sub").forEach(el=>el.textContent=t("brand_sub"));
   // rebuild things that are generated in JS
   if(document.getElementById("discPick")) buildDiscPick();
-  buildIntensityOptions();
-  updateMonthLabel();
   // language selectors reflect current
   document.querySelectorAll(".lang-select").forEach(sel=>sel.value=lang);
   // re-render current views
   if(me) renderAll();
-  // refresh nutrition/program if their section is visible
-  const nut=document.getElementById("tab-nutrition");
-  if(nut && nut.style.display!=="none" && me && me!=="coach") renderNutrition();
-  const prog=document.getElementById("tab-program");
-  if(prog && prog.style.display!=="none" && me && me!=="coach") renderProgram();
-  const space=document.getElementById("tab-space");
-  if(space && space.style.display!=="none" && me && me!=="coach") renderSpace();
-  const cprog=document.getElementById("ctab-cprogram");
-  if(cprog && cprog.style.display!=="none" && me==="coach") renderProgram();
-  const cnut=document.getElementById("ctab-cnutrition");
-  if(cnut && cnut.style.display!=="none" && me==="coach") renderCoachNutrition();
 }
 function updateHero(){
   const h=document.querySelector(".hero .title h1");
@@ -1299,14 +1337,15 @@ function intensityLabel(v){
 
 
 const ATHLETES = [
-  {id:"coach", name:"Moniteur", color:"#d8a53a", role:"coach"},
+  {id:"coach", name:"Admin", color:"#4f9d69", role:"coach"},
   {id:"a1", name:"Kumeil", color:"#c9262c", role:"athlete"},
   {id:"a2", name:"Barir", color:"#3f7cc9", role:"athlete"},
   {id:"a3", name:"Mark", color:"#4f9d69", role:"athlete"},
 ];
 const byId = id => ATHLETES.find(a=>a.id===id);
 const initials = n => n.split(/[\s]/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
-const avatarText = a => a.role==="coach" ? "★" : initials(a.name);
+// admin avatar: green dot (★ removed, replaced by a plain mark)
+const avatarText = a => a.role==="coach" ? "●" : initials(a.name);
 
 let sessions = [];
 let me = null;            // set after login = current user's slot ('a1'|'coach'…)
@@ -1473,6 +1512,81 @@ async function saveRoadmap(athleteId){
   await window.storage.set("roadmap:"+athleteId, JSON.stringify(roadmaps[athleteId]||[]), true);
 }
 
+/* ===================== SOCIAL (likes / comments / ratings / notifications) ===================== */
+let likes = [];          // [{session_id, liker_slot}]
+let comments = [];       // [{id, session_id, author_slot, body, created_at}]
+let profileRatings = []; // [{rated_slot, rater_slot, stars}]
+let notifs = [];         // [{id, recipient_slot, kind, body, from_slot, read_by, created_at}]
+
+async function loadSocial(){
+  try{
+    const [lk,cm,pr,nt]=await Promise.all([
+      sb.from("likes").select("*"),
+      sb.from("comments").select("*").order("created_at",{ascending:true}),
+      sb.from("profile_ratings").select("*"),
+      sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(100),
+    ]);
+    likes = lk.data||[];
+    comments = cm.data||[];
+    profileRatings = pr.data||[];
+    notifs = nt.data||[];
+  }catch(e){ /* social tables may not exist yet */ likes=[];comments=[];profileRatings=[];notifs=[]; }
+}
+function sessionLikes(sid){ return likes.filter(l=>l.session_id===sid); }
+function iLiked(sid){ return likes.some(l=>l.session_id===sid && l.liker_slot===me); }
+async function toggleLike(sid, ownerSlot){
+  if(iLiked(sid)){
+    await sb.from("likes").delete().eq("session_id",sid).eq("liker_slot",me);
+    likes = likes.filter(l=>!(l.session_id===sid && l.liker_slot===me));
+  }else{
+    await sb.from("likes").insert({session_id:sid, liker_slot:me});
+    likes.push({session_id:sid, liker_slot:me});
+    if(ownerSlot && ownerSlot!==me) await pushNotif(ownerSlot,"like", t("liked")+" · "+displayName(byId(me)));
+  }
+}
+function sessionComments(sid){ return comments.filter(c=>c.session_id===sid); }
+async function addComment(sid, ownerSlot, body){
+  body=(body||"").trim(); if(!body) return;
+  const { data }=await sb.from("comments").insert({session_id:sid, author_slot:me, body}).select().maybeSingle();
+  if(data) comments.push(data); else comments.push({id:"tmp"+Date.now(),session_id:sid,author_slot:me,body,created_at:new Date().toISOString()});
+  if(ownerSlot && ownerSlot!==me) await pushNotif(ownerSlot,"comment", displayName(byId(me))+": "+body.slice(0,40));
+}
+async function delComment(cid){
+  await sb.from("comments").delete().eq("id",cid);
+  comments = comments.filter(c=>c.id!==cid);
+}
+function myProfileRating(ratedSlot){ const r=profileRatings.find(x=>x.rated_slot===ratedSlot && x.rater_slot===me); return r?r.stars:0; }
+function avgProfileRating(ratedSlot){
+  const rs=profileRatings.filter(x=>x.rated_slot===ratedSlot);
+  if(!rs.length) return 0;
+  return rs.reduce((s,r)=>s+r.stars,0)/rs.length;
+}
+async function setProfileRating(ratedSlot, stars){
+  const existing=profileRatings.find(x=>x.rated_slot===ratedSlot && x.rater_slot===me);
+  if(existing){
+    await sb.from("profile_ratings").update({stars, updated_at:new Date().toISOString()}).eq("rated_slot",ratedSlot).eq("rater_slot",me);
+    existing.stars=stars;
+  }else{
+    await sb.from("profile_ratings").insert({rated_slot:ratedSlot, rater_slot:me, stars});
+    profileRatings.push({rated_slot:ratedSlot, rater_slot:me, stars});
+  }
+}
+async function pushNotif(recipient, kind, body){
+  try{
+    const { data }=await sb.from("notifications").insert({recipient_slot:recipient, kind, body, from_slot:me, read_by:[]}).select().maybeSingle();
+    if(data) notifs.unshift(data);
+  }catch(e){}
+}
+function myNotifs(){ return notifs.filter(n=>n.recipient_slot===me || n.recipient_slot==="*"); }
+function unreadCount(){ return myNotifs().filter(n=>!(n.read_by||[]).includes(me)).length; }
+async function markNotifsRead(){
+  const mine=myNotifs().filter(n=>!(n.read_by||[]).includes(me));
+  for(const n of mine){
+    const rb=[...(n.read_by||[]),me];
+    try{ await sb.from("notifications").update({read_by:rb}).eq("id",n.id); n.read_by=rb; }catch(e){}
+  }
+}
+
 // coach notes on nutrition (per athlete, standing) and program (per athlete)
 let coachNotes = {}; // { "nutri:athleteId": "text", "prog:athleteId": "text" }
 async function loadCoachNotes(){
@@ -1548,7 +1662,7 @@ function enterApp(){
   subscribeRealtime();
 }
 async function reloadAll(){
-  await Promise.all([loadSessions(), loadGoals(), loadNutriTargets(), loadPrograms(), loadWeights(), loadCoachNotes(), loadWeeklyGoals(), loadRoadmaps()]);
+  await Promise.all([loadSessions(), loadGoals(), loadPrograms(), loadWeights(), loadWeeklyGoals(), loadRoadmaps(), loadSocial()]);
 }
 // Realtime: when any table changes, reload and re-render (debounced).
 let realtimeTimer=null;
@@ -1561,6 +1675,10 @@ function subscribeRealtime(){
   realtimeChannel = sb.channel("camp-changes")
     .on("postgres_changes", { event:"*", schema:"public", table:"sessions" }, scheduleRefresh)
     .on("postgres_changes", { event:"*", schema:"public", table:"kv" }, scheduleRefresh)
+    .on("postgres_changes", { event:"*", schema:"public", table:"likes" }, scheduleRefresh)
+    .on("postgres_changes", { event:"*", schema:"public", table:"comments" }, scheduleRefresh)
+    .on("postgres_changes", { event:"*", schema:"public", table:"profile_ratings" }, scheduleRefresh)
+    .on("postgres_changes", { event:"*", schema:"public", table:"notifications" }, scheduleRefresh)
     .subscribe();
 }
 function applyRoleView(){
@@ -1568,14 +1686,17 @@ function applyRoleView(){
   document.getElementById("tabsAthlete").style.display = isCoach?"none":"";
   document.getElementById("tabsCoach").style.display = isCoach?"":"none";
   updateHero();
-  ["log","feed","nutrition","program","space","stats"].forEach(x=>{const el=document.getElementById("tab-"+x);if(el)el.style.display="none";});
-  ["dash","journal","cnutrition","cprogram"].forEach(x=>{const el=document.getElementById("ctab-"+x);if(el)el.style.display="none";});
+  ["log","space","editing","stats"].forEach(x=>{const el=document.getElementById("tab-"+x);if(el)el.style.display="none";});
+  ["dash","profiles","notifs"].forEach(x=>{const el=document.getElementById("ctab-"+x);if(el)el.style.display="none";});
   if(isCoach){
     document.getElementById("ctab-dash").style.display="";
     document.querySelectorAll("#tabsCoach .tab").forEach((el,i)=>el.classList.toggle("on",i===0));
+    renderCoachDash();
   }else{
-    document.getElementById("tab-log").style.display="";
+    const home=document.getElementById("tab-stats");
+    if(home) home.style.display="";
     document.querySelectorAll("#tabsAthlete .tab").forEach((el,i)=>el.classList.toggle("on",i===0));
+    renderRoster(); renderLeaderboard(); renderRatingInputs();
   }
 }
 async function logout(){
@@ -1735,36 +1856,50 @@ function exLine(sets){
     return "";
   }).filter(Boolean).join("  ·  ");
 }
+// extract a YouTube/Vimeo thumbnail URL from a video link, else null
+function videoThumb(url){
+  if(!url) return null;
+  let m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  if(m) return "https://img.youtube.com/vi/"+m[1]+"/hqdefault.jpg";
+  return null;
+}
 function sessionCard(s, showCoach){
   const a = byId(s.athlete) || {name:s.athlete,color:"#888"};
-  const totalSets = (s.exercises||[]).reduce((n,e)=>n+e.sets.length,0);
-  const exHtml = (s.exercises||[]).map(e=>`
-    <div class="exrow"><span class="n">${esc(e.name)}</span><span class="s">${esc(exLine(e.sets))}</span></div>`).join("");
-  const stars = n => "★★★★★☆☆☆☆☆".slice(5-n,10-n);
-  const ratingBadge = s.coachRating ? `<span class="rating-badge" title="${esc(t("coach_feedback"))}">${stars(s.coachRating)} ${s.coachRating}/5</span>` : "";
-  const coachNote = (s.coachNote||s.coachRating) ? `<div class="note"><b>${t("coach_feedback")} ${ratingBadge}</b>${esc(s.coachNote||"")}</div>`:"";
   const canDelete = me===s.athlete;
-  const durTxt = s.duration?" · "+s.duration+" "+t("minutes").toLowerCase():"";
-  const intTxt = s.intensity?" · "+esc(intensityLabel(s.intensity)):"";
-  const prBadge = sessionHasPR(s) ? `<span class="pr-badge">${t("pr_new")}</span>` : "";
+  const timeTxt = s.time?" · "+s.time:"";
+  const sparBadge = s.sparring ? `<span class="spar-badge">${t("sparring")}</span>` : "";
+  const r = s.rating||{};
+  const ratingHtml = Object.keys(r).length ? `<div class="sess-rating">${RATING_SCALES.filter(k=>r[k]).map(k=>`<div class="sr-item"><span>${t(k)}</span><b>${r[k]}<i>/10</i></b></div>`).join("")}</div>`:"";
+  const thumb=videoThumb(s.video);
+  const videoHtml = s.video ? `<a class="sess-video" href="${esc(s.video)}" target="_blank" rel="noopener">
+      ${thumb?`<img src="${thumb}" alt="">`:`<div class="sess-video-ph"></div>`}
+      <span class="sess-video-play">▶</span>
+      <span class="sess-video-label">${t("watch_video")}</span>
+    </a>`:"";
+  // social
+  const lk=sessionLikes(s.id).length;
+  const cm=sessionComments(s.id);
+  const likedCls=iLiked(s.id)?"on":"";
   return `<div class="sess">
     <div class="sess-h">
       <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
-      <div class="meta"><b>${esc(displayName(a))}</b><span>${fmtDate(s.date)}${durTxt}${intTxt}</span></div>
-      ${prBadge}
+      <div class="meta"><b>${esc(displayName(a))}</b><span>${fmtDate(s.date)}${timeTxt}</span></div>
+      ${sparBadge}
       <div class="tag">${esc(discLabel(s.discipline))}</div>
     </div>
     <div class="sess-b">
-      <div class="stats">
-        <div class="stat"><b>${s.duration||"—"}</b><span>${t("minutes")}</span></div>
-        <div class="stat"><b>${(s.exercises||[]).length||"—"}</b><span>${t("exercises")}</span></div>
-        <div class="stat"><b>${totalSets||"—"}</b><span>${t("sets")}</span></div>
-      </div>
-      ${exHtml?`<div class="exlist">${exHtml}</div>`:""}
       ${s.photo?`<div class="sess-photo"><img src="${s.photo}" alt="" data-zoom></div>`:""}
-      ${s.note?`<div class="note" style="border-left-color:var(--smoke)"><b style="color:var(--smoke)">${t("note")}</b>${esc(s.note)}</div>`:""}
-      ${coachNote}
-      ${canDelete?`<div style="text-align:${isRTL()?"left":"right"};margin-top:8px"><button class="del" data-del="${s.id}">${t("delete")}</button></div>`:""}
+      ${videoHtml}
+      ${ratingHtml}
+      <div class="sess-social">
+        <button class="like-btn ${likedCls}" data-like="${s.id}" data-owner="${s.athlete}"><span class="heart">♥</span> ${lk}</button>
+        <button class="cmt-btn" data-cmttoggle="${s.id}">💬 ${cm.length}</button>
+        ${canDelete?`<button class="del" data-del="${s.id}" style="margin-inline-start:auto">${t("delete")}</button>`:""}
+      </div>
+      <div class="cmt-box" data-cmtbox="${s.id}" style="display:none">
+        ${cm.map(c=>`<div class="cmt-row"><b>${esc(displayName(byId(c.author_slot)||{name:c.author_slot}))}</b> ${esc(c.body)}${c.author_slot===me?` <button class="cmt-del" data-cmtdel="${c.id}">×</button>`:""}</div>`).join("")}
+        <div class="cmt-add"><input data-cmtinput="${s.id}" placeholder="${esc(t("add_comment"))}"><button data-cmtsend="${s.id}" data-owner="${s.athlete}">→</button></div>
+      </div>
     </div>
   </div>`;
 }
@@ -1772,9 +1907,7 @@ function wireCards(root){
   root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
   root.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
     if(b.dataset.confirm!=="1"){
-      b.dataset.confirm="1";
-      b.classList.add("confirm");
-      b.textContent=t("delete")+" ?";
+      b.dataset.confirm="1"; b.classList.add("confirm"); b.textContent=t("delete")+" ?";
       setTimeout(()=>{ if(b.dataset.confirm==="1"){ b.dataset.confirm="0"; b.classList.remove("confirm"); b.textContent=t("delete"); } },3000);
       return;
     }
@@ -1783,25 +1916,39 @@ function wireCards(root){
     sessions = sessions.filter(x=>x.id!==id);
     renderAll();
   });
+  // likes
+  root.querySelectorAll("[data-like]").forEach(b=>b.onclick=async()=>{
+    await toggleLike(b.dataset.like, b.dataset.owner);
+    renderAll();
+  });
+  // toggle comment box
+  root.querySelectorAll("[data-cmttoggle]").forEach(b=>b.onclick=()=>{
+    const box=root.querySelector(`[data-cmtbox="${b.dataset.cmttoggle}"]`);
+    if(box) box.style.display = box.style.display==="none"?"":"none";
+  });
+  // send comment
+  root.querySelectorAll("[data-cmtsend]").forEach(b=>b.onclick=async()=>{
+    const sid=b.dataset.cmtsend;
+    const inp=root.querySelector(`[data-cmtinput="${sid}"]`);
+    if(inp&&inp.value.trim()){ await addComment(sid, b.dataset.owner, inp.value); renderAll(); }
+  });
+  root.querySelectorAll("[data-cmtinput]").forEach(inp=>inp.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){ const sid=inp.dataset.cmtinput; const b=root.querySelector(`[data-cmtsend="${sid}"]`); if(b) b.click(); }
+  }));
+  // delete comment
+  root.querySelectorAll("[data-cmtdel]").forEach(b=>b.onclick=async()=>{ await delComment(b.dataset.cmtdel); renderAll(); });
 }
 function renderFeeds(){
   const recent = document.getElementById("recentFeed");
+  if(!recent) return;
   const rc = document.getElementById("recentCount");
-  rc.textContent = t("total_count",{n:sessions.length});
-  if(!sessions.length){
+  const mine = sessions.filter(s=>s.athlete===me);
+  if(rc) rc.textContent = t("total_count",{n:mine.length});
+  if(!mine.length){
     recent.innerHTML=`<div class="empty"><b>${t("empty_none")}</b>${t("empty_first")}</div>`;
   }else{
-    recent.innerHTML = sessions.slice(0,4).map(s=>sessionCard(s,false)).join("");
+    recent.innerHTML = mine.map(s=>sessionCard(s,false)).join("");
     wireCards(recent);
-  }
-  const full=document.getElementById("fullFeed");
-  const filt=document.getElementById("filterAthlete").value;
-  const list = filt?sessions.filter(s=>s.athlete===filt):sessions;
-  if(!list.length){
-    full.innerHTML=`<div class="empty"><b>${t("no_session")}</b>${t("change_filter")}</div>`;
-  }else{
-    full.innerHTML=list.map(s=>sessionCard(s,true)).join("");
-    wireCards(full);
   }
 }
 function renderRoster(){
@@ -2328,42 +2475,241 @@ function renderRail(athleteId, readonly){
   }
 }
 
+/* ---------- editing helpers (self-contained) ---------- */
+function renderProgramInto(athleteId, root){
+  if(!root) return;
+  const prog = programs[athleteId] || [];
+  let html = `<div class="nutri-group-h" style="margin-bottom:10px">${t("nav_editing")} — ${t("programs_title")}</div>`;
+  if(!prog.length) html += `<div class="empty"><b>${t("program_empty")}</b></div>`;
+  html += `<div class="prog-days">` + prog.map((day,di)=>`
+    <div class="prog-day">
+      <div class="prog-day-h">
+        <input class="prog-day-name-input" data-dayname="${di}" value="${esc(day.name||"")}" placeholder="${esc(t("day_name_ph"))}">
+        <button class="prog-del" data-dayremove="${di}" title="${esc(t("remove"))}">×</button>
+      </div>
+      <div class="prog-blocks">
+        ${(day.blocks||[]).map((b,bi)=>`
+          <div class="prog-block">
+            <input class="prog-block-input" data-block="${di}:${bi}" value="${esc(b)}" placeholder="${esc(t("block_ph"))}">
+            <button class="prog-block-del" data-blockremove="${di}:${bi}" title="${esc(t("remove"))}">×</button>
+          </div>`).join("")}
+        <button class="mini" data-addblock="${di}">${t("add_block")}</button>
+      </div>
+    </div>`).join("") + `</div>`;
+  html += `<button class="mini prog-addday" id="progAddDay" style="margin-top:14px">${t("add_day")}</button>`;
+  root.innerHTML = `<div class="nutri-group">${html}</div>`;
+  wireProgram(athleteId, false, root);
+}
+function renderWeightEditor(root){
+  if(!root) return;
+  const w = weights[me] || {target:null, entries:[]};
+  const entries=(w.entries||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const today=new Date().toISOString().slice(0,10);
+  root.innerHTML = `<div class="nutri-group">
+    <div class="nutri-group-h">${t("weight")}</div>
+    <div class="row">
+      <div class="field"><label>${t("weight_date")}</label><input type="date" id="ewDate" value="${today}" max="${today}"></div>
+      <div class="field"><label>${t("weight_kg")}</label><input type="number" min="0" step="0.1" id="ewKg" placeholder="75.0"></div>
+      <div class="field"><label>${t("target_weight")}</label><input type="number" min="0" step="0.1" id="ewTarget" value="${w.target!=null?w.target:""}" placeholder="70.0"></div>
+    </div>
+    <button class="btn" id="ewSave">${t("log_weight")}</button>
+    <div id="ewMsg" style="text-align:center;margin-top:8px;height:14px"></div>
+    ${entries.length?`<div class="wh-list">
+      <div class="wh-list-h">${t("weight_entries")}</div>
+      ${entries.slice().reverse().map(e=>`<div class="wh-row"><span class="wh-date">${fmtDate(e.date)}</span><span class="wh-kg">${e.kg} kg</span><button class="wh-del" data-ewdel="${e.date}">×</button></div>`).join("")}
+    </div>`:""}
+  </div>`;
+  document.getElementById("ewSave").onclick=async()=>{
+    const kg=parseFloat(document.getElementById("ewKg").value);
+    const tg=document.getElementById("ewTarget").value;
+    const d=document.getElementById("ewDate").value||today;
+    if(!weights[me]) weights[me]={target:null,entries:[]};
+    weights[me].target = tg!==""?parseFloat(tg):null;
+    if(!isNaN(kg)){ const ex=weights[me].entries.find(e=>e.date===d); if(ex)ex.kg=kg; else weights[me].entries.push({date:d,kg}); }
+    await saveWeight(me); renderEditing();
+  };
+  root.querySelectorAll("[data-ewdel]").forEach(b=>b.onclick=async()=>{
+    if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="?"; b.classList.add("confirm"); setTimeout(()=>{if(b.dataset.confirm==="1"){b.dataset.confirm="0";b.textContent="×";b.classList.remove("confirm");}},3000); return; }
+    weights[me].entries=weights[me].entries.filter(e=>e.date!==b.dataset.ewdel);
+    await saveWeight(me); renderEditing();
+  });
+}
+
+/* ---------- editing section (weight + journey + programs) ---------- */
+function renderEditing(){
+  const root=document.getElementById("editingBody");
+  if(!root) return;
+  root.innerHTML = `
+    <div id="editProgram"></div>
+    <div id="editWeight" style="margin-top:20px"></div>
+    <div id="editRoadmap" style="margin-top:20px"></div>`;
+  // reuse existing renderers into sub-containers
+  renderProgramInto(me, document.getElementById("editProgram"));
+  renderWeightEditor(document.getElementById("editWeight"));
+  renderRoadmap(me, false, document.getElementById("editRoadmap"));
+}
+
+/* ---------- profile viewer (social) ---------- */
+function openProfileViewer(athleteId){
+  const a=byId(athleteId); if(!a) return;
+  const ov=document.getElementById("profileViewer");
+  const lv=computeLevel(athleteId);
+  const avg=avgProfileRating(athleteId);
+  const myR=myProfileRating(athleteId);
+  const stars=(active)=>Array.from({length:5},(_,i)=>`<button class="pv-star ${i<active?"on":""}" data-pvstar="${i+1}">★</button>`).join("");
+  const sess=sessions.filter(s=>s.athlete===athleteId).sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  ov.innerHTML = `<div class="pv-card">
+    <button class="pv-close" id="pvClose">${t("back")}</button>
+    <div class="pv-top">
+      <div class="pv-photo" style="border-color:${a.color}">
+        ${profilePhoto(athleteId)?`<img src="${profilePhoto(athleteId)}">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:30px">${avatarText(a)}</div>`}
+      </div>
+      <div class="pv-id">
+        <h2>${esc(displayName(a))}</h2>
+        <div class="pv-level" style="color:${a.color}">${t("level")} ${lv.level}</div>
+      </div>
+    </div>
+    <div class="pv-rate">
+      <span>${t("rate_profile")}</span>
+      <div class="pv-stars" id="pvStars">${stars(myR)}</div>
+      <span class="pv-avg">${t("avg_rating")}: ${avg?avg.toFixed(1):"—"}</span>
+    </div>
+    <div class="pv-sessions">
+      ${sess.length?sess.map(s=>sessionCard(s,true)).join(""):`<div class="empty"><b>${t("no_session")}</b></div>`}
+    </div>
+  </div>`;
+  ov.style.display="";
+  document.body.style.overflow="hidden";
+  document.getElementById("pvClose").onclick=()=>{ ov.style.display="none"; document.body.style.overflow=""; };
+  ov.querySelectorAll("[data-pvstar]").forEach(b=>b.onclick=async()=>{ await setProfileRating(athleteId,+b.dataset.pvstar); openProfileViewer(athleteId); });
+  wireCards(ov);
+  applyI18n();
+}
+
+/* ---------- admin: profiles list ---------- */
+function renderProfilesList(){
+  const root=document.getElementById("profilesBody");
+  if(!root) return;
+  root.innerHTML = `<div class="prof-grid">` + ATHLETES.filter(a=>a.role==="athlete").map(a=>{
+    const lv=computeLevel(a.id); const avg=avgProfileRating(a.id);
+    return `<button class="prof-card" data-prof="${a.id}">
+      <div class="pv-photo" style="border-color:${a.color};width:72px;height:72px">
+        ${profilePhoto(a.id)?`<img src="${profilePhoto(a.id)}">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:24px">${avatarText(a)}</div>`}
+      </div>
+      <b>${esc(a.name)}</b>
+      <span class="prof-lvl" style="color:${a.color}">${t("level")} ${lv.level}</span>
+      <span class="prof-avg">★ ${avg?avg.toFixed(1):"—"}</span>
+    </button>`;
+  }).join("") + `</div>`;
+  root.querySelectorAll("[data-prof]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.prof));
+}
+
+/* ---------- admin: announcements + notifications ---------- */
+function renderNotifications(){
+  const root=document.getElementById("notifsBody");
+  if(!root) return;
+  const isAdmin = me==="coach";
+  const list = isAdmin ? notifs : myNotifs();
+  root.innerHTML = `
+    ${isAdmin?`<div class="nutri-group" style="margin-bottom:16px">
+      <div class="nutri-group-h">${t("announcement")}</div>
+      <div class="cmt-add"><input id="annInput" placeholder="${esc(t("announcement_ph"))}"><button id="annSend">${t("send_announcement")}</button></div>
+    </div>`:""}
+    <div class="notif-list">
+      ${list.length?list.map(n=>`<div class="notif-row ${(n.read_by||[]).includes(me)?"":"unread"}">
+        <span class="notif-kind">${n.kind==="announce"?"📢":n.kind==="like"?"♥":n.kind==="comment"?"💬":"●"}</span>
+        <div><b>${esc(n.body)}</b><span class="notif-time">${fmtDate((n.created_at||"").slice(0,10))}</span></div>
+      </div>`).join(""):`<div class="empty"><b>${t("no_notifs")}</b></div>`}
+    </div>`;
+  if(isAdmin){
+    const send=document.getElementById("annSend");
+    if(send) send.onclick=async()=>{
+      const inp=document.getElementById("annInput");
+      if(inp&&inp.value.trim()){ await pushNotif("*","announce",inp.value.trim()); inp.value=""; renderNotifications(); }
+    };
+  }
+  markNotifsRead();
+}
+
+/* ---------- levels ---------- */
+// ISO-week key "YYYY-Www" for a date string
+function weekKey(dateStr){
+  const d=new Date(dateStr+"T00:00");
+  const day=(d.getDay()+6)%7; // Mon=0
+  d.setDate(d.getDate()-day+3); // nearest Thursday
+  const firstThu=new Date(d.getFullYear(),0,4);
+  const week=1+Math.round(((d-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);
+  return d.getFullYear()+"-W"+String(week).padStart(2,"0");
+}
+// Level = number of weeks with 3+ sessions (acquired, never lost) + sparring bonus.
+// Each week with 3+ sessions = +1 level. Sparring bonus: every 3 sparring sessions = +1 level.
+function computeLevel(athleteId){
+  const mine=sessions.filter(s=>s.athlete===athleteId);
+  const byWeek={};
+  let sparrings=0;
+  mine.forEach(s=>{
+    if(!s.date) return;
+    const wk=weekKey(s.date);
+    byWeek[wk]=(byWeek[wk]||0)+1;
+    if(s.sparring) sparrings++;
+  });
+  const fullWeeks=Object.values(byWeek).filter(n=>n>=3).length;
+  const sparBonus=Math.floor(sparrings/3);
+  const level=fullWeeks+sparBonus;
+  return {level, fullWeeks, sparBonus, sparrings, nSessions:mine.length};
+}
+
 /* ---------- leaderboard ---------- */
 function computeScore(athleteId){
   const mine=sessions.filter(s=>s.athlete===athleteId);
   const nSessions=mine.length;
-  // active days this month
-  const active=activeDaysForMonth(athleteId, viewMonth.y, viewMonth.m).size;
-  const st=computeStreaks(athleteId);
-  // combined score: sessions*10 + activeDays*5 + bestStreak*8
-  const score = nSessions*10 + active*5 + st.best*8;
-  return {score, nSessions, active, best:st.best};
+  const lv=computeLevel(athleteId);
+  return {score:lv.level, level:lv.level, nSessions, sparrings:lv.sparrings, fullWeeks:lv.fullWeeks};
 }
 function renderLeaderboard(root){
   root = root || document.getElementById("leaderboard");
   if(!root) return;
   const rows=ATHLETES.filter(a=>a.role==="athlete").map(a=>({a, ...computeScore(a.id)}))
-    .sort((x,y)=>y.score-x.score);
+    .sort((x,y)=>y.level-x.level);
   const medals=["🥇","🥈","🥉"];
+  const maxLevel=Math.max(1, ...rows.map(r=>r.level));
   root.innerHTML=`
     <div class="lb">
       <div class="lb-head">
         <h3>${t("leaderboard")}</h3>
         <span>${t("leaderboard_sub")}</span>
       </div>
-      ${rows.map((r,i)=>`
-        <div class="lb-row ${i===0?"lead":""}">
-          <div class="lb-rank">${medals[i]||("#"+(i+1))}</div>
-          <div class="avatar" style="background:${r.a.color}">${avatarText(r.a)}</div>
-          <div class="lb-name">${esc(r.a.name)}</div>
-          <div class="lb-metrics">
-            <span><b>${r.nSessions}</b> ${t("lb_sessions")}</span>
-            <span><b>${r.active}</b> ${t("lb_active")}</span>
-            <span><b>${r.best}</b> ${t("lb_streak")}</span>
-          </div>
-          <div class="lb-score">${r.score}<i>${t("pts")}</i></div>
-        </div>`).join("")}
+      <div class="lb-circles">
+        ${rows.map((r,i)=>{
+          const size = i===0?168:148;
+          const rr=(size-14)/2, c=2*Math.PI*rr, off=c*(1-Math.min(1,r.level/maxLevel));
+          return `<button class="lb-circle ${i===0?"lead":""}" data-lbview="${r.a.id}">
+            <div class="lb-medal">${medals[i]||("#"+(i+1))}</div>
+            <div class="lb-ring" style="width:${size}px;height:${size}px">
+              <svg viewBox="0 0 ${size} ${size}">
+                <circle cx="${size/2}" cy="${size/2}" r="${rr}" class="lb-ring-bg"/>
+                <circle cx="${size/2}" cy="${size/2}" r="${rr}" class="lb-ring-fg" style="stroke:${r.a.color};stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${off.toFixed(1)}"/>
+              </svg>
+              <div class="lb-ring-center">
+                <span class="lb-lvl-label">${t("level")}</span>
+                <b style="color:${r.a.color}">${r.level}</b>
+              </div>
+            </div>
+            <div class="lb-photo" style="border-color:${r.a.color}">
+              ${profilePhoto(r.a.id)?`<img src="${profilePhoto(r.a.id)}" alt="">`:`<div class="avatar" style="background:${r.a.color};width:100%;height:100%;font-size:22px">${avatarText(r.a)}</div>`}
+            </div>
+            <div class="lb-name">${esc(displayName(r.a))}</div>
+          </button>`;
+        }).join("")}
+      </div>
     </div>`;
+  // clicking a circle opens that athlete's profile in viewer mode
+  root.querySelectorAll("[data-lbview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.lbview));
+}
+// latest progress photo of an athlete (from their most recent session with a photo)
+function profilePhoto(athleteId){
+  const withPhoto=sessions.filter(s=>s.athlete===athleteId && s.photo).sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  return withPhoto.length?withPhoto[0].photo:null;
 }
 
 function wireGoals(){
@@ -2459,14 +2805,27 @@ function sessionHasPR(s){
 
 function renderAll(){
   if(me==="coach"){
-    fillCoachFilter();
     renderCoachDash();
-    renderCoachJournal();
+    renderProfilesList();
+    renderNotifications();
   }else{
     renderFeeds();
     renderRoster();
+    renderLeaderboard();
     renderRail(me, false);
+    // keep whichever sub-view is open fresh
+    const sp=$("tab-space"); if(sp && sp.style.display!=="none") renderSpace();
+    const ed=$("tab-editing"); if(ed && ed.style.display!=="none") renderEditing();
   }
+  // notification badge on header
+  updateNotifBadge();
+}
+function updateNotifBadge(){
+  const el=document.getElementById("notifBadge");
+  if(!el) return;
+  const n=unreadCount();
+  el.textContent=n>0?n:"";
+  el.style.display=n>0?"":"none";
 }
 
 /* ---------- coach views ---------- */
@@ -2490,42 +2849,8 @@ function daysSince(dateStr){
 function renderCoachDash(){
   const root=document.getElementById("coachDash");
   if(!root) return;
-  const cml=document.getElementById("cMonthLabel");
-  if(cml) cml.textContent=monthLabelText();
-  root.innerHTML = `<div id="coachLeaderboard"></div><div class="c-dash-grid">` + ATHLETES.filter(a=>a.role==="athlete").map(a=>{
-    const mine=sessions.filter(s=>s.athlete===a.id);
-    const last=lastSessionFor(a.id);
-    const since=last?daysSince(last.date):null;
-    const st=computeStreaks(a.id);
-    const active=activeDaysForMonth(a.id, viewMonth.y, viewMonth.m);
-    const daysInMonth=new Date(viewMonth.y, viewMonth.m+1, 0).getDate();
-    let alert="";
-    if(since===null) alert=`<span class="c-alert warn">${t("no_session_badge")}</span>`;
-    else if(since>=4) alert=`<span class="c-alert warn">${t("inactive_since",{n:since})}</span>`;
-    else if(since<=1) alert=`<span class="c-alert ok">${t("active")}</span>`;
-    else alert=`<span class="c-alert">${t("days_ago",{n:since})}</span>`;
-    return `<div class="c-card">
-      <div class="c-card-h">
-        <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
-        <div class="c-card-id"><b>${esc(a.name)}</b><span>${t("total_sessions",{n:mine.length})}</span></div>
-        ${alert}
-      </div>
-      <div class="c-metrics">
-        <div class="c-metric"><b>${active.size}<i>/${daysInMonth}</i></b><span>${t("days_this_month")}</span></div>
-        <div class="c-metric"><b>${st.current}</b><span>${t("streak_current")}</span></div>
-        <div class="c-metric"><b>${st.best}</b><span>${t("streak_best")}</span></div>
-        <div class="c-metric"><b>${last?esc(discLabel(last.discipline)):"—"}</b><span>${t("last_disc")}</span></div>
-      </div>
-      ${cubeGridHTML(a.id)}
-      ${goalsHTML(a.id)}
-    </div>`;
-  }).join("") + `</div>`;
-  wireGoalsIn(root);
+  root.innerHTML = `<div id="coachLeaderboard"></div>`;
   renderLeaderboard(document.getElementById("coachLeaderboard"));
-  // coach rail: read-only, shows the filtered athlete (or first athlete)
-  const f=document.getElementById("coachFilter");
-  const railAthlete = (f && f.value) ? f.value : (ATHLETES.find(a=>a.role==="athlete")||{}).id;
-  if(railAthlete) renderRail(railAthlete, true);
 }
 function wireGoalsIn(root){
   root.querySelectorAll("[data-goaladd]").forEach(b=>b.onclick=async()=>{
@@ -2738,36 +3063,56 @@ function fmtDate(iso){
 }
 
 /* ---------- save flow ---------- */
+/* ---------- self-rating scales ---------- */
+const RATING_SCALES = ["fatigue","efficiency","new_skill","satisfaction","gratitude"];
+let pendingRating = {}; // {scale: 1..10}
+function renderRatingInputs(){
+  const wrap=document.getElementById("ratingWrap");
+  if(!wrap) return;
+  wrap.innerHTML = RATING_SCALES.map(k=>{
+    const val=pendingRating[k]||0;
+    return `<div class="rate-row">
+      <span class="rate-label">${t(k)}</span>
+      <div class="rate-dots" data-rate="${k}">
+        ${Array.from({length:10},(_,i)=>`<button type="button" class="rate-dot ${i<val?"on":""}" data-v="${i+1}">${i+1}</button>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll("[data-rate]").forEach(row=>{
+    row.querySelectorAll(".rate-dot").forEach(d=>d.onclick=()=>{
+      pendingRating[row.dataset.rate]=+d.dataset.v; renderRatingInputs();
+    });
+  });
+}
+
 async function doSave(){
   const btn=document.getElementById("save");
   const msg=document.getElementById("saveMsg");
+  const nowDate=new Date().toISOString().slice(0,10);
+  const nowTime=new Date().toTimeString().slice(0,5);
   const s={
     id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     athlete: me==="coach" ? "a1" : me,
     discipline: selectedDisc(),
-    date: document.getElementById("fDate").value || new Date().toISOString().slice(0,10),
-    duration: document.getElementById("fDur").value || "",
-    intensity: document.getElementById("fIntensity").value || "",
-    note: document.getElementById("fNote").value.trim(),
-    exercises: collectExercises(),
+    date: document.getElementById("fDate").value || nowDate,
+    time: document.getElementById("fTime").value || nowTime,
+    sparring: document.getElementById("fSparring").checked,
+    rating: {...pendingRating},
+    video: document.getElementById("fVideo").value.trim(),
     photo: null,
-    coachNote:"",
     ts: Date.now()
   };
   if(me==="coach"){ msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${esc(t("coach_no_log"))}</span>`; return; }
   btn.disabled=true; msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
   try{
-    // upload progress photo to Storage (if any), keep only the URL
-    if(pendingPhoto){
-      s.photo = await uploadPhoto(s.id, pendingPhoto);
-    }
+    if(pendingPhoto){ s.photo = await uploadPhoto(s.id, pendingPhoto); }
     await saveSession(s);
     sessions.unshift(s);
     sessions.sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
-    document.getElementById("fDur").value="";
-    document.getElementById("fIntensity").value="";
-    document.getElementById("fNote").value="";
-    document.getElementById("exWrap").innerHTML="";
+    document.getElementById("fTime").value=nowTime;
+    document.getElementById("fSparring").checked=false;
+    document.getElementById("fVideo").value="";
+    pendingRating={}; renderRatingInputs();
     clearPhoto();
     msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("saved")}</span>`;
     setTimeout(()=>msg.innerHTML="",2500);
@@ -2781,68 +3126,45 @@ async function doSave(){
 document.querySelectorAll("#tabsAthlete .tab").forEach(el=>el.onclick=()=>{
   document.querySelectorAll("#tabsAthlete .tab").forEach(x=>x.classList.remove("on"));
   el.classList.add("on");
-  ["log","feed","nutrition","program","space","stats"].forEach(id=>document.getElementById("tab-"+id).style.display = id===el.dataset.tab?"":"none");
-  if(el.dataset.tab==="nutrition") renderNutrition();
-  if(el.dataset.tab==="program") renderProgram();
+  ["log","space","editing","stats"].forEach(id=>{const e=document.getElementById("tab-"+id); if(e) e.style.display = id===el.dataset.tab?"":"none";});
+  if(el.dataset.tab==="log") renderRatingInputs();
   if(el.dataset.tab==="space") renderSpace();
+  if(el.dataset.tab==="editing") renderEditing();
+  if(el.dataset.tab==="stats"){ renderRoster(); renderLeaderboard(); }
 });
 document.querySelectorAll("#tabsCoach .tab").forEach(el=>el.onclick=()=>{
   document.querySelectorAll("#tabsCoach .tab").forEach(x=>x.classList.remove("on"));
   el.classList.add("on");
-  ["dash","journal","cnutrition","cprogram"].forEach(id=>document.getElementById("ctab-"+id).style.display = id===el.dataset.ctab?"":"none");
-  if(el.dataset.ctab==="dash"){ renderCoachDash(); }
-  else { const rail=document.getElementById("rmRail"); if(rail){rail.style.display="none";} document.body.classList.remove("has-rail"); }
-  if(el.dataset.ctab==="journal") renderCoachJournal();
-  if(el.dataset.ctab==="cnutrition") renderCoachNutrition();
-  if(el.dataset.ctab==="cprogram") renderProgram();
+  ["dash","profiles","notifs"].forEach(id=>{const e=document.getElementById("ctab-"+id); if(e) e.style.display = id===el.dataset.ctab?"":"none";});
+  const rail=document.getElementById("rmRail"); if(rail){rail.style.display="none";} document.body.classList.remove("has-rail");
+  if(el.dataset.ctab==="dash") renderCoachDash();
+  if(el.dataset.ctab==="profiles") renderProfilesList();
+  if(el.dataset.ctab==="notifs") renderNotifications();
 });
 
 /* ---------- init ---------- */
+const $ = id => document.getElementById(id);
+function on(id, ev, fn){ const el=$(id); if(el) el[ev]=fn; }
 (async function(){
-  buildWeek();
   buildDiscPick();
-  fillFilter();
-  document.getElementById("fDate").value=new Date().toISOString().slice(0,10);
-  document.getElementById("addEx").onclick=addExercise;
-  document.getElementById("save").onclick=doSave;
-  document.getElementById("fPhoto").onchange=onPhotoPick;
-  document.getElementById("photoRemove").onclick=clearPhoto;
-  document.getElementById("lightbox").onclick=()=>document.getElementById("lightbox").classList.remove("on");
-  document.getElementById("filterAthlete").onchange=renderFeeds;
-  document.getElementById("mPrev").onclick=()=>shiftMonth(-1);
-  document.getElementById("mNext").onclick=()=>shiftMonth(1);
-  updateMonthLabel();
-  // coach view wiring
-  document.getElementById("coachFilter").onchange=renderCoachJournal;
-  document.getElementById("cmPrev").onclick=()=>{ shiftMonthCoach(-1); };
-  document.getElementById("cmNext").onclick=()=>{ shiftMonthCoach(1); };
+  on("fDate","value",new Date().toISOString().slice(0,10));
+  if($("fDate")) $("fDate").value=new Date().toISOString().slice(0,10);
+  if($("fTime")) $("fTime").value=new Date().toTimeString().slice(0,5);
+  on("save","onclick",doSave);
+  on("fPhoto","onchange",onPhotoPick);
+  on("photoRemove","onclick",clearPhoto);
+  on("lightbox","onclick",()=>$("lightbox").classList.remove("on"));
   // login wiring (Supabase Auth)
-  document.getElementById("gateSubmit").onclick=submitGate;
-  document.getElementById("logout").onclick=logout;
-  ["authEmail","authPw"].forEach(idp=>{
-    const el=document.getElementById(idp);
-    if(el) el.addEventListener("keydown",e=>{if(e.key==="Enter")submitGate();});
-  });
+  on("gateSubmit","onclick",submitGate);
+  on("logout","onclick",logout);
+  ["authEmail","authPw"].forEach(idp=>{ const el=$(idp); if(el) el.addEventListener("keydown",e=>{if(e.key==="Enter")submitGate();}); });
   // language selectors
-  buildLangSelect(document.getElementById("langGate"));
-  buildLangSelect(document.getElementById("langHeader"));
+  buildLangSelect($("langGate"));
+  buildLangSelect($("langHeader"));
   // theme toggles
   applyTheme();
-  ["themeToggle","themeToggleGate"].forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=toggleTheme; });
-  // nutrition date nav
-  const nDate=document.getElementById("nDate");
-  if(nDate){ nDate.value=nutriDay; nDate.onchange=()=>{ nutriDay=nDate.value; renderNutrition(); }; }
-  const shiftNutri=(d)=>{ const dt=new Date(nutriDay+"T00:00"); dt.setDate(dt.getDate()+d); nutriDay=dt.toISOString().slice(0,10); if(nDate)nDate.value=nutriDay; renderNutrition(); };
-  if(document.getElementById("nPrev")) document.getElementById("nPrev").onclick=()=>shiftNutri(-1);
-  if(document.getElementById("nNext")) document.getElementById("nNext").onclick=()=>shiftNutri(1);
-  if(document.getElementById("nTargets")) document.getElementById("nTargets").onclick=openTargetsEditor;
-  // coach nutrition controls
-  const cnDate=document.getElementById("cnDate");
-  if(cnDate){ cnDate.value=coachNutriDay; cnDate.onchange=()=>{ coachNutriDay=cnDate.value; renderCoachNutrition(); }; }
-  const cnShift=(d)=>{ const dt=new Date(coachNutriDay+"T00:00"); dt.setDate(dt.getDate()+d); coachNutriDay=dt.toISOString().slice(0,10); if(cnDate)cnDate.value=coachNutriDay; renderCoachNutrition(); };
-  if(document.getElementById("cnPrev")) document.getElementById("cnPrev").onclick=()=>cnShift(-1);
-  if(document.getElementById("cnNext")) document.getElementById("cnNext").onclick=()=>cnShift(1);
-  if(document.getElementById("cnAthlete")) document.getElementById("cnAthlete").onchange=renderCoachNutrition;
+  ["themeToggle","themeToggleGate"].forEach(id=>{ const b=$(id); if(b) b.onclick=toggleTheme; });
+  renderRatingInputs();
   applyI18n();
   // init Supabase; if a session already exists (returning user), go straight in
   if(SUPABASE_URL.startsWith("http")){
@@ -2850,7 +3172,7 @@ document.querySelectorAll("#tabsCoach .tab").forEach(el=>el.onclick=()=>{
     const { data:{ session } } = await sb.auth.getSession();
     if(session){ await afterLogin(); }
   }else{
-    document.getElementById("gateErr").textContent="⚠ Supabase not configured (edit SUPABASE_URL / SUPABASE_ANON).";
+    const ge=$("gateErr"); if(ge) ge.textContent="⚠ Supabase not configured (edit SUPABASE_URL / SUPABASE_ANON).";
   }
 })();
 </script>
