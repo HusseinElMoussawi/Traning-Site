@@ -822,10 +822,11 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
     <div id="spaceBody"><div class="loading" data-i18n="loading">Loading…</div></div>
   </section>
 
-  <!-- HOME (leaderboard + roster, no calendar) -->
+  <!-- HOME (leaderboard + roster + global gallery, no calendar) -->
   <section id="tab-stats" style="display:none">
     <div id="leaderboard"></div>
     <div class="roster" id="roster"></div>
+    <div id="globalGallery" style="margin-top:24px"></div>
   </section>
 
   <!-- COACH: HOME -->
@@ -955,7 +956,7 @@ const I18N = {
     session_time:"Time", likes:"Likes", comments:"Comments", add_comment:"Add a comment…", rate_profile:"Rate this profile",
     notifications:"Notifications", no_notifs:"No notifications yet.", announcement:"Announcement", send_announcement:"Send to the camp",
     announcement_ph:"Write an announcement…", viewer_mode:"Viewer mode", back:"← Back", like:"Like", liked:"Liked",
-    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_empty:"No media yet — add photos or videos to your sessions.",
+    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", gallery_empty:"No media yet — add photos or videos to your sessions.",
     weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
@@ -1049,7 +1050,7 @@ const I18N = {
     session_time:"Heure", likes:"J'aime", comments:"Commentaires", add_comment:"Ajoute un commentaire…", rate_profile:"Note ce profil",
     notifications:"Notifications", no_notifs:"Aucune notification.", announcement:"Annonce", send_announcement:"Envoyer au camp",
     announcement_ph:"Écris une annonce…", viewer_mode:"Mode lecture", back:"← Retour", like:"J'aime", liked:"Aimé",
-    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
+    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
     weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
@@ -1143,7 +1144,7 @@ const I18N = {
     session_time:"الوقت", likes:"إعجابات", comments:"تعليقات", add_comment:"أضف تعليقًا…", rate_profile:"قيّم هذا الملف",
     notifications:"الإشعارات", no_notifs:"لا إشعارات بعد.", announcement:"إعلان", send_announcement:"إرسال للنادي",
     announcement_ph:"اكتب إعلانًا…", viewer_mode:"وضع القراءة", back:"← رجوع", like:"إعجاب", liked:"أعجبني",
-    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
+    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
     weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
@@ -1237,7 +1238,7 @@ const I18N = {
     session_time:"Zeit", likes:"Likes", comments:"Kommentare", add_comment:"Kommentar hinzufügen…", rate_profile:"Profil bewerten",
     notifications:"Benachrichtigungen", no_notifs:"Noch keine Benachrichtigungen.", announcement:"Ankündigung", send_announcement:"An das Camp senden",
     announcement_ph:"Ankündigung schreiben…", viewer_mode:"Ansichtsmodus", back:"← Zurück", like:"Like", liked:"Geliked",
-    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
+    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
     weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
@@ -1991,9 +1992,10 @@ function galleryHTML(athleteId){
   return `<div class="gallery">${photos.slice(0,9).map(s=>`
     <div class="gal-cell"><img src="${s.photo}" alt="" data-zoom></div>`).join("")}</div>`;
 }
-// full personal gallery: all photos AND videos (video = thumbnail + play, opens link)
+// full gallery: all photos AND videos (video = thumbnail + play, opens link)
+// athleteId null/undefined -> global gallery of the whole camp
 function mediaGalleryHTML(athleteId){
-  const items=sessions.filter(s=>s.athlete===athleteId && (s.photo||s.video))
+  const items=sessions.filter(s=>(!athleteId || s.athlete===athleteId) && (s.photo||s.video))
     .sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
   if(!items.length) return `<div class="goal-empty">${t("gallery_empty")}</div>`;
   return `<div class="gallery">${items.map(s=>{
@@ -2038,6 +2040,12 @@ function renderRoster(){
   wireGoals();
   r.querySelectorAll("[data-rosterview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.rosterview));
   r.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  // global camp gallery under the roster
+  const gg=document.getElementById("globalGallery");
+  if(gg){
+    gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div>${mediaGalleryHTML(null)}</div>`;
+    gg.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  }
   renderLeaderboard();
 }
 
