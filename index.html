@@ -242,6 +242,11 @@ body.light input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 .gate-panel{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);padding:28px 26px}
 .gate-panel h2{font-size:20px;font-weight:600;margin-bottom:4px}
 .gate-panel .lead{color:var(--smoke);font-size:13px;margin-bottom:20px}
+.gate-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--smoke)}
+.link-btn{background:none;border:none;color:var(--blood);cursor:pointer;font-size:13px;font-weight:600;text-decoration:underline}
+.pending-icon{font-size:40px;text-align:center;margin-bottom:10px}
+#gatePending{text-align:center}
+#gatePending .mini{margin-top:16px}
 .pick-user{display:grid;gap:9px}
 .pick-user button{display:flex;align-items:center;gap:13px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;text-align:left;color:var(--chalk);transition:border-color .12s}
 .pick-user button:hover{border-color:var(--blood)}
@@ -460,6 +465,14 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .lb-circle{color:var(--chalk)}
 .lb-circle .lb-name{font-size:15px;flex:none;text-align:center;color:var(--chalk)}
 .lb-circle.lead .lb-ring-center b{font-size:48px}
+.lb-rest{display:flex;flex-direction:column;gap:6px;padding:0 10px 14px;max-width:420px;margin:0 auto}
+.lb-rest-row{display:flex;align-items:center;gap:12px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:8px 12px;cursor:pointer;width:100%}
+.lb-rest-row:hover{border-color:var(--blood)}
+.lb-rest-rank{font-family:'Oswald';font-weight:700;color:var(--smoke);min-width:28px}
+.lb-rest-photo{width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid var(--line);flex-shrink:0}
+.lb-rest-photo img{width:100%;height:100%;object-fit:cover}
+.lb-rest-name{font-family:'Oswald';font-weight:600;flex:1;text-align:start}
+.lb-rest-lvl{font-family:'Oswald';font-weight:600;font-size:14px}
 
 /* ---------- self-rating dots ---------- */
 .rate-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
@@ -786,14 +799,34 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
         <button class="theme-toggle" id="themeToggleGate" aria-label="Theme" title="Theme">◐</button>
         <select class="lang-select" id="langGate" aria-label="Language"></select>
       </div>
-      <div id="gateLogin">
-        <h2 data-i18n="gate_who">Sign in</h2>
-        <p class="lead" data-i18n="gate_pick_lead">Enter your camp email and password.</p>
-        <div class="field"><label data-i18n="email">Email</label><input type="email" id="authEmail" autocomplete="username" placeholder="your.email@example.com"></div>
-        <div class="field"><label data-i18n="pw">Password</label><input type="password" id="authPw" autocomplete="current-password"></div>
-        <div class="gate-err" id="gateErr"></div>
-        <button class="btn" id="gateSubmit" data-i18n="enter">Enter</button>
-        <div class="gate-note" data-i18n="gate_note_supabase">Data is shared across the camp. Forgot your password? Ask the coach to reset it.</div>
+      <div id="gateForms">
+        <!-- LOGIN -->
+        <div id="gateLogin">
+          <h2 data-i18n="gate_who">Sign in</h2>
+          <p class="lead" data-i18n="gate_pick_lead">Enter your camp email and password.</p>
+          <div class="field"><label data-i18n="email">Email</label><input type="email" id="authEmail" autocomplete="username" placeholder="your.email@example.com"></div>
+          <div class="field"><label data-i18n="pw">Password</label><input type="password" id="authPw" autocomplete="current-password"></div>
+          <div class="gate-err" id="gateErr"></div>
+          <button class="btn" id="gateSubmit" data-i18n="enter">Enter</button>
+          <div class="gate-switch"><span data-i18n="no_account">No account?</span> <button class="link-btn" id="toSignup" data-i18n="signup_link">Create one</button></div>
+        </div>
+        <!-- SIGNUP -->
+        <div id="gateSignup" style="display:none">
+          <h2 data-i18n="signup_title">Join the camp</h2>
+          <p class="lead" data-i18n="signup_lead">Create your account. An admin will approve you.</p>
+          <div class="field"><label data-i18n="your_name">Name</label><input type="text" id="suName" placeholder="Kumeil"></div>
+          <div class="field"><label data-i18n="email">Email</label><input type="email" id="suEmail" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="field"><label data-i18n="pw">Password</label><input type="password" id="suPw" autocomplete="new-password"></div>
+          <button class="btn" id="suSubmit" data-i18n="signup_btn">Sign up</button>
+          <div class="gate-switch"><span data-i18n="have_account">Already a member?</span> <button class="link-btn" id="toLogin" data-i18n="signin_link">Sign in</button></div>
+        </div>
+      </div>
+      <!-- PENDING -->
+      <div id="gatePending" style="display:none">
+        <div class="pending-icon">⏳</div>
+        <h2 data-i18n="pending_title">Waiting for approval</h2>
+        <p class="lead" data-i18n="pending_lead">Your account was created. An admin will approve you soon. Come back later.</p>
+        <button class="mini" id="pendingLogout" data-i18n="logout">Log out</button>
       </div>
     </div>
   </div>
@@ -947,7 +980,7 @@ const I18N = {
     gate_back:"← Change profile", gate_new_title:"Create your password",
     pw_new:"New password", pw_confirm:"Confirm", pw:"Password",
     enter:"Enter", create_enter:"Create & enter",
-    email:"Email", gate_note_supabase:"Data is shared across the camp. Forgot your password? Ask the coach to reset it.",
+    email:"Email", gate_note_supabase:"Data is shared across the camp. Forgot your password? Ask the coach to reset it.", no_account:"No account?", signup_link:"Create one", have_account:"Already a member?", signin_link:"Sign in", signup_title:"Join the camp", signup_lead:"Create your account. An admin will approve you.", your_name:"Name", signup_btn:"Sign up", signup_fill:"Please fill in all fields.", signup_done:"Account created — waiting for approval.", pending_title:"Waiting for approval", pending_lead:"Your account was created. An admin will approve you soon. Come back later.",
     gate_note:"Friends-only, serverless site: your password is hashed and stored in the site. Don't reuse an important password (email, bank). Pick a code just for the camp.",
     coach:"Coach", athlete:"Athlete", to_setup:"To set up", login:"Log in",
     err_pw_short:"Choose at least 4 characters.", err_pw_match:"The two passwords don't match.", err_pw_wrong:"Wrong password.",
@@ -1041,7 +1074,7 @@ const I18N = {
     gate_back:"← Changer de profil", gate_new_title:"Crée ton mot de passe",
     pw_new:"Nouveau mot de passe", pw_confirm:"Confirme", pw:"Mot de passe",
     enter:"Entrer", create_enter:"Créer et entrer",
-    email:"Email", gate_note_supabase:"Les données sont partagées dans le camp. Mot de passe oublié ? Demande au moniteur de le réinitialiser.",
+    email:"Email", gate_note_supabase:"Les données sont partagées dans le camp. Mot de passe oublié ? Demande au moniteur de le réinitialiser.", no_account:"Pas de compte ?", signup_link:"En créer un", have_account:"Déjà membre ?", signin_link:"Se connecter", signup_title:"Rejoindre le camp", signup_lead:"Crée ton compte. Un admin devra t'approuver.", your_name:"Nom", signup_btn:"S'inscrire", signup_fill:"Remplis tous les champs.", signup_done:"Compte créé — en attente de validation.", pending_title:"En attente de validation", pending_lead:"Ton compte a été créé. Un admin t'approuvera bientôt. Reviens plus tard.",
     gate_note:"Site entre potes, sans serveur : ton mot de passe est haché et stocké dans le site. Ne réutilise pas un mot de passe important (mail, banque). Prends un code dédié au camp.",
     coach:"Moniteur", athlete:"Athlète", to_setup:"À configurer", login:"Connexion",
     err_pw_short:"Choisis au moins 4 caractères.", err_pw_match:"Les deux mots de passe ne correspondent pas.", err_pw_wrong:"Mot de passe incorrect.",
@@ -1135,7 +1168,7 @@ const I18N = {
     gate_back:"→ تغيير الملف", gate_new_title:"أنشئ كلمة المرور",
     pw_new:"كلمة مرور جديدة", pw_confirm:"تأكيد", pw:"كلمة المرور",
     enter:"دخول", create_enter:"إنشاء ودخول",
-    email:"البريد الإلكتروني", gate_note_supabase:"البيانات مشتركة داخل النادي. نسيت كلمة المرور؟ اطلب من المدرب إعادة تعيينها.",
+    email:"البريد الإلكتروني", gate_note_supabase:"البيانات مشتركة داخل النادي. نسيت كلمة المرور؟ اطلب من المدرب إعادة تعيينها.", no_account:"لا حساب؟", signup_link:"أنشئ حسابًا", have_account:"عضو بالفعل؟", signin_link:"تسجيل الدخول", signup_title:"انضم إلى النادي", signup_lead:"أنشئ حسابك. سيوافق عليك المسؤول.", your_name:"الاسم", signup_btn:"تسجيل", signup_fill:"يرجى ملء جميع الحقول.", signup_done:"تم إنشاء الحساب — بانتظار الموافقة.", pending_title:"بانتظار الموافقة", pending_lead:"تم إنشاء حسابك. سيوافق عليك المسؤول قريبًا. عد لاحقًا.",
     gate_note:"موقع بين الأصدقاء بدون خادم: كلمة مرورك مُشفّرة ومخزّنة في الموقع. لا تُعد استخدام كلمة مرور مهمة (البريد، البنك). اختر رمزًا خاصًا بالنادي.",
     coach:"المدرب", athlete:"لاعب", to_setup:"للإعداد", login:"دخول",
     err_pw_short:"اختر 4 أحرف على الأقل.", err_pw_match:"كلمتا المرور غير متطابقتين.", err_pw_wrong:"كلمة مرور خاطئة.",
@@ -1229,7 +1262,7 @@ const I18N = {
     gate_back:"← Profil wechseln", gate_new_title:"Erstelle dein Passwort",
     pw_new:"Neues Passwort", pw_confirm:"Bestätigen", pw:"Passwort",
     enter:"Eintreten", create_enter:"Erstellen & eintreten",
-    email:"E-Mail", gate_note_supabase:"Die Daten werden im Camp geteilt. Passwort vergessen? Bitte den Trainer, es zurückzusetzen.",
+    email:"E-Mail", gate_note_supabase:"Die Daten werden im Camp geteilt. Passwort vergessen? Bitte den Trainer, es zurückzusetzen.", no_account:"Kein Konto?", signup_link:"Erstellen", have_account:"Schon Mitglied?", signin_link:"Anmelden", signup_title:"Dem Camp beitreten", signup_lead:"Erstelle dein Konto. Ein Admin bestätigt dich.", your_name:"Name", signup_btn:"Registrieren", signup_fill:"Bitte alle Felder ausfüllen.", signup_done:"Konto erstellt — wartet auf Freigabe.", pending_title:"Warte auf Freigabe", pending_lead:"Dein Konto wurde erstellt. Ein Admin gibt dich bald frei. Komm später wieder.",
     gate_note:"Private, serverlose Seite: dein Passwort wird gehasht und in der Seite gespeichert. Verwende kein wichtiges Passwort (E-Mail, Bank). Nimm einen eigenen Code fürs Camp.",
     coach:"Trainer", athlete:"Athlet", to_setup:"Einzurichten", login:"Anmelden",
     err_pw_short:"Wähle mindestens 4 Zeichen.", err_pw_match:"Die beiden Passwörter stimmen nicht überein.", err_pw_wrong:"Falsches Passwort.",
@@ -1435,12 +1468,9 @@ function intensityLabel(v){
 }
 
 
-const ATHLETES = [
-  {id:"coach", name:"Admin", color:"#4f9d69", role:"coach"},
-  {id:"a1", name:"Kumeil", color:"#c9262c", role:"athlete"},
-  {id:"a2", name:"Barir", color:"#3f7cc9", role:"athlete"},
-  {id:"a3", name:"Mark", color:"#4f9d69", role:"athlete"},
-];
+// Dynamic roster — filled from the profiles table at login (approved members only).
+let ATHLETES = [];
+const PALETTE = ["#c9262c","#3f7cc9","#4f9d69","#d8a53a","#7d5bc9","#2fa8a0","#e0683c","#c14d8a"];
 const byId = id => ATHLETES.find(a=>a.id===id);
 const initials = n => n.split(/[\s]/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 // admin avatar: green dot (★ removed, replaced by a plain mark)
@@ -1736,14 +1766,19 @@ async function delSession(id){ try{ await window.storage.delete("sess:"+id, true
 async function updateSession(s){ await window.storage.set("sess:"+s.id, JSON.stringify(s), true); }
 
 /* ---------- login (Supabase Auth) ---------- */
-// Loaded from public.profiles after sign-in; overrides the static ATHLETES defaults.
+// Build the dynamic roster from the profiles table (APPROVED members only).
 async function loadProfiles(){
-  const { data, error } = await sb.from("profiles").select("slot,display_name,role,color");
+  const { data, error } = await sb.from("profiles").select("id,slot,display_name,role,color,approved");
   if(error||!data) return;
-  data.forEach(p=>{
-    const a=ATHLETES.find(x=>x.id===p.slot);
-    if(a){ a.name=p.display_name; a.role=p.role; a.color=p.color||a.color; }
-  });
+  const approved=data.filter(p=>p.approved);
+  // assign a stable palette color by index when none stored
+  ATHLETES = approved.map((p,i)=>({
+    id: p.slot,
+    uid: p.id,
+    name: p.display_name||"—",
+    role: p.role||"athlete",
+    color: p.color || PALETTE[i % PALETTE.length]
+  }));
 }
 async function submitGate(){
   const err=document.getElementById("gateErr");
@@ -1758,17 +1793,65 @@ async function submitGate(){
   if(error){ err.textContent=t("err_pw_wrong"); return; }
   await afterLogin();
 }
-// resolve current session -> slot/role, then enter the app
+// Sign up: create account + own profile row (pending approval)
+async function doSignup(){
+  const err=document.getElementById("gateErr");
+  err.textContent="";
+  const name=document.getElementById("suName").value.trim();
+  const email=document.getElementById("suEmail").value.trim();
+  const pw=document.getElementById("suPw").value;
+  if(!name||!email||!pw){ err.textContent=t("signup_fill"); return; }
+  if(pw.length<6){ err.textContent=t("err_pw_short"); return; }
+  const btn=document.getElementById("suSubmit");
+  btn.disabled=true; btn.textContent=t("saving");
+  try{
+    const { data, error } = await sb.auth.signUp({ email, password: pw });
+    if(error){ err.textContent=error.message; btn.disabled=false; btn.textContent=t("signup_btn"); return; }
+    // create my profile row; trigger sets role/approved/slot
+    const uid=data.user?data.user.id:null;
+    if(uid){
+      await sb.from("profiles").insert({ id:uid, display_name:name });
+    }
+    btn.disabled=false; btn.textContent=t("signup_btn");
+    // if email confirmation is required there may be no session yet
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await afterLogin(); }
+    else { showGateMode("login"); err.textContent=t("signup_done"); }
+  }catch(e){ err.textContent=t("save_fail"); btn.disabled=false; btn.textContent=t("signup_btn"); }
+}
+// resolve current session -> slot/role, then enter the app (or pending screen)
 async function afterLogin(){
   const { data:{ user } } = await sb.auth.getUser();
   if(!user) return;
-  const { data:prof, error } = await sb.from("profiles").select("slot,role").eq("id", user.id).maybeSingle();
-  if(error||!prof){ document.getElementById("gateErr").textContent="No profile linked to this account."; await sb.auth.signOut(); return; }
+  const { data:prof, error } = await sb.from("profiles").select("slot,role,approved").eq("id", user.id).maybeSingle();
+  if(error){ document.getElementById("gateErr").textContent=t("err_pw_wrong"); return; }
+  if(!prof){
+    // signed in but no profile yet -> create a pending one from their email name
+    const nm=(user.email||"athlete").split("@")[0];
+    await sb.from("profiles").insert({ id:user.id, display_name:nm });
+    showPending(); return;
+  }
+  if(!prof.approved){ showPending(); return; }
   me = prof.slot;
   myRole = prof.role;
   await loadProfiles();
   await reloadAll();
   enterApp();
+}
+// "waiting for approval" screen
+function showPending(){
+  const gate=document.getElementById("gate");
+  gate.style.display="grid";
+  document.getElementById("gateForms").style.display="none";
+  document.getElementById("gatePending").style.display="";
+}
+// switch between login / signup forms
+function showGateMode(mode){
+  document.getElementById("gatePending").style.display="none";
+  document.getElementById("gateForms").style.display="";
+  document.getElementById("gateLogin").style.display = mode==="signup"?"none":"";
+  document.getElementById("gateSignup").style.display = mode==="signup"?"":"none";
+  const err=document.getElementById("gateErr"); if(err) err.textContent="";
 }
 function enterApp(){
   document.getElementById("gate").style.display="none";
@@ -1824,6 +1907,7 @@ async function logout(){
   document.getElementById("authEmail").value="";
   document.getElementById("authPw").value="";
   document.getElementById("gateErr").textContent="";
+  showGateMode("login");
 }
 function buildSessionBadge(){
   const a=byId(me);
@@ -2888,6 +2972,10 @@ function renderLeaderboard(root){
     .sort((x,y)=>y.level-x.level);
   const medals=["🥇","🥈","🥉"];
   const maxLevel=Math.max(1, ...rows.map(r=>r.level));
+  const top=rows.slice(0,3);
+  const rest=rows.slice(3);
+  // podium order: 2nd, 1st, 3rd so the winner is centered
+  const podium = top.length===3 ? [top[1],top[0],top[2]] : top;
   root.innerHTML=`
     <div class="lb">
       <div class="lb-head">
@@ -2895,11 +2983,12 @@ function renderLeaderboard(root){
         <span>${t("leaderboard_sub")}</span>
       </div>
       <div class="lb-circles">
-        ${rows.map((r,i)=>{
-          const size = i===0?168:148;
+        ${podium.map((r)=>{
+          const rank=rows.indexOf(r);
+          const size = rank===0?168:148;
           const rr=(size-14)/2, c=2*Math.PI*rr, off=c*(1-Math.min(1,r.level/maxLevel));
-          return `<button class="lb-circle ${i===0?"lead":""}" data-lbview="${r.a.id}">
-            <div class="lb-medal">${medals[i]||("#"+(i+1))}</div>
+          return `<button class="lb-circle ${rank===0?"lead":""}" data-lbview="${r.a.id}">
+            <div class="lb-medal">${medals[rank]||("#"+(rank+1))}</div>
             <div class="lb-ring" style="width:${size}px;height:${size}px">
               <svg viewBox="0 0 ${size} ${size}">
                 <circle cx="${size/2}" cy="${size/2}" r="${rr}" class="lb-ring-bg"/>
@@ -2917,8 +3006,18 @@ function renderLeaderboard(root){
           </button>`;
         }).join("")}
       </div>
+      ${rest.length?`<div class="lb-rest">
+        ${rest.map((r,i)=>`<button class="lb-rest-row" data-lbview="${r.a.id}">
+          <span class="lb-rest-rank">#${i+4}</span>
+          <div class="lb-rest-photo" style="border-color:${r.a.color}">
+            ${profilePhoto(r.a.id)?`<img src="${profilePhoto(r.a.id)}" alt="">`:`<div class="avatar" style="background:${r.a.color};width:100%;height:100%;font-size:14px">${avatarText(r.a)}</div>`}
+          </div>
+          <span class="lb-rest-name">${esc(displayName(r.a))}</span>
+          <span class="lb-rest-lvl" style="color:${r.a.color}">${t("level")} ${r.level}</span>
+        </button>`).join("")}
+      </div>`:""}
     </div>`;
-  // clicking a circle opens that athlete's profile in viewer mode
+  // clicking a circle/row opens that athlete's profile in viewer mode
   root.querySelectorAll("[data-lbview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.lbview));
 }
 // latest progress photo of an athlete (from their most recent session with a photo)
@@ -3310,7 +3409,7 @@ async function doSave(){
   const nowDate=new Date().toISOString().slice(0,10);
   const s={
     id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    athlete: me==="coach" ? "a1" : me,
+    athlete: me,
     discipline: selectedDisc(),
     date: document.getElementById("fDate").value || nowDate,
     duration: document.getElementById("fDur").value || "",
@@ -3374,6 +3473,10 @@ function on(id, ev, fn){ const el=$(id); if(el) el[ev]=fn; }
   // login wiring (Supabase Auth)
   on("gateSubmit","onclick",submitGate);
   on("logout","onclick",logout);
+  on("toSignup","onclick",()=>showGateMode("signup"));
+  on("toLogin","onclick",()=>showGateMode("login"));
+  on("suSubmit","onclick",doSignup);
+  on("pendingLogout","onclick",logout);
   ["authEmail","authPw"].forEach(idp=>{ const el=$(idp); if(el) el.addEventListener("keydown",e=>{if(e.key==="Enter")submitGate();}); });
   // language selectors
   buildLangSelect($("langGate"));
