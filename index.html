@@ -187,6 +187,9 @@ body.light input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 .sess{border:1px solid var(--line-soft);border-radius:var(--r);margin-bottom:14px;background:var(--panel);overflow:hidden}
 .sess-h{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
 .avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:'Oswald';font-weight:600;font-size:15px;color:#fff;flex-shrink:0}
+.avatar-img{overflow:hidden;background:var(--panel-2)}
+.avatar-img img{width:100%;height:100%;object-fit:cover}
+.avatar-img[data-zoom]{cursor:zoom-in}
 .sess-h .meta{flex:1;min-width:0}
 .sess-h .meta b{font-family:'Oswald';font-size:15px;letter-spacing:.02em;font-weight:600}
 .sess-h .meta span{display:block;font-size:12px;color:var(--smoke)}
@@ -467,7 +470,8 @@ body.rtl .coach-note-box{border-left:none;border-right:2px solid var(--gold)}
 .rate-dot:hover{border-color:var(--blood)}
 
 /* ---------- sparring toggle ---------- */
-.spar-toggle{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--chalk);text-transform:none;letter-spacing:0}
+.field label.spar-toggle,.spar-toggle{display:flex!important;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--chalk);text-transform:none;letter-spacing:0;margin-bottom:0}
+.spar-toggle>span:last-child{line-height:1}
 .spar-toggle input{position:absolute!important;opacity:0!important;width:0!important;height:0!important;margin:0!important;pointer-events:none}
 .spar-box{width:46px;min-width:46px;height:26px;border-radius:999px;background:var(--ink);border:1px solid var(--line);position:relative;transition:background .15s,border-color .15s;flex-shrink:0;display:inline-block;box-sizing:border-box}
 .spar-box::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--smoke);transition:transform .15s,background .15s}
@@ -568,7 +572,7 @@ body.rtl .spar-toggle input:checked+.spar-box::after{transform:translateX(-20px)
 
 /* ---------- Instagram-style profile header ---------- */
 .ig-profile{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px}
-.ig-photo{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0;position:relative;cursor:pointer;display:block}
+.ig-photo{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0;position:relative;cursor:zoom-in;display:block}
 .ig-photo img{width:100%;height:100%;object-fit:cover}
 .ig-photo-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
 .ig-photo-btn{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;transition:color .15s,border-color .15s}
@@ -1824,7 +1828,7 @@ async function logout(){
 function buildSessionBadge(){
   const a=byId(me);
   document.getElementById("sessionBadge").innerHTML =
-    `<div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+    `${avatarHTML(a)}
      <b>${esc(displayName(a))}</b>`;
 }
 function fillFilter(){
@@ -1994,7 +1998,7 @@ function sessionCard(s, showCoach){
   const likedCls=iLiked(s.id)?"on":"";
   return `<div class="sess">
     <div class="sess-h">
-      <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+      ${avatarHTML(a, 34, true)}
       <div class="meta"><b>${esc(displayName(a))}</b><span>${fmtDate(s.date)}${timeTxt}</span></div>
       ${sparBadge}
       <div class="tag">${esc(discLabel(s.discipline))}</div>
@@ -2016,7 +2020,7 @@ function sessionCard(s, showCoach){
   </div>`;
 }
 function wireCards(root){
-  root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  root.querySelectorAll("[data-zoom]").forEach(el=>el.onclick=()=>openLightbox(el.getAttribute("data-zoom")||el.src));
   root.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
     if(b.dataset.confirm!=="1"){
       b.dataset.confirm="1"; b.classList.add("confirm"); b.textContent=t("delete")+" ?";
@@ -2103,7 +2107,7 @@ function renderRoster(){
       || `<div class="t" style="color:var(--smoke);font-size:11px">${t("no_session_yet")}</div>`;
     return `<div class="athlete">
       <button class="athlete-head" data-rosterview="${a.id}">
-        <div class="avatar" style="background:${a.color}">${avatarText(a)}</div>
+        ${avatarHTML(a, 48)}
         <h3>${esc(displayName(a))}</h3>
         <div class="roster-level" style="color:${a.color}">${t("level")} ${lv.level}</div>
       </button>
@@ -2118,7 +2122,7 @@ function renderRoster(){
   }).join("");
   wireGoals();
   r.querySelectorAll("[data-rosterview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.rosterview));
-  r.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  r.querySelectorAll("[data-zoom]").forEach(el=>el.onclick=()=>openLightbox(el.getAttribute("data-zoom")||el.src));
   // global camp gallery under the roster (paginated + social)
   renderGlobalGallery();
   renderLeaderboard();
@@ -2178,7 +2182,7 @@ function openPhotoDetail(sid){
       ${s.photo?`<img src="${s.photo}" alt="">`:(s.video?`<a href="${esc(s.video)}" target="_blank" rel="noopener" class="pd-video"><span class="gal-play">▶</span> ${t("watch_video")}</a>`:"")}
     </div>
     <div class="pd-head">
-      <div class="avatar" style="background:${a.color};width:34px;height:34px;font-size:14px">${avatarText(a)}</div>
+      ${avatarHTML(a, 34)}
       <b>${esc(displayName(a))}</b><span class="pd-date">${fmtDate(s.date)}</span>
     </div>
     <div class="pd-social">
@@ -2449,10 +2453,10 @@ async function renderSpace(){
   root.innerHTML = `
     <div class="ig-profile">
       <div class="ig-photo-wrap">
-        <label class="ig-photo" style="border-color:${a.color}">
+        <div class="ig-photo" style="border-color:${a.color}" ${pf.photo?`data-zoom="${pf.photo}"`:""}>
           ${pf.photo?`<img src="${pf.photo}" alt="">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:38px">${avatarText(a)}</div>`}
-          <input type="file" id="pfPhoto" accept="image/*" hidden>
-        </label>
+        </div>
+        <input type="file" id="pfPhoto" accept="image/*" hidden>
         <label class="ig-photo-btn" for="pfPhoto">✎ ${t("change_photo")}</label>
       </div>
       <div class="ig-id">
@@ -2525,7 +2529,7 @@ function editableGalleryHTML(athleteId){
   }).join("")}</div>`;
 }
 function wireEditableGallery(root){
-  root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  root.querySelectorAll("[data-zoom]").forEach(el=>el.onclick=()=>openLightbox(el.getAttribute("data-zoom")||el.src));
   root.querySelectorAll("[data-galdel]").forEach(b=>b.onclick=async()=>{
     if(b.dataset.confirm!=="1"){
       b.dataset.confirm="1"; b.classList.add("confirm"); b.textContent="✓?";
@@ -2920,8 +2924,20 @@ function renderLeaderboard(root){
 }
 // latest progress photo of an athlete (from their most recent session with a photo)
 function profilePhoto(athleteId){
+  // prefer the uploaded profile picture, else the latest session photo
+  const pf=(profiles||{})[athleteId];
+  if(pf&&pf.photo) return pf.photo;
   const withPhoto=sessions.filter(s=>s.athlete===athleteId && s.photo).sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
   return withPhoto.length?withPhoto[0].photo:null;
+}
+// unified avatar: profile photo if any, else colored initials. clickOpen => clicking shows it big
+function avatarHTML(a, size, clickOpen){
+  const ph=profilePhoto(a.id);
+  const dim=size?`width:${size}px;height:${size}px`:"";
+  const font=size?`font-size:${Math.round(size*0.42)}px`:"";
+  const zoom = clickOpen && ph ? ` data-zoom="${ph}"` : "";
+  if(ph) return `<div class="avatar avatar-img" style="${dim}"${zoom}><img src="${ph}" alt=""></div>`;
+  return `<div class="avatar" style="background:${a.color};${dim};${font}">${avatarText(a)}</div>`;
 }
 
 function wireGoals(){
@@ -3140,7 +3156,7 @@ function coachSessionCard(s){
   </div>`;
 }
 function wireCoachCards(root){
-  root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  root.querySelectorAll("[data-zoom]").forEach(el=>el.onclick=()=>openLightbox(el.getAttribute("data-zoom")||el.src));
   const picked={};
   root.querySelectorAll("[data-rate]").forEach(span=>{
     const id=span.dataset.rate;
