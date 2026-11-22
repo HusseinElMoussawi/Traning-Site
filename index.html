@@ -84,7 +84,7 @@ input[type="number"]{-moz-appearance:textfield;appearance:textfield}
 /* ---------- top bar ---------- */
 header{
   position:sticky;top:0;z-index:40;
-  background:linear-gradient(180deg,#0d0d0f 60%,rgba(13,13,15,.85));
+  background:var(--panel);
   border-bottom:1px solid var(--line);
   backdrop-filter:blur(6px);
 }
@@ -230,7 +230,7 @@ body.light input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 .saving{font-size:11px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
 
 /* ---------- login ---------- */
-.gate{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 80% at 50% -10%,#1a1114 0%,var(--ink) 55%);display:grid;place-items:center;padding:24px}
+.gate{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 80% at 50% -10%,var(--panel-2) 0%,var(--ink) 55%);display:grid;place-items:center;padding:24px}
 .gate-card{width:100%;max-width:400px}
 .gate-brand{text-align:center;margin-bottom:26px}
 .gate-brand .mark{font-family:'Oswald';font-weight:700;font-size:46px;letter-spacing:.05em;line-height:.9}
@@ -566,6 +566,32 @@ body.rtl .spar-toggle input:checked+.spar-box::after{transform:translateX(-20px)
 .pd-cmt-count{color:var(--smoke);font-size:14px}
 .pd-comments{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:12px}
 
+/* ---------- Instagram-style profile header ---------- */
+.ig-profile{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px}
+.ig-photo{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0;position:relative;cursor:pointer;display:block}
+.ig-photo img{width:100%;height:100%;object-fit:cover}
+.ig-photo-edit{position:absolute;bottom:4px;right:4px;width:28px;height:28px;border-radius:50%;background:var(--blood);color:#fff;display:grid;place-items:center;font-size:13px;border:2px solid var(--panel)}
+.ig-id{flex:1;min-width:0}
+.ig-id h2{font-family:'Oswald';font-size:26px;font-weight:700;color:var(--chalk)}
+.ig-level{font-family:'Oswald';font-size:15px;font-weight:600;margin-bottom:8px}
+.ig-bio{width:100%;background:var(--panel);border:1px solid var(--line-soft);color:var(--chalk);border-radius:8px;padding:8px 10px;font-size:13px;resize:vertical;font-family:'Archivo',sans-serif}
+.ig-bio:focus{outline:1px solid var(--blood);border-color:var(--blood)}
+
+/* ---------- compact weight bar ---------- */
+.wbar{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:12px 18px;min-height:64px}
+.wbar-main{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.wbar-label{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke)}
+.wbar-val{font-family:'Oswald';font-size:28px;font-weight:700;color:var(--chalk);line-height:1}
+.wbar-tgt{font-size:11px;color:var(--smoke)}
+.wbar-hist{flex:1;max-width:280px;margin-inline-start:auto;height:48px;display:flex;align-items:center;justify-content:flex-end}
+.wbar-hist .weight-svg{height:48px;width:100%;background:transparent;border:none;margin:0}
+.wbar-empty{font-size:11px;color:var(--smoke)}
+
+/* ---------- scroll-to-top button ---------- */
+#scrollTop{position:fixed;bottom:22px;right:22px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--blood);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);display:none;align-items:center;justify-content:center}
+#scrollTop.show{display:flex}
+body.rtl #scrollTop{right:auto;left:22px}
+
 /* single-rating slider + display */
 .rate-line{display:flex;align-items:center;gap:16px}
 .rate-slider{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;background:var(--line);outline:none}
@@ -888,6 +914,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 </main>
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""></div>
+<button id="scrollTop" title="Top" aria-label="Scroll to top">↑</button>
 
 <script>
 /* ===================== i18n ===================== */
@@ -983,7 +1010,7 @@ const I18N = {
     session_time:"Time", likes:"Likes", comments:"Comments", add_comment:"Add a comment…", rate_profile:"Rate this profile",
     notifications:"Notifications", no_notifs:"No notifications yet.", announcement:"Announcement", send_announcement:"Send to the camp",
     announcement_ph:"Write an announcement…", viewer_mode:"Viewer mode", back:"← Back", like:"Like", liked:"Liked",
-    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", see_more:"More", see_all:"See all", gallery_empty:"No media yet — add photos or videos to your sessions.",
+    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", see_more:"More", see_all:"See all", see_less:"See less", bio_ph:"Write a short bio…", gallery_empty:"No media yet — add photos or videos to your sessions.",
     weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
@@ -1077,7 +1104,7 @@ const I18N = {
     session_time:"Heure", likes:"J'aime", comments:"Commentaires", add_comment:"Ajoute un commentaire…", rate_profile:"Note ce profil",
     notifications:"Notifications", no_notifs:"Aucune notification.", announcement:"Annonce", send_announcement:"Envoyer au camp",
     announcement_ph:"Écris une annonce…", viewer_mode:"Mode lecture", back:"← Retour", like:"J'aime", liked:"Aimé",
-    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", see_more:"Plus", see_all:"Voir tout", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
+    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", see_more:"Plus", see_all:"Voir tout", see_less:"Voir moins", bio_ph:"Écris une courte bio…", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
     weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
@@ -1171,7 +1198,7 @@ const I18N = {
     session_time:"الوقت", likes:"إعجابات", comments:"تعليقات", add_comment:"أضف تعليقًا…", rate_profile:"قيّم هذا الملف",
     notifications:"الإشعارات", no_notifs:"لا إشعارات بعد.", announcement:"إعلان", send_announcement:"إرسال للنادي",
     announcement_ph:"اكتب إعلانًا…", viewer_mode:"وضع القراءة", back:"← رجوع", like:"إعجاب", liked:"أعجبني",
-    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", see_more:"المزيد", see_all:"عرض الكل", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
+    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", see_more:"المزيد", see_all:"عرض الكل", see_less:"عرض أقل", bio_ph:"اكتب نبذة قصيرة…", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
     weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
@@ -1265,7 +1292,7 @@ const I18N = {
     session_time:"Zeit", likes:"Likes", comments:"Kommentare", add_comment:"Kommentar hinzufügen…", rate_profile:"Profil bewerten",
     notifications:"Benachrichtigungen", no_notifs:"Noch keine Benachrichtigungen.", announcement:"Ankündigung", send_announcement:"An das Camp senden",
     announcement_ph:"Ankündigung schreiben…", viewer_mode:"Ansichtsmodus", back:"← Zurück", like:"Like", liked:"Geliked",
-    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", see_more:"Mehr", see_all:"Alle ansehen", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
+    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", see_more:"Mehr", see_all:"Alle ansehen", see_less:"Weniger", bio_ph:"Kurze Bio schreiben…", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
     weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
@@ -1440,6 +1467,7 @@ function ownerSlotForKey(key){
   if(key.startsWith("prog:"))   return key.slice(5);
   if(key.startsWith("weight:")) return key.slice(7);
   if(key.startsWith("roadmap:")) return key.slice(8);
+  if(key.startsWith("profile:")) return key.slice(8);
   if(key.startsWith("coach:"))  return "coach";   // coach:goals, coach:notes
   if(key.startsWith("weekly:")) return me || "coach";
   return me || "coach";
@@ -1569,6 +1597,22 @@ async function loadRoadmaps(){
 }
 async function saveRoadmap(athleteId){
   await window.storage.set("roadmap:"+athleteId, JSON.stringify(roadmaps[athleteId]||[]), true);
+}
+
+// profile info: profile:<slot> -> {photo, bio}
+let profiles = {};
+async function loadProfilesInfo(){
+  try{
+    const r=await window.storage.list("profile:", true);
+    const keys=(r&&r.keys)?r.keys:[];
+    profiles={};
+    for(const k of keys){
+      try{ const g=await window.storage.get(k, true); if(g&&g.value){ profiles[k.slice(8)]=JSON.parse(g.value); } }catch(e){}
+    }
+  }catch(e){ profiles={}; }
+}
+async function saveProfileInfo(slot){
+  await window.storage.set("profile:"+slot, JSON.stringify(profiles[slot]||{}), true);
 }
 
 /* ===================== SOCIAL (likes / comments / ratings / notifications) ===================== */
@@ -1721,7 +1765,7 @@ function enterApp(){
   subscribeRealtime();
 }
 async function reloadAll(){
-  await Promise.all([loadSessions(), loadGoals(), loadPrograms(), loadWeights(), loadWeeklyGoals(), loadRoadmaps(), loadSocial()]);
+  await Promise.all([loadSessions(), loadGoals(), loadPrograms(), loadWeights(), loadWeeklyGoals(), loadRoadmaps(), loadSocial(), loadProfilesInfo()]);
 }
 // Realtime: when any table changes, reload and re-render (debounced).
 let realtimeTimer=null;
@@ -2098,16 +2142,20 @@ function renderGlobalGallery(){
     </div>`;
   }).join("");
   let controls="";
-  if(items.length>galleryShown){
+  const hasMore = items.length>galleryShown;
+  const expanded = galleryShown>9;
+  if(hasMore || expanded){
     controls=`<div class="gal-controls">
-      <button class="mini" id="galMore">${t("see_more")}</button>
-      <button class="mini" id="galAll">${t("see_all")}</button>
+      ${hasMore?`<button class="mini" id="galMore">${t("see_more")}</button>
+      <button class="mini" id="galAll">${t("see_all")}</button>`:""}
+      ${expanded?`<button class="mini" id="galLess">${t("see_less")}</button>`:""}
     </div>`;
   }
   gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div><div class="gallery">${cells}</div>${controls}</div>`;
   gg.querySelectorAll("[data-galopen]").forEach(el=>el.onclick=()=>openPhotoDetail(el.dataset.galopen));
   const more=document.getElementById("galMore"); if(more) more.onclick=()=>{ galleryShown+=6; renderGlobalGallery(); };
   const all=document.getElementById("galAll"); if(all) all.onclick=()=>{ galleryShown=1e9; renderGlobalGallery(); };
+  const less=document.getElementById("galLess"); if(less) less.onclick=()=>{ galleryShown=9; renderGlobalGallery(); };
 }
 // Instagram-style photo detail: big image + likes + comments
 function openPhotoDetail(sid){
@@ -2379,13 +2427,65 @@ function weightSparkline(entries){
 async function renderSpace(){
   const root=document.getElementById("spaceBody");
   if(!root) return;
-  // My profile = personal gallery with edit/delete on each media
+  const a=byId(me)||{color:"#888"};
+  const pf=profiles[me]||{};
+  // weight bar
+  const w=weights[me]||{target:null,entries:[]};
+  const entries=(w.entries||[]).slice().sort((x,y)=>x.date.localeCompare(y.date));
+  const last=entries.length?entries[entries.length-1].kg:null;
+  const target=w.target;
+  // mini history sparkline (last up to 8 points)
+  const hist=entries.slice(-8);
+  const spark=hist.length>=2?weightSparkline(hist):"";
+  // Instagram-style profile: photo + bio, then weight bar, then gallery
   root.innerHTML = `
-    <div class="nutri-group">
+    <div class="ig-profile">
+      <label class="ig-photo" style="border-color:${a.color}">
+        ${pf.photo?`<img src="${pf.photo}" alt="">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:38px">${avatarText(a)}</div>`}
+        <input type="file" id="pfPhoto" accept="image/*" hidden>
+        <span class="ig-photo-edit">✎</span>
+      </label>
+      <div class="ig-id">
+        <h2>${esc(displayName(a))}</h2>
+        <div class="ig-level" style="color:${a.color}">${t("level")} ${computeLevel(me).level}</div>
+        <textarea id="pfBio" class="ig-bio" rows="2" placeholder="${esc(t("bio_ph"))}">${esc(pf.bio||"")}</textarea>
+        <button class="mini" id="pfBioSave" style="display:none">${t("save_btn2")}</button>
+      </div>
+    </div>
+
+    <div class="wbar">
+      <div class="wbar-main">
+        <span class="wbar-label">${t("current_weight")}</span>
+        <b class="wbar-val">${last!=null?last+" kg":"—"}</b>
+        ${target!=null&&last!=null?`<span class="wbar-tgt">${t("target_weight")}: ${target} kg</span>`:""}
+      </div>
+      <div class="wbar-hist">${spark||`<span class="wbar-empty">${t("weight_none")}</span>`}</div>
+    </div>
+
+    <div class="nutri-group" style="margin-top:16px">
       <div class="nutri-group-h">${t("gallery_title")}</div>
       ${editableGalleryHTML(me)}
     </div>`;
   wireEditableGallery(root);
+  // profile photo upload
+  const pfPhoto=document.getElementById("pfPhoto");
+  if(pfPhoto) pfPhoto.onchange=async(e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const dataURL=await compressImage(file, 600, 0.78);
+    const url=await uploadPhoto("profile-"+me+"-"+Date.now(), dataURL);
+    if(!profiles[me]) profiles[me]={};
+    profiles[me].photo=url||dataURL;
+    await saveProfileInfo(me); renderSpace();
+  };
+  // bio edit
+  const bio=document.getElementById("pfBio");
+  const bioSave=document.getElementById("pfBioSave");
+  if(bio) bio.oninput=()=>{ if(bioSave) bioSave.style.display=""; };
+  if(bioSave) bioSave.onclick=async()=>{
+    if(!profiles[me]) profiles[me]={};
+    profiles[me].bio=bio.value.trim();
+    await saveProfileInfo(me); bioSave.style.display="none";
+  };
 }
 // gallery with edit (change discipline/video) + delete controls on each item
 function editableGalleryHTML(athleteId){
@@ -3248,6 +3348,12 @@ function on(id, ev, fn){ const el=$(id); if(el) el[ev]=fn; }
   applyTheme();
   ["themeToggle","themeToggleGate"].forEach(id=>{ const b=$(id); if(b) b.onclick=toggleTheme; });
   renderRatingInputs();
+  // scroll-to-top button
+  const stBtn=$("scrollTop");
+  if(stBtn){
+    stBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+    window.addEventListener("scroll",()=>{ stBtn.classList.toggle("show", window.scrollY>300); });
+  }
   applyI18n();
   // init Supabase; if a session already exists (returning user), go straight in
   if(SUPABASE_URL.startsWith("http")){
