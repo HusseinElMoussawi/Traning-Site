@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LE CAMP — Suivi de combat</title>
+<title>LA PUISSANCE — Suivi de combat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -36,17 +36,17 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
   --r-sm:8px;
 }
 body.light{
-  --ink:#f4f2ee;
+  --ink:#f2f3f5;
   --panel:#ffffff;
-  --panel-2:#efece6;
-  --line:#e4e0d8;
-  --line-soft:#eeeae2;
-  --smoke:#6b6b73;
-  --chalk:#1a1a1f;
-  --blood:#c9262c;
+  --panel-2:#eef0f3;
+  --line:#e2e5ea;
+  --line-soft:#eef0f3;
+  --smoke:#767a85;
+  --chalk:#15171c;
+  --blood:#d12e34;
   --blood-hi:#e8393f;
-  --gold:#b5852a;
-  --win:#3f8557;
+  --gold:#bf8f2e;
+  --win:#39925f;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{
@@ -540,6 +540,31 @@ body.rtl .spar-toggle input:checked+.spar-box::after{transform:translateX(-20px)
 .gal-video{position:relative;display:block}
 .gal-vph{width:100%;height:100%;background:linear-gradient(135deg,var(--panel-2),var(--ink))}
 .gal-play{position:absolute;inset:0;margin:auto;width:38px;height:38px;border-radius:50%;background:rgba(201,38,44,.9);color:#fff;display:grid;place-items:center;font-size:15px;padding-left:3px}
+.gal-media{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+/* social overlay on home gallery cells */
+.gal-cell.social{position:relative}
+.gal-overlay{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:6px 8px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;font-size:12px;cursor:pointer;opacity:0;transition:opacity .15s}
+.gal-cell.social:hover .gal-overlay{opacity:1}
+.gal-ov-dot{width:8px;height:8px;border-radius:50%;margin-inline-end:auto}
+@media(hover:none){.gal-overlay{opacity:1}}
+/* edit gallery (profile) delete button */
+.gallery.edit .gal-cell{position:relative}
+.gal-actions{position:absolute;top:6px;right:6px;display:flex;gap:4px}
+.gal-del{background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:6px;width:30px;height:30px;font-size:14px;cursor:pointer}
+.gal-del.confirm{background:var(--blood)}
+/* gallery pagination controls */
+.gal-controls{display:flex;gap:10px;justify-content:center;margin-top:14px}
+/* Instagram-style photo detail */
+.pd-card{max-width:560px;margin:0 auto}
+.pd-media{border-radius:12px;overflow:hidden;background:var(--ink);margin-bottom:14px}
+.pd-media img{width:100%;display:block}
+.pd-video{display:flex;align-items:center;gap:10px;justify-content:center;padding:40px;color:var(--chalk)}
+.pd-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pd-head b{font-family:'Oswald';font-size:16px}
+.pd-date{color:var(--smoke);font-size:12px;margin-inline-start:auto}
+.pd-social{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.pd-cmt-count{color:var(--smoke);font-size:14px}
+.pd-comments{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:12px}
 
 /* single-rating slider + display */
 .rate-line{display:flex;align-items:center;gap:16px}
@@ -697,7 +722,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 <header>
   <div class="bar">
     <div class="brand">
-      <div class="mark">LE<b>·</b>CAMP</div>
+      <div class="mark">LA<b>·</b>PUISSANCE</div>
       <div class="sub">Fight logbook</div>
     </div>
     <div class="who">
@@ -714,7 +739,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
 <div class="gate" id="gate">
   <div class="gate-card">
     <div class="gate-brand">
-      <div class="mark">LE<b>·</b>CAMP</div>
+      <div class="mark">LA<b>·</b>PUISSANCE</div>
       <div class="sub">Fight logbook</div>
     </div>
     <div class="gate-panel">
@@ -767,7 +792,7 @@ body.rtl input[type="date"],body.rtl input[type="number"]{text-align:right;direc
         </div>
         <div class="row">
           <div class="field"><label data-i18n="date">Date</label><input type="date" id="fDate"></div>
-          <div class="field"><label data-i18n="session_time">Time</label><input type="time" id="fTime"></div>
+          <div class="field"><label data-i18n="duration">Duration (min)</label><input type="number" min="0" step="1" id="fDur" placeholder="90"></div>
         </div>
 
         <!-- sparring toggle -->
@@ -958,7 +983,7 @@ const I18N = {
     session_time:"Time", likes:"Likes", comments:"Comments", add_comment:"Add a comment…", rate_profile:"Rate this profile",
     notifications:"Notifications", no_notifs:"No notifications yet.", announcement:"Announcement", send_announcement:"Send to the camp",
     announcement_ph:"Write an announcement…", viewer_mode:"Viewer mode", back:"← Back", like:"Like", liked:"Liked",
-    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", gallery_empty:"No media yet — add photos or videos to your sessions.",
+    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", see_more:"More", see_all:"See all", gallery_empty:"No media yet — add photos or videos to your sessions.",
     weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
@@ -1052,7 +1077,7 @@ const I18N = {
     session_time:"Heure", likes:"J'aime", comments:"Commentaires", add_comment:"Ajoute un commentaire…", rate_profile:"Note ce profil",
     notifications:"Notifications", no_notifs:"Aucune notification.", announcement:"Annonce", send_announcement:"Envoyer au camp",
     announcement_ph:"Écris une annonce…", viewer_mode:"Mode lecture", back:"← Retour", like:"J'aime", liked:"Aimé",
-    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
+    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", see_more:"Plus", see_all:"Voir tout", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
     weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
@@ -1146,7 +1171,7 @@ const I18N = {
     session_time:"الوقت", likes:"إعجابات", comments:"تعليقات", add_comment:"أضف تعليقًا…", rate_profile:"قيّم هذا الملف",
     notifications:"الإشعارات", no_notifs:"لا إشعارات بعد.", announcement:"إعلان", send_announcement:"إرسال للنادي",
     announcement_ph:"اكتب إعلانًا…", viewer_mode:"وضع القراءة", back:"← رجوع", like:"إعجاب", liked:"أعجبني",
-    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
+    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", see_more:"المزيد", see_all:"عرض الكل", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
     weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
@@ -1240,7 +1265,7 @@ const I18N = {
     session_time:"Zeit", likes:"Likes", comments:"Kommentare", add_comment:"Kommentar hinzufügen…", rate_profile:"Profil bewerten",
     notifications:"Benachrichtigungen", no_notifs:"Noch keine Benachrichtigungen.", announcement:"Ankündigung", send_announcement:"An das Camp senden",
     announcement_ph:"Ankündigung schreiben…", viewer_mode:"Ansichtsmodus", back:"← Zurück", like:"Like", liked:"Geliked",
-    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
+    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", see_more:"Mehr", see_all:"Alle ansehen", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
     weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
@@ -1337,7 +1362,7 @@ function setLang(l){
   lang=l;
   applyI18n();
 }
-let theme = "dark";
+let theme = "light";
 function applyTheme(){
   document.body.classList.toggle("light", theme==="light");
   document.querySelectorAll(".theme-toggle").forEach(b=>b.textContent = theme==="light"?"☀":"◐");
@@ -1900,7 +1925,7 @@ function videoThumb(url){
 function sessionCard(s, showCoach){
   const a = byId(s.athlete) || {name:s.athlete,color:"#888"};
   const canDelete = me===s.athlete;
-  const timeTxt = s.time?" · "+s.time:"";
+  const timeTxt = s.duration?" · "+s.duration+" "+t("minutes").toLowerCase():"";
   const sparBadge = s.sparring ? `<span class="spar-badge">${t("sparring")}</span>` : "";
   const r = s.rating||{};
   const rv = (typeof s.rating==="number") ? s.rating : 0;
@@ -2042,13 +2067,79 @@ function renderRoster(){
   wireGoals();
   r.querySelectorAll("[data-rosterview]").forEach(b=>b.onclick=()=>openProfileViewer(b.dataset.rosterview));
   r.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
-  // global camp gallery under the roster
-  const gg=document.getElementById("globalGallery");
-  if(gg){
-    gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div>${mediaGalleryHTML(null)}</div>`;
-    gg.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
-  }
+  // global camp gallery under the roster (paginated + social)
+  renderGlobalGallery();
   renderLeaderboard();
+}
+
+/* ---------- global camp gallery (paginated 9 / +6 / all + likes & comments) ---------- */
+let galleryShown = 9;
+function renderGlobalGallery(){
+  const gg=document.getElementById("globalGallery");
+  if(!gg) return;
+  const items=sessions.filter(s=>s.athlete && (s.photo||s.video))
+    .sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  if(!items.length){ gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div><div class="goal-empty">${t("gallery_empty")}</div></div>`; return; }
+  const shown=items.slice(0, galleryShown);
+  const cells=shown.map(s=>{
+    const a=byId(s.athlete)||{color:"#888"};
+    const lk=sessionLikes(s.id).length;
+    const cm=sessionComments(s.id).length;
+    const thumb=s.video?videoThumb(s.video):null;
+    const media = s.video
+      ? `<a class="gal-media gal-video" href="${esc(s.video)}" target="_blank" rel="noopener">${thumb?`<img src="${thumb}">`:(s.photo?`<img src="${s.photo}">`:`<div class="gal-vph"></div>`)}<span class="gal-play">▶</span></a>`
+      : `<img class="gal-media" src="${s.photo}" alt="" data-galopen="${s.id}">`;
+    return `<div class="gal-cell social">
+      ${media}
+      <div class="gal-overlay" data-galopen="${s.id}">
+        <span class="gal-ov-dot" style="background:${a.color}"></span>
+        <span>♥ ${lk}</span><span>💬 ${cm}</span>
+      </div>
+    </div>`;
+  }).join("");
+  let controls="";
+  if(items.length>galleryShown){
+    controls=`<div class="gal-controls">
+      <button class="mini" id="galMore">${t("see_more")}</button>
+      <button class="mini" id="galAll">${t("see_all")}</button>
+    </div>`;
+  }
+  gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div><div class="gallery">${cells}</div>${controls}</div>`;
+  gg.querySelectorAll("[data-galopen]").forEach(el=>el.onclick=()=>openPhotoDetail(el.dataset.galopen));
+  const more=document.getElementById("galMore"); if(more) more.onclick=()=>{ galleryShown+=6; renderGlobalGallery(); };
+  const all=document.getElementById("galAll"); if(all) all.onclick=()=>{ galleryShown=1e9; renderGlobalGallery(); };
+}
+// Instagram-style photo detail: big image + likes + comments
+function openPhotoDetail(sid){
+  const s=sessions.find(x=>x.id===sid); if(!s) return;
+  const a=byId(s.athlete)||{name:s.athlete,color:"#888"};
+  const ov=document.getElementById("profileViewer");
+  const lk=sessionLikes(sid); const liked=iLiked(sid);
+  const cm=sessionComments(sid);
+  ov.innerHTML=`<div class="pd-card">
+    <button class="pv-close" id="pdClose">${t("back")}</button>
+    <div class="pd-media">
+      ${s.photo?`<img src="${s.photo}" alt="">`:(s.video?`<a href="${esc(s.video)}" target="_blank" rel="noopener" class="pd-video"><span class="gal-play">▶</span> ${t("watch_video")}</a>`:"")}
+    </div>
+    <div class="pd-head">
+      <div class="avatar" style="background:${a.color};width:34px;height:34px;font-size:14px">${avatarText(a)}</div>
+      <b>${esc(displayName(a))}</b><span class="pd-date">${fmtDate(s.date)}</span>
+    </div>
+    <div class="pd-social">
+      <button class="like-btn ${liked?"on":""}" id="pdLike"><span class="heart">♥</span> ${lk.length}</button>
+      <span class="pd-cmt-count">💬 ${cm.length}</span>
+    </div>
+    <div class="pd-comments">
+      ${cm.map(c=>`<div class="cmt-row"><b>${esc(displayName(byId(c.author_slot)||{name:c.author_slot}))}</b> ${esc(c.body)}${c.author_slot===me?` <button class="cmt-del" data-pdcmtdel="${c.id}">×</button>`:""}</div>`).join("")}
+      <div class="cmt-add"><input id="pdCmtInput" placeholder="${esc(t("add_comment"))}"><button id="pdCmtSend">→</button></div>
+    </div>
+  </div>`;
+  ov.style.display=""; document.body.style.overflow="hidden";
+  document.getElementById("pdClose").onclick=()=>{ ov.style.display="none"; document.body.style.overflow=""; };
+  document.getElementById("pdLike").onclick=async()=>{ await toggleLike(sid, s.athlete); openPhotoDetail(sid); renderGlobalGallery(); };
+  document.getElementById("pdCmtSend").onclick=async()=>{ const inp=document.getElementById("pdCmtInput"); if(inp.value.trim()){ await addComment(sid, s.athlete, inp.value); openPhotoDetail(sid); renderGlobalGallery(); } };
+  document.getElementById("pdCmtInput").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("pdCmtSend").click(); });
+  ov.querySelectorAll("[data-pdcmtdel]").forEach(b=>b.onclick=async()=>{ await delComment(b.dataset.pdcmtdel); openPhotoDetail(sid); renderGlobalGallery(); });
 }
 
 /* ---------- nutrition ---------- */
@@ -2288,91 +2379,48 @@ function weightSparkline(entries){
 async function renderSpace(){
   const root=document.getElementById("spaceBody");
   if(!root) return;
-  const w = weights[me] || {target:null, entries:[]};
-  const entries=(w.entries||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
-  const last=entries.length?entries[entries.length-1].kg:null;
-  const target=w.target;
-  const diff=(last!=null && target!=null)?(last-target):null;
-  const today=new Date().toISOString().slice(0,10);
-  const todayVal = entries.find(e=>e.date===today);
-  const wg = weeklyGoals[me] || 0;
-  const doneWeek = sessionsThisWeek(me);
-  const pctWeek = wg? Math.min(100, Math.round((doneWeek/wg)*100)) : 0;
-  const circ=2*Math.PI*52;
-  const dash= wg ? circ*(1 - Math.min(1, doneWeek/wg)) : circ;
-  const reached = wg && doneWeek>=wg;
-  const prs = computePRs(me);
-  const prEntries = Object.entries(prs).sort((a,b)=>b[1].kg-a[1].kg);
+  // My profile = personal gallery with edit/delete on each media
   root.innerHTML = `
-    <div class="grid two">
-      <div class="nutri-group">
-        <div class="nutri-group-h">${t("weight_today")}</div>
-        <div class="row">
-          <div class="field"><label>${t("weight_date")}</label><input type="date" id="wDate" value="${today}" max="${today}"></div>
-          <div class="field"><label>${t("weight_kg")}</label><input type="number" min="0" step="0.1" id="wKg" value="${todayVal?todayVal.kg:""}" placeholder="75.0"></div>
-          <div class="field"><label>${t("target_weight")}</label><input type="number" min="0" step="0.1" id="wTarget" value="${target!=null?target:""}" placeholder="70.0"></div>
-        </div>
-        <button class="btn" id="wSave">${t("log_weight")}</button>
-        <div id="wMsg" style="text-align:center;margin-top:8px;height:14px"></div>
-      </div>
-      <div class="nutri-group">
-        <div class="nutri-group-h">${t("weight_history")}</div>
-        ${last!=null?`
-          <div class="weight-stats">
-            <div class="stat"><b>${last} kg</b><span>${t("current_weight")}</span></div>
-            ${target!=null?`<div class="stat"><b>${diff>0?"+":""}${diff.toFixed(1)} kg</b><span>${t("to_target")}</span></div>`:""}
-          </div>
-          ${entries.length>=2?weightSparkline(entries):""}
-          ${entries.length?`<div class="wh-list">
-            <div class="wh-list-h">${t("weight_entries")}</div>
-            ${entries.slice().reverse().map(e=>`<div class="wh-row">
-              <span class="wh-date">${fmtDate(e.date)}</span>
-              <span class="wh-kg">${e.kg} kg</span>
-              <button class="wh-del" data-wdel="${e.date}" title="${esc(t("delete"))}">×</button>
-            </div>`).join("")}
-          </div>`:""}
-        `:`<div class="goal-empty">${t("weight_none")}</div>`}
-      </div>
-    </div>
-
-    <div id="roadmapWrap" style="margin-top:16px"></div>
-    <div class="nutri-group" style="margin-top:16px">
+    <div class="nutri-group">
       <div class="nutri-group-h">${t("gallery_title")}</div>
-      ${mediaGalleryHTML(me)}
+      ${editableGalleryHTML(me)}
     </div>`;
-  renderRoadmap(me, false, document.getElementById("roadmapWrap"));
+  wireEditableGallery(root);
+}
+// gallery with edit (change discipline/video) + delete controls on each item
+function editableGalleryHTML(athleteId){
+  const items=sessions.filter(s=>s.athlete===athleteId && (s.photo||s.video))
+    .sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  if(!items.length) return `<div class="goal-empty">${t("gallery_empty")}</div>`;
+  return `<div class="gallery edit">${items.map(s=>{
+    const thumb=s.video?videoThumb(s.video):null;
+    const media = s.video
+      ? `<a class="gal-media gal-video" href="${esc(s.video)}" target="_blank" rel="noopener">${thumb?`<img src="${thumb}">`:(s.photo?`<img src="${s.photo}">`:`<div class="gal-vph"></div>`)}<span class="gal-play">▶</span></a>`
+      : `<img class="gal-media" src="${s.photo}" alt="" data-zoom>`;
+    return `<div class="gal-cell">
+      ${media}
+      <div class="gal-actions">
+        <button class="gal-del" data-galdel="${s.id}" title="${esc(t("delete"))}">🗑</button>
+      </div>
+    </div>`;
+  }).join("")}</div>`;
+}
+function wireEditableGallery(root){
   root.querySelectorAll("[data-zoom]").forEach(img=>img.onclick=()=>openLightbox(img.src));
-  document.getElementById("wSave").onclick=async()=>{
-    const kg=parseFloat(document.getElementById("wKg").value);
-    const tg=document.getElementById("wTarget").value;
-    const chosenDate=document.getElementById("wDate").value || today;
-    const msg=document.getElementById("wMsg");
-    if(!weights[me]) weights[me]={target:null,entries:[]};
-    weights[me].target = tg!==""?parseFloat(tg):null;
-    if(!isNaN(kg)){
-      const ex=weights[me].entries.find(e=>e.date===chosenDate);
-      if(ex) ex.kg=kg; else weights[me].entries.push({date:chosenDate,kg});
-    }
-    msg.innerHTML=`<span class="saving">${t("saving")}</span>`;
-    try{ await saveWeight(me); msg.innerHTML=`<span style="color:var(--win);font-size:12px;letter-spacing:.1em;text-transform:uppercase">${t("weight_saved")}</span>`; setTimeout(()=>{msg.innerHTML="";},2000); renderSpace(); }
-    catch(e){ msg.innerHTML=`<span style="color:var(--blood);font-size:12px">${t("save_fail")}</span>`; }
-  };
-  const wgSave=document.getElementById("wgSave");
-  if(wgSave) wgSave.onclick=async()=>{
-    const v=parseInt(document.getElementById("wgInput").value,10);
-    if(v>0){ weeklyGoals[me]=v; } else { delete weeklyGoals[me]; }
-    await saveWeeklyGoals(); renderSpace();
-  };
-  // delete a weight entry (two-click confirm)
-  document.querySelectorAll("[data-wdel]").forEach(b=>b.onclick=async()=>{
+  root.querySelectorAll("[data-galdel]").forEach(b=>b.onclick=async()=>{
     if(b.dataset.confirm!=="1"){
-      b.dataset.confirm="1"; b.textContent="?"; b.classList.add("confirm");
-      setTimeout(()=>{ if(b.dataset.confirm==="1"){ b.dataset.confirm="0"; b.textContent="×"; b.classList.remove("confirm"); } },3000);
+      b.dataset.confirm="1"; b.classList.add("confirm"); b.textContent="✓?";
+      setTimeout(()=>{ if(b.dataset.confirm==="1"){ b.dataset.confirm="0"; b.classList.remove("confirm"); b.textContent="🗑"; } },3000);
       return;
     }
-    const d=b.dataset.wdel;
-    if(weights[me]&&weights[me].entries){ weights[me].entries = weights[me].entries.filter(e=>e.date!==d); }
-    await saveWeight(me); renderSpace();
+    const id=b.dataset.galdel;
+    const s=sessions.find(x=>x.id===id);
+    if(s){
+      // remove just the media from the session (keep the session itself)
+      s.photo=null; s.video="";
+      await saveSession(s);
+    }
+    renderAll();
   });
 }
 
@@ -3126,13 +3174,12 @@ async function doSave(){
   const btn=document.getElementById("save");
   const msg=document.getElementById("saveMsg");
   const nowDate=new Date().toISOString().slice(0,10);
-  const nowTime=new Date().toTimeString().slice(0,5);
   const s={
     id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     athlete: me==="coach" ? "a1" : me,
     discipline: selectedDisc(),
     date: document.getElementById("fDate").value || nowDate,
-    time: document.getElementById("fTime").value || nowTime,
+    duration: document.getElementById("fDur").value || "",
     sparring: document.getElementById("fSparring").checked,
     rating: pendingRating||0,
     video: document.getElementById("fVideo").value.trim(),
@@ -3146,7 +3193,7 @@ async function doSave(){
     await saveSession(s);
     sessions.unshift(s);
     sessions.sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
-    document.getElementById("fTime").value=nowTime;
+    document.getElementById("fDur").value="";
     document.getElementById("fSparring").checked=false;
     document.getElementById("fVideo").value="";
     pendingRating=0; renderRatingInputs();
@@ -3186,7 +3233,6 @@ function on(id, ev, fn){ const el=$(id); if(el) el[ev]=fn; }
   buildDiscPick();
   on("fDate","value",new Date().toISOString().slice(0,10));
   if($("fDate")) $("fDate").value=new Date().toISOString().slice(0,10);
-  if($("fTime")) $("fTime").value=new Date().toTimeString().slice(0,5);
   on("save","onclick",doSave);
   on("fPhoto","onchange",onPhotoPick);
   on("photoRemove","onclick",clearPhoto);
