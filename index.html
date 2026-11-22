@@ -2214,8 +2214,8 @@ function renderRoster(){
 
 /* ---------- global camp gallery (paginated 9 / +6 / all + likes & comments) ---------- */
 let galleryShown = 9;
-function renderGlobalGallery(){
-  const gg=document.getElementById("globalGallery");
+function renderGlobalGallery(targetEl){
+  const gg=targetEl||document.getElementById("globalGallery");
   if(!gg) return;
   const items=sessions.filter(s=>s.athlete && (s.photo||s.video))
     .sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
@@ -2249,9 +2249,9 @@ function renderGlobalGallery(){
   }
   gg.innerHTML=`<div class="nutri-group"><div class="nutri-group-h">${t("gallery_global")}</div><div class="gallery">${cells}</div>${controls}</div>`;
   gg.querySelectorAll("[data-galopen]").forEach(el=>el.onclick=()=>openPhotoDetail(el.dataset.galopen));
-  const more=document.getElementById("galMore"); if(more) more.onclick=()=>{ galleryShown+=6; renderGlobalGallery(); };
-  const all=document.getElementById("galAll"); if(all) all.onclick=()=>{ galleryShown=1e9; renderGlobalGallery(); };
-  const less=document.getElementById("galLess"); if(less) less.onclick=()=>{ galleryShown=9; renderGlobalGallery(); };
+  const more=gg.querySelector("#galMore"); if(more) more.onclick=()=>{ galleryShown+=6; renderGlobalGallery(targetEl); };
+  const all=gg.querySelector("#galAll"); if(all) all.onclick=()=>{ galleryShown=1e9; renderGlobalGallery(targetEl); };
+  const less=gg.querySelector("#galLess"); if(less) less.onclick=()=>{ galleryShown=9; renderGlobalGallery(targetEl); };
 }
 // Instagram-style photo detail: big image + likes + comments
 function openPhotoDetail(sid){
@@ -3175,8 +3175,9 @@ function daysSince(dateStr){
 function renderCoachDash(){
   const root=document.getElementById("coachDash");
   if(!root) return;
-  root.innerHTML = `<div id="coachLeaderboard"></div>`;
+  root.innerHTML = `<div id="coachLeaderboard"></div><div id="coachGallery" style="margin-top:24px"></div>`;
   renderLeaderboard(document.getElementById("coachLeaderboard"));
+  renderGlobalGallery(document.getElementById("coachGallery"));
 }
 function wireGoalsIn(root){
   root.querySelectorAll("[data-goaladd]").forEach(b=>b.onclick=async()=>{
