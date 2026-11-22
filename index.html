@@ -506,9 +506,10 @@ body.rtl .spar-toggle input:checked+.spar-box::after{transform:translateX(-20px)
 .cmt-add button{background:var(--blood);border:none;color:#fff;border-radius:8px;padding:0 16px;cursor:pointer;font-size:15px}
 
 /* ---------- profile viewer overlay ---------- */
-.pv-overlay{position:fixed;inset:0;z-index:100;background:rgba(5,5,7,.92);overflow-y:auto;padding:24px 16px}
+.pv-overlay{position:fixed;inset:0;z-index:200;background:var(--ink);overflow-y:auto;padding:24px 16px}
 .pv-card{max-width:680px;margin:0 auto}
-.pv-close{background:none;border:1px solid var(--line);color:var(--chalk);border-radius:999px;padding:8px 16px;cursor:pointer;margin-bottom:18px;font-size:13px}
+.pv-close{background:var(--panel);border:1px solid var(--line);color:var(--chalk);border-radius:999px;padding:8px 18px;cursor:pointer;margin-bottom:18px;font-size:13px;font-weight:600}
+.pv-close:hover{border-color:var(--blood);color:var(--blood)}
 .pv-top{display:flex;align-items:center;gap:18px;margin-bottom:18px}
 .pv-photo{width:96px;height:96px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0}
 .pv-photo img{width:100%;height:100%;object-fit:cover}
@@ -654,30 +655,30 @@ body.rtl #scrollTop{right:auto;left:22px}
 .rm-row select,.rm-row input{flex:1;min-width:80px}
 body.rtl .rm-title{text-align:right}
 
-/* ---------- roadmap side rail ---------- */
-.rmrail{position:fixed;top:0;left:0;bottom:0;width:190px;background:transparent;z-index:40;overflow-y:auto;overflow-x:hidden;padding:18px 0;display:flex;flex-direction:column;justify-content:center;align-items:center}
-.rmrail-inner{display:flex;flex-direction:column;align-items:center;margin:auto 0;width:100%}
-.rmrail-item{background:none;border:none;padding:0;cursor:pointer;display:flex;justify-content:center;width:100%;position:relative}
+/* ---------- roadmap side rail (floats in the left margin, never pushes content) ---------- */
+/* content is centered at max-width 1080px. The rail lives in the empty left gutter:
+   left = (100vw - 1080px)/2 centers the gutter; we clamp so it stays off the content. */
+.rmrail{position:fixed;top:50%;transform:translateY(-50%);left:16px;z-index:45;
+  display:none;flex-direction:column;align-items:center;
+  max-height:90vh;overflow-y:auto;overflow-x:hidden;padding:8px 0}
+.rmrail-inner{display:flex;flex-direction:column;align-items:center}
+.rmrail-item{background:none;border:none;padding:0;cursor:pointer;display:flex;justify-content:center;position:relative}
 .rmrail-item:disabled{cursor:default}
-.rmrail-node{position:relative;width:76px;height:76px;display:grid;place-items:center}
+.rmrail-node{position:relative;width:60px;height:60px;display:grid;place-items:center}
 .rmrail-node svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .rmrail-bg{fill:none;stroke:var(--line);stroke-width:5}
 .rmrail-fg{fill:none;stroke:var(--blood);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
-.rmrail-num{font-family:'Oswald';font-weight:700;font-size:26px;color:var(--smoke);z-index:1}
+.rmrail-num{font-family:'Oswald';font-weight:700;font-size:21px;color:var(--smoke);z-index:1}
 .rmrail-node.active .rmrail-num{color:var(--blood)}
 .rmrail-node.active{animation:flamePulse 2.2s ease-in-out infinite}
 .rmrail-node.mastered .rmrail-fg{stroke:var(--blood)}
 .rmrail-node.mastered .rmrail-num{color:var(--blood)}
 .rmrail-item:hover .rmrail-num{color:var(--chalk)}
-.rmrail-line{width:3px;height:40px;background:var(--line);border-radius:6px;position:relative;overflow:hidden;margin:4px 0}
+.rmrail-line{width:3px;height:26px;background:var(--line);border-radius:6px;position:relative;overflow:hidden;margin:3px 0}
 .rmrail-line-fill{position:absolute;top:0;left:0;width:100%;background:var(--blood);transition:height .6s cubic-bezier(.2,.8,.2,1)}
-/* shift content right when the rail is visible */
-body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:190px}
-/* RTL: rail on the right instead */
-body.rtl .rmrail{left:auto;right:0}
-body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-left:0;padding-right:190px}
-/* hide rail on small screens (handled later) */
-@media(max-width:720px){.rmrail{display:none!important}body.has-rail header,body.has-rail .hero,body.has-rail main,body.has-rail .gate{padding-left:0}body.rtl.has-rail header,body.rtl.has-rail .hero,body.rtl.has-rail main,body.rtl.has-rail .gate{padding-right:0}}
+body.rtl .rmrail{left:auto;right:16px}
+/* only show the rail when there is real empty gutter space (wide screens) */
+@media(min-width:1300px){ body.has-rail .rmrail{display:flex} }
 
 /* ---------- weekly goal ring ---------- */
 .weekly-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
@@ -1819,7 +1820,6 @@ async function logout(){
   try{ await sb.auth.signOut(); }catch(e){}
   me=null; myRole=null;
   document.getElementById("gate").style.display="grid";
-  const rail=document.getElementById("rmRail"); if(rail) rail.style.display="none";
   document.body.classList.remove("has-rail");
   document.getElementById("authEmail").value="";
   document.getElementById("authPw").value="";
@@ -2661,10 +2661,9 @@ function renderRail(athleteId, readonly){
   const rail=document.getElementById("rmRail");
   if(!rail) return;
   const list = roadmaps[athleteId] || [];
-  if(!list.length){ rail.style.display="none"; document.body.classList.remove("has-rail"); return; }
-  rail.style.display="";
-  document.body.classList.add("has-rail");
-  const size=76;
+  if(!list.length){ document.body.classList.remove("has-rail"); return; }
+  document.body.classList.add("has-rail"); // CSS media query decides if it actually shows
+  const size=60;
   const nodes = list.map((m,i)=>{
     const pct=milestoneProgress(athleteId,m);
     const mastered=pct>=100;
@@ -2679,13 +2678,13 @@ function renderRail(athleteId, readonly){
   if(!readonly){
     rail.querySelectorAll("[data-railedit]").forEach(b=>b.onclick=()=>{
       const i=b.dataset.railedit;
-      // go to My space, then open the matching milestone editor
-      const tab=document.querySelector('#tabsAthlete .tab[data-tab="space"]');
+      // go to Editing, then open the matching milestone editor
+      const tab=document.querySelector('#tabsAthlete .tab[data-tab="editing"]');
       if(tab) tab.click();
       setTimeout(()=>{
-        const form=document.querySelector(`#roadmapWrap [data-rmform="${i}"]`);
+        const form=document.querySelector(`#editRoadmap [data-rmform="${i}"]`);
         if(form){ form.style.display=""; form.scrollIntoView({behavior:"smooth",block:"center"}); }
-      },80);
+      },100);
     });
   }
 }
@@ -3355,7 +3354,7 @@ document.querySelectorAll("#tabsCoach .tab").forEach(el=>el.onclick=()=>{
   document.querySelectorAll("#tabsCoach .tab").forEach(x=>x.classList.remove("on"));
   el.classList.add("on");
   ["dash","profiles","notifs"].forEach(id=>{const e=document.getElementById("ctab-"+id); if(e) e.style.display = id===el.dataset.ctab?"":"none";});
-  const rail=document.getElementById("rmRail"); if(rail){rail.style.display="none";} document.body.classList.remove("has-rail");
+  document.body.classList.remove("has-rail");
   if(el.dataset.ctab==="dash") renderCoachDash();
   if(el.dataset.ctab==="profiles") renderProfilesList();
   if(el.dataset.ctab==="notifs") renderNotifications();
