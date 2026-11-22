@@ -570,7 +570,15 @@ body.rtl .spar-toggle input:checked+.spar-box::after{transform:translateX(-20px)
 .ig-profile{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px}
 .ig-photo{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--line);flex-shrink:0;position:relative;cursor:pointer;display:block}
 .ig-photo img{width:100%;height:100%;object-fit:cover}
-.ig-photo-edit{position:absolute;bottom:4px;right:4px;width:28px;height:28px;border-radius:50%;background:var(--blood);color:#fff;display:grid;place-items:center;font-size:13px;border:2px solid var(--panel)}
+.ig-photo-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.ig-photo-btn{font-family:'Archivo Narrow';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--smoke);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;transition:color .15s,border-color .15s}
+.ig-photo-btn:hover{color:var(--blood);border-color:var(--blood)}
+.ig-bio-view{display:flex;align-items:flex-start;gap:8px}
+.ig-bio-text{font-size:14px;color:var(--chalk);line-height:1.45;flex:1}
+.ig-bio-text.empty{color:var(--smoke);font-style:italic}
+.ig-bio-edit{background:none;border:none;color:var(--smoke);cursor:pointer;font-size:14px;flex-shrink:0}
+.ig-bio-edit:hover{color:var(--blood)}
+.ig-bio-editor{display:flex;flex-direction:column;gap:8px}
 .ig-id{flex:1;min-width:0}
 .ig-id h2{font-family:'Oswald';font-size:26px;font-weight:700;color:var(--chalk)}
 .ig-level{font-family:'Oswald';font-size:15px;font-weight:600;margin-bottom:8px}
@@ -1010,7 +1018,7 @@ const I18N = {
     session_time:"Time", likes:"Likes", comments:"Comments", add_comment:"Add a comment…", rate_profile:"Rate this profile",
     notifications:"Notifications", no_notifs:"No notifications yet.", announcement:"Announcement", send_announcement:"Send to the camp",
     announcement_ph:"Write an announcement…", viewer_mode:"Viewer mode", back:"← Back", like:"Like", liked:"Liked",
-    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", see_more:"More", see_all:"See all", see_less:"See less", bio_ph:"Write a short bio…", gallery_empty:"No media yet — add photos or videos to your sessions.",
+    watch_video:"Watch video", avg_rating:"Avg rating", your_rating:"Your rating", gallery_title:"Gallery", gallery_global:"Camp gallery", see_more:"More", see_all:"See all", see_less:"See less", bio_ph:"Write a short bio…", change_photo:"Change", gallery_empty:"No media yet — add photos or videos to your sessions.",
     weekly_goal:"Weekly goal", weekly_goal_sub:"Sessions this week", set_weekly:"Set weekly goal",
     per_week:"/week", this_week:"This week", goal_reached:"Goal reached!", sessions_word_short:"sess.",
     prs:"Personal records", pr_new:"NEW PR", pr_none:"No PR yet — log sets with weight to start.",
@@ -1104,7 +1112,7 @@ const I18N = {
     session_time:"Heure", likes:"J'aime", comments:"Commentaires", add_comment:"Ajoute un commentaire…", rate_profile:"Note ce profil",
     notifications:"Notifications", no_notifs:"Aucune notification.", announcement:"Annonce", send_announcement:"Envoyer au camp",
     announcement_ph:"Écris une annonce…", viewer_mode:"Mode lecture", back:"← Retour", like:"J'aime", liked:"Aimé",
-    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", see_more:"Plus", see_all:"Voir tout", see_less:"Voir moins", bio_ph:"Écris une courte bio…", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
+    watch_video:"Voir la vidéo", avg_rating:"Note moyenne", your_rating:"Ta note", gallery_title:"Galerie", gallery_global:"Galerie du camp", see_more:"Plus", see_all:"Voir tout", see_less:"Voir moins", bio_ph:"Écris une courte bio…", change_photo:"Changer", gallery_empty:"Aucun média — ajoute des photos ou vidéos à tes séances.",
     weekly_goal:"Objectif hebdo", weekly_goal_sub:"Séances cette semaine", set_weekly:"Définir l'objectif hebdo",
     per_week:"/sem", this_week:"Cette semaine", goal_reached:"Objectif atteint !", sessions_word_short:"séa.",
     prs:"Records personnels", pr_new:"NOUVEAU PR", pr_none:"Pas encore de PR — enregistre des séries avec poids.",
@@ -1198,7 +1206,7 @@ const I18N = {
     session_time:"الوقت", likes:"إعجابات", comments:"تعليقات", add_comment:"أضف تعليقًا…", rate_profile:"قيّم هذا الملف",
     notifications:"الإشعارات", no_notifs:"لا إشعارات بعد.", announcement:"إعلان", send_announcement:"إرسال للنادي",
     announcement_ph:"اكتب إعلانًا…", viewer_mode:"وضع القراءة", back:"← رجوع", like:"إعجاب", liked:"أعجبني",
-    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", see_more:"المزيد", see_all:"عرض الكل", see_less:"عرض أقل", bio_ph:"اكتب نبذة قصيرة…", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
+    watch_video:"شاهد الفيديو", avg_rating:"متوسط التقييم", your_rating:"تقييمك", gallery_title:"المعرض", gallery_global:"معرض النادي", see_more:"المزيد", see_all:"عرض الكل", see_less:"عرض أقل", bio_ph:"اكتب نبذة قصيرة…", change_photo:"تغيير", gallery_empty:"لا وسائط بعد — أضف صورًا أو فيديوهات لحصصك.",
     weekly_goal:"الهدف الأسبوعي", weekly_goal_sub:"حصص هذا الأسبوع", set_weekly:"تحديد الهدف الأسبوعي",
     per_week:"/أسبوع", this_week:"هذا الأسبوع", goal_reached:"تحقق الهدف!", sessions_word_short:"حصة",
     prs:"الأرقام الشخصية", pr_new:"رقم جديد", pr_none:"لا رقم بعد — سجّل مجموعات بالوزن للبدء.",
@@ -1292,7 +1300,7 @@ const I18N = {
     session_time:"Zeit", likes:"Likes", comments:"Kommentare", add_comment:"Kommentar hinzufügen…", rate_profile:"Profil bewerten",
     notifications:"Benachrichtigungen", no_notifs:"Noch keine Benachrichtigungen.", announcement:"Ankündigung", send_announcement:"An das Camp senden",
     announcement_ph:"Ankündigung schreiben…", viewer_mode:"Ansichtsmodus", back:"← Zurück", like:"Like", liked:"Geliked",
-    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", see_more:"Mehr", see_all:"Alle ansehen", see_less:"Weniger", bio_ph:"Kurze Bio schreiben…", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
+    watch_video:"Video ansehen", avg_rating:"Ø Bewertung", your_rating:"Deine Bewertung", gallery_title:"Galerie", gallery_global:"Camp-Galerie", see_more:"Mehr", see_all:"Alle ansehen", see_less:"Weniger", bio_ph:"Kurze Bio schreiben…", change_photo:"Ändern", gallery_empty:"Noch keine Medien — füge Fotos oder Videos hinzu.",
     weekly_goal:"Wochenziel", weekly_goal_sub:"Einheiten diese Woche", set_weekly:"Wochenziel festlegen",
     per_week:"/Woche", this_week:"Diese Woche", goal_reached:"Ziel erreicht!", sessions_word_short:"Einh.",
     prs:"Persönliche Rekorde", pr_new:"NEUER PR", pr_none:"Noch kein PR — erfasse Sätze mit Gewicht.",
@@ -2440,16 +2448,24 @@ async function renderSpace(){
   // Instagram-style profile: photo + bio, then weight bar, then gallery
   root.innerHTML = `
     <div class="ig-profile">
-      <label class="ig-photo" style="border-color:${a.color}">
-        ${pf.photo?`<img src="${pf.photo}" alt="">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:38px">${avatarText(a)}</div>`}
-        <input type="file" id="pfPhoto" accept="image/*" hidden>
-        <span class="ig-photo-edit">✎</span>
-      </label>
+      <div class="ig-photo-wrap">
+        <label class="ig-photo" style="border-color:${a.color}">
+          ${pf.photo?`<img src="${pf.photo}" alt="">`:`<div class="avatar" style="background:${a.color};width:100%;height:100%;font-size:38px">${avatarText(a)}</div>`}
+          <input type="file" id="pfPhoto" accept="image/*" hidden>
+        </label>
+        <label class="ig-photo-btn" for="pfPhoto">✎ ${t("change_photo")}</label>
+      </div>
       <div class="ig-id">
         <h2>${esc(displayName(a))}</h2>
         <div class="ig-level" style="color:${a.color}">${t("level")} ${computeLevel(me).level}</div>
-        <textarea id="pfBio" class="ig-bio" rows="2" placeholder="${esc(t("bio_ph"))}">${esc(pf.bio||"")}</textarea>
-        <button class="mini" id="pfBioSave" style="display:none">${t("save_btn2")}</button>
+        <div class="ig-bio-view" id="pfBioView">
+          <p class="ig-bio-text ${pf.bio?"":"empty"}">${pf.bio?esc(pf.bio):esc(t("bio_ph"))}</p>
+          <button class="ig-bio-edit" id="pfBioEdit">✎</button>
+        </div>
+        <div class="ig-bio-editor" id="pfBioEditor" style="display:none">
+          <textarea id="pfBio" class="ig-bio" rows="2" placeholder="${esc(t("bio_ph"))}">${esc(pf.bio||"")}</textarea>
+          <button class="mini" id="pfBioSave">${t("save_btn2")}</button>
+        </div>
       </div>
     </div>
 
@@ -2477,14 +2493,17 @@ async function renderSpace(){
     profiles[me].photo=url||dataURL;
     await saveProfileInfo(me); renderSpace();
   };
-  // bio edit
+  // bio: plain text by default, becomes editable on pencil click
+  const bioEdit=document.getElementById("pfBioEdit");
+  const bioView=document.getElementById("pfBioView");
+  const bioEditor=document.getElementById("pfBioEditor");
   const bio=document.getElementById("pfBio");
   const bioSave=document.getElementById("pfBioSave");
-  if(bio) bio.oninput=()=>{ if(bioSave) bioSave.style.display=""; };
+  if(bioEdit) bioEdit.onclick=()=>{ bioView.style.display="none"; bioEditor.style.display=""; bio.focus(); };
   if(bioSave) bioSave.onclick=async()=>{
     if(!profiles[me]) profiles[me]={};
     profiles[me].bio=bio.value.trim();
-    await saveProfileInfo(me); bioSave.style.display="none";
+    await saveProfileInfo(me); renderSpace();
   };
 }
 // gallery with edit (change discipline/video) + delete controls on each item
